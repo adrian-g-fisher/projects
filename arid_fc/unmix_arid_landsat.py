@@ -20,6 +20,7 @@ import os
 import sys
 import argparse
 import itertools
+import glob
 import numpy as np
 from numpy.linalg import pinv
 from sklearn.utils.extmath import randomized_svd
@@ -147,6 +148,7 @@ def main(inImage, outImage):
     otherargs.M = M
     controls = applier.ApplierControls()
     controls.setStatsIgnore(255)
+    controls.setCalcStats(True)
     controls.setOutputDriverName("GTiff")
     applier.apply(unmixImage, infiles, outfiles, otherArgs=otherargs,
                   controls=controls)
@@ -160,17 +162,28 @@ def getCmdargs():
             description=("Creates arid zone fractional cover images from " +
                          "JRSRP surface reflectance Landsat imagery"))
     p.add_argument("-i", "--inImage", dest="inImage", default=None,
-                   help=("Input Landsat surface reflectance image file."))
+                   help=("Input Landsat surface reflectance file."))
     p.add_argument("-o", "--outImage", dest="outImage", default=None,
-                   help=("Output arid fractional cover image file."))
+                   help=("Output arid fractional cover file."))
+    p.add_argument("--inDir", dest="inDir", default=None,
+                   help=("Directory with Landsat surface reflectance files."))
+    p.add_argument("--outDir", dest="outDir", default=None,
+                   help=("Directory for arid fractional cover files."))
     cmdargs = p.parse_args()
-    if cmdargs.inImage is None or cmdargs.outImage is None:
-        p.print_help()
-        print("Must name inImage and outImage.")
-        sys.exit()
+    if cmdargs.inDir is None and cmdargs.outDir is None:
+        if cmdargs.inImage is None or cmdargs.outImage is None:
+            p.print_help()
+            print("Must name in/out images or directories.")
+            sys.exit()
     return cmdargs
 
 
 if __name__ == "__main__":
     cmdargs = getCmdargs()
-    main(cmdargs.inImage, cmdargs.outImage)
+    if cmdargs.inDir is not None:
+        for inImage in glob.glob(os.path.join(cmdargs.inDir, '*.tif')):
+            outImage = os.path.join(cmdargs.outDir,
+                       os.path.basename(inImage).replace('.tif', '_AZN.tif'))
+            main(inImage, outImage)
+    else:
+        main(cmdargs.inImage, cmdargs.outImage)

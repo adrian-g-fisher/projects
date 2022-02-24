@@ -26,6 +26,7 @@ from numpy.linalg import pinv
 from sklearn.utils.extmath import randomized_svd
 from fastnnls import fnnls
 from rios import applier
+from rios import cuiprogress
 from csv import reader
 
 
@@ -150,6 +151,7 @@ def main(inImage, outImage):
     controls.setStatsIgnore(255)
     controls.setCalcStats(True)
     controls.setOutputDriverName("GTiff")
+    controls.setProgress(cuiprogress.CUIProgressBar())
     applier.apply(unmixImage, infiles, outfiles, otherArgs=otherargs,
                   controls=controls)
     

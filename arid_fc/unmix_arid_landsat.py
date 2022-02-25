@@ -186,6 +186,7 @@ if __name__ == "__main__":
         for inImage in glob.glob(os.path.join(cmdargs.inDir, '*.tif')):
             outImage = os.path.join(cmdargs.outDir,
                        os.path.basename(inImage).replace('.tif', '_AZN.tif'))
-            main(inImage, outImage)
+            if os.path.exists(outImage) is False:
+                main(inImage, outImage)
     else:
         main(cmdargs.inImage, cmdargs.outImage)

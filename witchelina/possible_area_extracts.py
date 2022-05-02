@@ -31,7 +31,7 @@ def getPixels(info, inputs, outputs, otherargs):
     Gets stats from the 8 pixels surrounding a certain site or sites 
     """
     sites = inputs.sites[0]
-    for idvalue in range(1, 7):
+    for idvalue in np.unique(sites[sites != 0]):
         singlesite = (sites == idvalue)
         fc = inputs.fc
         nodataPixels = (fc[0] == 0)
@@ -91,6 +91,6 @@ with open(csvfile, 'w') as f:
             'meanBare,stdevBare,meanGreen,stdevGreen,meanDead,stdevDead\n')
 
 # Iterate over images and get pixel values
-polyFile = (r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\exclosures\possible_areas.shp')
+polyFile = (r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\exclosures\exclosure_possible.shp')
 for imagefile in imageList:
     extract_pixels(polyFile, imagefile, csvfile)

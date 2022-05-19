@@ -18,16 +18,16 @@ from pylidar.toolbox import interpolation
 from pylidar.toolbox.grdfilters import pmf
 
 
-def process_laz(lazFile, epsg, pixelSize):
+def process_laz(lazFile, epsg, pixelSize, projName, outDir):
     """
     Main function to create a digital surface model, digital elevation model,
     and canopy height model.
     """
     
     # Create names for output files
-    dsmFile = lazFile.replace('.laz', '_dsm.img')
-    demFile = lazFile.replace('.laz', '_dem.img')
-    chmFile = lazFile.replace('.laz', '_chm.img')
+    dsmFile = os.path.join(outDir, r'%s_dsm.tif'%projName)
+    demFile = os.path.join(outDir, r'%s_dem.tif'%projName)
+    chmFile = os.path.join(outDir, r'%s_chm.tif'%projName)
     
     # Read in the point cloud and calculate image extents
     points = readLidarPoints(lazFile, colNames=['X', 'Y', 'Z'])
@@ -60,7 +60,7 @@ def process_laz(lazFile, epsg, pixelSize):
     dsm[numpy.isnan(dsm)] = nullVal
     dsm[~nullArray] = maxHeight[~nullArray]
     dsm = numpy.round(dsm.astype(numpy.float32), 3)
-    writeImage(dsm, dsmFile, driver='HFA', tlx=int(minX),
+    writeImage(dsm, dsmFile, driver='GTiff', tlx=int(minX),
                tly=int(numpy.ceil(maxY)), binsize=pixelSize, epsg=epsg,
                nullVal=nullVal)
 
@@ -105,7 +105,7 @@ def process_laz(lazFile, epsg, pixelSize):
     nullVal = -999
     dem[invalid] = nullVal
     dem = numpy.round(dem.astype(numpy.float32), 3)
-    writeImage(dem, demFile, driver='HFA', tlx=int(minX),
+    writeImage(dem, demFile, driver='GTiff', tlx=int(minX),
                tly=int(numpy.ceil(maxY)), binsize=pixelSize, epsg=epsg,
                nullVal=nullVal)
 
@@ -113,7 +113,7 @@ def process_laz(lazFile, epsg, pixelSize):
     chm = dsm - dem
     chm[chm < 0] = 0
     chm[invalid] = nullVal
-    writeImage(chm, chmFile, driver='HFA', tlx=int(minX),
+    writeImage(chm, chmFile, driver='GTiff', tlx=int(minX),
                tly=int(numpy.ceil(maxY)), binsize=pixelSize, epsg=epsg,
                nullVal=nullVal)
     
@@ -155,7 +155,7 @@ def disk(radius):
     return numpy.array((X ** 2 + Y ** 2) <= radius ** 2, dtype=numpy.uint8)
 
             
-def writeImage(image, outfile, driver='HFA', tlx=0.0, tly=0.0, binsize=0.0,
+def writeImage(image, outfile, driver='GTiff', tlx=0.0, tly=0.0, binsize=0.0,
                epsg=None, nullVal=None):
     """
     Write data to a GDAL supported image file format
@@ -175,7 +175,7 @@ def writeImage(image, outfile, driver='HFA', tlx=0.0, tly=0.0, binsize=0.0,
     if dt == 'float32': gdaldtype = gdal.GDT_Float32
     if dt == 'float64': gdaldtype = gdal.GDT_Float64
     
-    ds = driver.Create(outfile, nx, ny, nz, gdaldtype, ['COMPRESSED=YES'])
+    ds = driver.Create(outfile, nx, ny, nz, gdaldtype, ['COMPRESS=LZW'])
     ds.SetGeoTransform([tlx,binsize,0,tly,0,-binsize])
 
     if epsg is not None:
@@ -303,17 +303,23 @@ def getCmdargs():
     p.add_argument("-i", "--inLaz", dest="inLaz", default=None,
                    help=("Input LAZ file"))
     p.add_argument("-e", "--epsg", dest="epsg", default=None,
-                   help=("EPSG code for gridded outputs (e.g. 28355)"))
-    p.add_argument("-p", "--pixelsize", dest="pixelsize", default=0.05,
+                   help=("EPSG code for gridded outputs (e.g. 32755)"))
+    p.add_argument("-p", "--projectName", dest="projectName", default=None,
+                   help=("Project name for output file prefix"))
+    p.add_argument("-o", "--outDir", dest="outDir", default=None,
+                   help=("Directory for output images"))  
+    p.add_argument("-s", "--pixelsize", dest="pixelsize", default=0.05,
                    help=("Pixelsize (m) for gridded outputs (default=0.05)"))
     cmdargs = p.parse_args()
-    if cmdargs.inLaz is None or cmdargs.epsg is None:
+    if (cmdargs.inLaz is None or cmdargs.epsg is None or
+        cmdargs.projectName is None or cmdargs.outDir is None):
         p.print_help()
-        print("Must name input LAS file and EPSG code.")
+        print("Must name input LAZ file, EPSG code, projectName and outDir.")
         sys.exit()
     return cmdargs
 
 
 if __name__ == "__main__":
     cmdargs = getCmdargs()
-    process_laz(cmdargs.inLaz, cmdargs.epsg, cmdargs.pixelsize)
+    process_laz(cmdargs.inLaz, int(cmdargs.epsg), float(cmdargs.pixelsize),
+                cmdargs.projectName, cmdargs.outDir)

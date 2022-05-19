@@ -9,8 +9,8 @@ import argparse
 
 def mergeBands(projName, inDir, outDir):
     """
-    projName should be like "p4m_fg03_20220513"
-    inDir should be like "C:\Users\...\pix4d\4_index\reflectance"
+    projName should be like p4m_fg03_20220513
+    inDir should be like ..\\pix4d\\4_index\\reflectance
     outDir can be anywhere you want
     """
     bands = [r'blue', r'green', r'red', r'red edge', r'nir']

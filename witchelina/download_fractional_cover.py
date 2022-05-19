@@ -4,7 +4,7 @@ from osgeo import gdal, ogr
 from datetime import datetime
 
 # Inputs and outputs
-polygon = r'witchelina_aoi_albers.shp'
+polygon = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\witchelina_aoi_albers.shp'
 dstDir = r'C:\Users\Adrian\Documents\witchelina\seasonal_fractional_cover'
 
 # Read in shapefile and get bounding box

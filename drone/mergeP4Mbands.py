@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 This makes a multiband image from single band images.
 """
@@ -8,21 +7,30 @@ import sys
 import argparse
 
 
-def mergeBands(projName, projDir, outDir): 
+def mergeBands(projName, inDir, outDir):
+    """
+    projName should be like p4m_fg03_20220513
+    inDir should be like ..\\pix4d\\4_index\\reflectance
+    outDir can be anywhere you want
+    """
     bands = [r'blue', r'green', r'red', r'red edge', r'nir']
-    projDir = os.path.join(projDir, r'Project\4_index\reflectance')
     images = []
     for b in bands:
-        image = os.path.join(projDir, r'pix4d_transparent_reflectance_%s.tif'%b)
+        image = os.path.join(inDir, r'pix4d_transparent_reflectance_%s.tif'%b)
         if b == r'red edge':
             old = image
             image = image.replace(' ', '_')        
             if os.path.exists(old) is True:
                 os.rename(old, image)
         images.append(image)
-    dstFile = os.path.join(outDir, r'%s_multiband.tif'%project)
-    cmd = r'gdal_merge.py -o %s -of GTiff -separate %s'%(dstFile, ' '.join(images))
+    
+    dstFile = os.path.join(outDir, r'%s_multiband.tif'%projName)
+    VRT = dstFile.replace('.tif', '.vrt')
+    cmd = r'gdalbuildvrt -separate %s %s'%(VRT, ' '.join(images))
     os.system(cmd)
+    cmd = r'gdal_translate %s %s'%(VRT, dstFile)
+    os.system(cmd)
+    os.remove(VRT)
     print("Processing completed")
 
 

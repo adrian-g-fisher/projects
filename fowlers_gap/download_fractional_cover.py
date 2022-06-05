@@ -17,7 +17,7 @@ ds = None
 
 # Construct dateList for all seasonal dates
 start = 198712198802
-end = 202109202111
+end = 202112202202
 dateList = []
 for y1 in range(1987, 2022):
     for m1 in range(3, 13, 3):
@@ -32,7 +32,9 @@ for y1 in range(1987, 2022):
             dateList.append(date)
 
 # For each date make the image subset
-srcDir = r'/vsicurl/http://qld.auscover.org.au/public/data/landsat/seasonal_fractional_cover/fractional_cover/nsw/'
+#srcDir = r'/vsicurl/http://qld.auscover.org.au/public/data/landsat/seasonal_fractional_cover/fractional_cover/nsw/'
+srcDir = r'/vsicurl/https://dap.tern.org.au/thredds/fileServer/landscapes/remote_sensing/landsat/seasonal_fractional_cover/fractional_cover/nsw/'
+
 for date in dateList:
     srcImage = r'lztmre_nsw_m%i_dima2.tif'%date
     srcFile = os.path.join(srcDir, srcImage)

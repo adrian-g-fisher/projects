@@ -18,7 +18,7 @@ from pylidar.toolbox import interpolation
 from pylidar.toolbox.grdfilters import pmf
 
 
-def process_laz(lazFile, epsg, pixelSize, projName, outDir):
+def process_laz(lazFile, epsg, pixelSize, projName, outDir, maxWinSize):
     """
     Main function to create a digital surface model, digital elevation model,
     and canopy height model.
@@ -77,7 +77,7 @@ def process_laz(lazFile, epsg, pixelSize, projName, outDir):
     noDataMask = ~nullArray
     binGeoSize = pixelSize
     initWinSize = 1
-    maxWinSize = 12
+    #maxWinSize = 12
     winSizeInc = 1
     slope = 0.3
     dh0 = 0.3
@@ -310,6 +310,8 @@ def getCmdargs():
                    help=("Directory for output images"))  
     p.add_argument("-s", "--pixelsize", dest="pixelsize", default=0.05,
                    help=("Pixelsize (m) for gridded outputs (default=0.05)"))
+    p.add_argument("-w", "--windowsize", dest="windowsize", default=40,
+                   help=("Window size for filtering (default=40"))
     cmdargs = p.parse_args()
     if (cmdargs.inLaz is None or cmdargs.epsg is None or
         cmdargs.projectName is None or cmdargs.outDir is None):
@@ -322,4 +324,4 @@ def getCmdargs():
 if __name__ == "__main__":
     cmdargs = getCmdargs()
     process_laz(cmdargs.inLaz, int(cmdargs.epsg), float(cmdargs.pixelsize),
-                cmdargs.projectName, cmdargs.outDir)
+                cmdargs.projectName, cmdargs.outDir, cmdargs.windowsize)

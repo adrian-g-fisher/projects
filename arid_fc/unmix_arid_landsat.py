@@ -4,6 +4,7 @@ This creates arid zone fractional cover images from JRSRP surface reflectance
 Landsat imagery. It follows the method as described in Shumack et al (2021).
 Most of the code was developed by Sam Shumack, with minor modification by Adrian
 Fisher. It needs AZN_M.csv, which contains the endmember data produced by Sam.
+The output is in GeoTiff format.
 
 Shumack, S., Fisher, A., Hesse, P.P., (2021), Refining medium resolution
     fractional cover for arid Australia to detect vegetation dynamics and wind
@@ -11,7 +12,25 @@ Shumack, S., Fisher, A., Hesse, P.P., (2021), Refining medium resolution
     265, https://doi.org/10.1016/j.rse.2021.112647
 
 This needs the fast-nnls package to be installed from GitHub with the following:
-    pip install git+git://github.com/lostsea/fast-nnls.git
+    pip install git+https://github.com/lostsea/fast-nnls.git
+
+The script can be run at the command line with the following arguments
+
+  -h, --help            show this help message and exit
+  -i INIMAGE, --inImage INIMAGE
+                        Input Landsat surface reflectance file.
+  -o OUTIMAGE, --outImage OUTIMAGE
+                        Output arid fractional cover file.
+  --inDir INDIR         Directory with Landsat surface reflectance files.
+  --outDir OUTDIR       Directory for arid fractional cover files.
+
+Example 1. Convert one surface reflectance image to arid zone fractional cover
+
+    > python unmix_arid_landsat.py -i surf_ref.tif -o arid_fc.tif
+
+Example 2. Convert many surface reflectance images to arid zone fractional cover
+
+    > python unmix_arid_landsat.py --inDir C:\surf_ref --outDir C:\arid_fc
 
 """
 

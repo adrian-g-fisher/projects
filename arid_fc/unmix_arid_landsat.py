@@ -41,8 +41,6 @@ import argparse
 import itertools
 import glob
 import numpy as np
-from numpy.linalg import pinv
-from sklearn.utils.extmath import randomized_svd
 from fastnnls import fnnls
 from rios import applier
 from rios import cuiprogress
@@ -51,8 +49,8 @@ from csv import reader
 
 def add_interactive_terms(X):
     """
-    This adds the interactive terms as used by Scarth et al. (2010), Guerschman
-    et al. (2015), and Shumack et al (2021).
+    This adds the interactive terms as used by Shumack et al (2021) (similar to Scarth et al. (2010) and Guerschman
+    et al. (2015) but fewer interactive terms are used here).
     """
     combos = list(itertools.combinations(range(0, X.shape[1]), 2))
     
@@ -63,22 +61,12 @@ def add_interactive_terms(X):
         logb = np.log(X[:, b])
         X = np.hstack((X, logb.reshape((logb.shape[0], 1))))
     
-    # bands 13-18 = product of log and original band
-    for b in range(0, 6):
-        logb = np.log(X[:, b]) * X[:, b]
-        X = np.hstack((X,logb.reshape((logb.shape[0], 1))))
-    
-    # bands 19-33 = product of each band combination
-    for c in combos:
-        bprod = X[:, c[0]] * X[:, c[1]]
-        X = np.hstack((X, bprod.reshape((bprod.shape[0], 1))))
-    
-    # bands 34-48 = product of each log band combination
+    # bands 13-27 = product of each log band combination
     for c in combos:
         logbprod = X[:, c[0] + 6] * X[:, c[1] + 6]
         X = np.hstack((X, logbprod.reshape((logbprod.shape[0], 1))))
     
-    # bands 49-63 = normalised band ratios
+    # bands 28-42 = normalised band ratios
     for c in combos:
         norm_ratio = (X[:, c[0]] - X[:, c[1]]) / (X[:, c[0]] + X[:, c[1]])
         X = np.hstack((X, norm_ratio.reshape((norm_ratio.shape[0], 1))))
@@ -87,13 +75,13 @@ def add_interactive_terms(X):
 
 
 
-def unmix(X, M, w=1, c=3):
+def unmix(X, M, w=0.2, c=3):
     """
     Unmixes an image into fractional cover.
     X is an array with n pixels times b bands (including all interactive terms).
     M is an array with c cover types times b bands.
     c = 3 for bare, PV and NPV
-    w = 1 is the weighting factor for the sum-to-one constraint.
+    w = 0.2 is the weighting factor for the sum-to-one constraint.
     """
     
     # Add ones for sum to one constraint

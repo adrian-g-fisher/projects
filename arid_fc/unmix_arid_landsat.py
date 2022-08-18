@@ -1,18 +1,32 @@
 #!/usr/bin/env python
 """
+Background
+
 This creates arid zone fractional cover images from JRSRP surface reflectance
-Landsat imagery. It follows the method as described in Shumack et al (2021).
-Most of the code was developed by Sam Shumack, with minor modification by Adrian
-Fisher. It needs AZN_M.csv, which contains the endmember data produced by Sam.
-The output is in GeoTiff format.
+Landsat images. It will work on TM, ETM+, or seasonal composites, but OLI
+imagery will need correcting first (Flood, 2014).
+
+It follows the method as described in Shumack et al (2021). Most of the code was
+developed by Sam Shumack, with minor modification by Adrian Fisher. It needs
+AZN_M.csv, which contains the endmember data produced by Sam. The output is in
+GeoTiff format.
+
+This needs the fast-nnls package to be installed from GitHub with the following:
+    pip install git+https://github.com/lostsea/fast-nnls.git
+
+References
+
+Flood, N., 2014. Continuity of reflectance data between Landsat-7 ETM+ and
+    Landsat-8 OLI, for both top-of-atmosphere and surface reflectance: a study
+    in the Australian landscape. Remote Sensing, 6, 7952–7970.
+    https://doi.org/10.3390/rs6097952
 
 Shumack, S., Fisher, A., Hesse, P.P., (2021), Refining medium resolution
     fractional cover for arid Australia to detect vegetation dynamics and wind
     erosion susceptibility on longitudinal dunes. Remote Sensing of Environment,
     265, https://doi.org/10.1016/j.rse.2021.112647
 
-This needs the fast-nnls package to be installed from GitHub with the following:
-    pip install git+https://github.com/lostsea/fast-nnls.git
+Examples
 
 The script can be run at the command line with the following arguments
 

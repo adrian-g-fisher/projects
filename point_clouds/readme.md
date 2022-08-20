@@ -4,7 +4,7 @@ This is a collection of scripts for processing point clouds (LAS format files) f
 `conda config --add channels conda-forge`<br />
 `conda config --add channels rios`<br />
 `conda create -n lidar pylidar`<br />
-`conda install -n lidar rios jupyterlab jupyter scipy matplotlib`
+`conda install -n lidar rios scipy matplotlib`
 
 ## Examples
 To create canopy height models (CHMs) from images of maximum height above ground derived from airborne lidar surveys:

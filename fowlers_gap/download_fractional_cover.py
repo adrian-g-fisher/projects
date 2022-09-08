@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 import sys
 from osgeo import gdal, ogr
@@ -5,7 +7,8 @@ from datetime import datetime
 
 # Inputs and outputs
 polygon = r'S:\fowlers_gap\gis\fowlers_aoi_albers.shp'
-dstDir = r'C:\Users\Adrian\Documents\fowlers_landsat'
+#dstDir = r'C:\Users\Adrian\Documents\fowlers_landsat'
+dstDir = r'S:\fowlers_gap\imagery\landsat\seasonal_fractional_cover_v3'
 
 # Read in shapefile and get bounding box
 basename = os.path.basename(polygon).replace(r'.shp', '')
@@ -17,9 +20,9 @@ ds = None
 
 # Construct dateList for all seasonal dates
 start = 198712198802
-end = 202112202202
+end = 202203202205
 dateList = []
-for y1 in range(1987, 2022):
+for y1 in range(1987, 2023):
     for m1 in range(3, 13, 3):
         if m1 < 12:
             y2 = y1
@@ -32,11 +35,12 @@ for y1 in range(1987, 2022):
             dateList.append(date)
 
 # For each date make the image subset
-#srcDir = r'/vsicurl/http://qld.auscover.org.au/public/data/landsat/seasonal_fractional_cover/fractional_cover/nsw/'
-srcDir = r'/vsicurl/https://dap.tern.org.au/thredds/fileServer/landscapes/remote_sensing/landsat/seasonal_fractional_cover/fractional_cover/nsw/'
+#srcDir = r'/vsicurl/https://dap.tern.org.au/thredds/fileServer/landscapes/remote_sensing/landsat/seasonal_fractional_cover/fractional_cover/nsw/'
+srcDir = r'/vsicurl/https://dap.tern.org.au/thredds/fileServer/landscapes/remote_sensing/landsat/seasonal_fractional_cover_v3/fractional_cover/seasonal/nsw/'
 
 for date in dateList:
-    srcImage = r'lztmre_nsw_m%i_dima2.tif'%date
+    #srcImage = r'lztmre_nsw_m%i_dima2.tif'%date
+    srcImage = r'lztmre_nsw_m%i_dp1a2.tif'%date
     srcFile = os.path.join(srcDir, srcImage)
     dstFile = os.path.join(dstDir, srcImage.replace(r'.tif', r'_subset.tif'))
     if os.path.exists(dstFile) is False:

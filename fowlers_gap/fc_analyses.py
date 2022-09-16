@@ -69,9 +69,25 @@ with open("seasonal_AZN_fc_extract.csv", 'r') as f:
 AZN_idYearList = np.array(AZN_idYearList)
 AZN_fc_data = np.array(AZN_fc_data)
 
+# Read in landsat fc v3 data
+v3_idYearList = []
+v3_fc_data = []
+with open("seasonal_fc_v3_extract.csv", 'r') as f:
+    f.readline()
+    for line in f:
+        ID = line.strip().split(',')[0]
+        Year = line.strip().split(',')[1].split('_')[2][1:5]
+        v3_idYearList.append('%s_%s'%(ID, Year))
+        PV = float(line.strip().split(',')[5])
+        NPV = float(line.strip().split(',')[7])
+        Bare = float(line.strip().split(',')[3])
+        v3_fc_data.append([PV, NPV, Bare])
+v3_idYearList = np.array(v3_idYearList)
+v3_fc_data = np.array(v3_fc_data)
+
 # Check that field and satellite data are in the same order
 for i, IDY in enumerate(idYearList):
-    if (IDY != NAT_idYearList[i]) or (IDY != AZN_idYearList[i]):
+    if (IDY != NAT_idYearList[i]) or (IDY != AZN_idYearList[i]) or (IDY != v3_idYearList[i]):
         print("Data does not line up")
 
 # Remove some sites as they have no data in the AZN model
@@ -81,8 +97,10 @@ NAT_fc_data = NAT_fc_data[(idYearList != '3_2012') & (idYearList != '4_2012') &
                          (idYearList != '8_2013') & (idYearList != '9_2013'), :]
 AZN_fc_data = AZN_fc_data[(idYearList != '3_2012') & (idYearList != '4_2012') &
                          (idYearList != '8_2013') & (idYearList != '9_2013'), :]
+v3_fc_data = v3_fc_data[(idYearList != '3_2012') & (idYearList != '4_2012') &
+                        (idYearList != '8_2013') & (idYearList != '9_2013'), :]
 colours = colours[(idYearList != '3_2012') & (idYearList != '4_2012') &
-                         (idYearList != '8_2013') & (idYearList != '9_2013'), :]
+                  (idYearList != '8_2013') & (idYearList != '9_2013'), :]
 
 # Make ternary plot of field measurements
 colours = np.array(colours)
@@ -106,14 +124,15 @@ plt.clf()
 # Make plot of field vs satellite data
 # Make plots
 fig = plt.figure(1)
-fig.set_size_inches((6, 4))
-rect = [[[0.17, 0.50, 0.2, 0.3],[0.40, 0.50, 0.2, 0.3],[0.63, 0.50, 0.2, 0.3]],
-        [[0.17, 0.15, 0.2, 0.3],[0.40, 0.15, 0.2, 0.3],[0.63, 0.15, 0.2, 0.3]]]
+fig.set_size_inches((6, 6))
+rect = [[[0.17, 0.65, 0.2, 0.2],[0.40, 0.65, 0.2, 0.2],[0.63, 0.65, 0.2, 0.2]],
+        [[0.17, 0.40, 0.2, 0.2],[0.40, 0.40, 0.2, 0.2],[0.63, 0.40, 0.2, 0.2]],
+        [[0.17, 0.15, 0.2, 0.2],[0.40, 0.15, 0.2, 0.2],[0.63, 0.15, 0.2, 0.2]],]
 
-ylabels = ["National model", "Arid model"]
-data = [NAT_fc_data, AZN_fc_data]
+ylabels = ["Fractional cover v2", "Fractional cover v3", "Arid model"]
+data = [NAT_fc_data, v3_fc_data, AZN_fc_data]
 
-for row in range(2):
+for row in range(3):
     for col in range(3):
     
         xdata = fc_data[:, col] / 100.0
@@ -127,7 +146,7 @@ for row in range(2):
         ax.plot([-0.05, 1.05], [-0.05, 1.05], ls='-', c='k', lw='1')
         ax.set_xticks([0.0, 0.5, 1.0])
         ax.set_yticks([0.0, 0.5, 1.0])
-        if row == 1:
+        if row == 2:
             ax.set_xticklabels([0.0, 0.5, 1.0], fontsize=8)
             if col == 1:
                 ax.set_xlabel("Field measured cover", fontsize=8)

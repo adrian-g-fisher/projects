@@ -8,6 +8,7 @@ import subprocess
 #           "project\\odm_dem\\dtm.tif",
 #           "project\\odm_georeferencing\\odm_georeferenced_model.laz",
 #           "project\\odm_orthophoto\\odm_orthophoto.tif"]
+
 dirList = ["p4m_fg04_20220513"]
 
 for name in dirList:

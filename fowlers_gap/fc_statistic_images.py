@@ -5,15 +5,35 @@ import glob
 import numpy as np
 from rios import applier
 
+def calcStatsTotal(info, inputs, outputs, otherargs):
+    """
+    This function is called from RIOS to calculate the stats image from the
+    input files.
+    """
+
+    stack = np.array(inputs.fc_list).astype(np.float32)
+    green_stack = stack[:, 1, :, :] - 100
+    dead_stack = stack[:, 2, :, :] - 100
+    total_stack = green_stack + dead_stack
+    
+    total_nodata = (total_stack == 0)
+    total_stack[total_stack < 0] = 0
+    total_stack[total_stack > 100] = 100
+    total_stack = np.ma.masked_where(total_nodata == 1, total_stack)
+    
+    nodata = (np.sum(total_nodata, axis=0) == stack.shape[0])
+    
+    meanTotal = np.mean(total_stack, axis=0)
+    meanTotal[nodata == 1] = 255
+    outputs.stats = np.array([meanTotal]).astype(np.float32)
+ 
 
 def calcStats(info, inputs, outputs, otherargs):
     """
     This function is called from RIOS to calculate the stats image from the
     input files.
     """
-    
 
-    
     stack = np.array(inputs.fc_list).astype(np.float32)
     bare_stack = stack[:, 0, :, :] - 100
     green_stack = stack[:, 1, :, :] - 100
@@ -69,12 +89,16 @@ controls.setStatsIgnore(255)
 controls.setCalcStats(True)
 controls.setOutputDriverName("GTiff")
 
-otherargs.stats = 'mean'
-controls.setLayerNames(['Bare_mean', 'PV_mean', 'NPV_mean'])
-outfiles.stats = os.path.join(dstDir, r'fowlers_fc_mean_198712_202205.tif')
-applier.apply(calcStats, infiles, outfiles, otherArgs=otherargs, controls=controls)
+controls.setLayerNames(['totalcover_mean'])
+outfiles.stats = os.path.join(dstDir, r'fowlers_fc_totalcover_mean_198712_202205.tif')
+applier.apply(calcStatsTotal, infiles, outfiles, otherArgs=otherargs, controls=controls)
 
 otherargs.stats = 'stdev'
 controls.setLayerNames(['Bare_stdev', 'PV_stdev', 'NPV_stdev'])
 outfiles.stats = os.path.join(dstDir, r'fowlers_fc_stdev_198712_202205.tif')
+applier.apply(calcStats, infiles, outfiles, otherArgs=otherargs, controls=controls)
+
+otherargs.stats = 'mean'
+controls.setLayerNames(['Bare_mean', 'PV_mean', 'NPV_mean'])
+outfiles.stats = os.path.join(dstDir, r'fowlers_fc_mean_198712_202205.tif')
 applier.apply(calcStats, infiles, outfiles, otherArgs=otherargs, controls=controls)

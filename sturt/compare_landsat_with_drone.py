@@ -58,6 +58,7 @@ dAlive = []
 dDead = []
 years = np.unique(droneYear)
 idents = np.unique(droneIdent)
+fudgefactor = 1.00 # Proportion of PV that should be NPV
 for y in years:
     for i in idents:
         if np.size(dronePix[(droneType == 'Alive') & (droneYear == y) & (droneIdent == i)]) > 0:
@@ -67,10 +68,8 @@ for y in years:
             total = alive + dead + background
             alivePercent = 100 * alive / float(total)
             deadPercent = 100 * dead / float(total)
-            
-            alive_component = alivePercent * 0.16
-            dead_component = (alivePercent * (1 - 0.16)) + deadPercent
-            
+            alive_component = alivePercent * fudgefactor
+            dead_component = (alivePercent * (1 - fudgefactor)) + deadPercent
             dIdent.append(i)
             dYear.append(y)        
             dAlive.append(alive_component)
@@ -118,7 +117,11 @@ def read_csvfile(csvFile):
             std_green.append(float(line[6]))
             mean_dead.append(float(line[7]))
             std_dead.append(float(line[8]))
-    return np.array([i,Date,pixels,mean_bare,std_bare,mean_green,std_green,mean_dead,std_dead])
+            
+    data = np.array([i,Date,pixels,mean_bare,std_bare,mean_green,std_green,mean_dead,std_dead])
+    data = data[:, data[1, :].argsort()]
+    
+    return data
 
 
 def make_plot(csvfile, sumFile):
@@ -165,25 +168,35 @@ def make_plot(csvfile, sumFile):
     axGreen.plot(droneDates, droneAlive, ls='', marker='o', markeredgecolor='r', markerfacecolor='r')
     axDead.plot(droneDates, droneDead, ls='', marker='o', markeredgecolor='r', markerfacecolor='r')
     
-    plt.savefig(csvfile.replace('.csv', '_%s_adjusted.png'%Ident.replace(' ', '_')), dpi=300)
+    plt.savefig(csvfile.replace('.csv', '_%s.png'%Ident.replace(' ', '_')), dpi=300)
     plt.clf()
     
     # Add to summary file
-    #with open(sumFile, 'a') as f:
-    #    for i, iDate in enumerate(droneDates):
-    #        iAlive = droneAlive[i]
-    #        iDead = droneDead[i]
-    #        f.write('%i,%s,%.4f,%.4f,%.4f,%.4f,%.4f\n'%(Id, Ident, iDate, iAlive, iDead,
-    #                                                    fcdata[5, :][dates == iDate],
-    #                                                    fcdata[7, :][dates == iDate]))
+    with open(sumFile, 'a') as f:
+        for i, iDate in enumerate(droneDates):
+            iAlive = droneAlive[i]
+            iDead = droneDead[i]
+            f.write('%i,%s,%.4f,%.4f,%.4f,%.4f,%.4f\n'%(Id, Ident, iDate, iAlive, iDead,
+                                                        fcdata[5, :][dates == iDate],
+                                                        fcdata[7, :][dates == iDate]))
+
+# FC Version 2
+sumFile = r'C:\Users\Adrian\OneDrive - UNSW\Documents\papers\preparation\wild_deserts_vegetation_change\comparison_fc.csv'
+csvDir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\papers\preparation\wild_deserts_vegetation_change\timeseries_fc'
+
+# FC Version 3
+#sumFile = r'C:\Users\Adrian\OneDrive - UNSW\Documents\papers\preparation\wild_deserts_vegetation_change\comparison_fc_v3.csv'
+#csvDir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\papers\preparation\wild_deserts_vegetation_change\timeseries_fc_v3'
+
+# FC Arid Zone
+#sumFile = r'C:\Users\Adrian\OneDrive - UNSW\Documents\papers\preparation\wild_deserts_vegetation_change\comparison_fc_AZN.csv'
+#csvDir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\papers\preparation\wild_deserts_vegetation_change\timeseries_fc_AZN'
 
 # Create summary file
-sumFile = r'C:\Users\Adrian\OneDrive - UNSW\Documents\papers\preparation\wild_deserts_vegetation_change\comparison.csv'
-#with open(sumFile, 'w') as f:
-#    f.write('Id,Ident,date,droneAlive,droneDead,satPV,satNPV\n')
+with open(sumFile, 'w') as f:
+    f.write('Id,Ident,date,droneAlive,droneDead,satPV,satNPV\n')
 
-# Make the graphs
-csvDir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\papers\preparation\wild_deserts_vegetation_change\timeseries_fc_v3'
+# Make the graphs and summarise data
 for csvfile in glob.glob(os.path.join(csvDir, '*_timeseries.csv')):
     make_plot(csvfile, sumFile)
 

@@ -63,8 +63,9 @@ from csv import reader
 
 def add_interactive_terms(X):
     """
-    This adds the interactive terms as used by Shumack et al (2021) (similar to Scarth et al. (2010) and Guerschman
-    et al. (2015) but fewer interactive terms are used here).
+    This adds the interactive terms as used by Shumack et al (2021) (similar to 
+    Scarth et al. (2010) and Guerschman et al. (2015) but fewer interactive
+    terms are used here).
     """
     combos = list(itertools.combinations(range(0, X.shape[1]), 2))
     

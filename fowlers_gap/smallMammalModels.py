@@ -91,55 +91,27 @@ def applyModels(info, inputs, outputs, otherargs):
     images.
     """
     # Listed like in the table in the chapter
-    c_forresti = [[-2.27268, 0.01038, 0.15129, 0.00000, -0.01569, 0.00000,  0.00000], # Emu
-                  [-2.27268, 0.01038, 0.15129, 0.00000, -0.01569, 0.00000, -0.41204], # Unfenced
-                  [-2.27268, 0.01038, 0.15129, 0.00000, -0.01569, 0.00000,  0.00000], # Conservation
-                  [-2.27268, 0.01038, 0.15129, 0.00000, -0.01569, 0.00000, -0.41204], # Unfenced
-                  [-2.27268, 0.01038, 0.15129, 0.00000, -0.01569, 1.36160,  0.00000], # Warrens
-                  [-2.27268, 0.01038, 0.15129, 0.00000, -0.01569, 1.36160, -0.41204]] # Unfenced
-    
-    c_musculus = [[-2.2123,  0.1216,  0.1673,  0.0000,   0.0000,   0.5478,   0.0000], # Emu
-                  [-2.2123,  0.1216,  0.1673,  0.0000,   0.0000,   0.5478,  -0.0511], # Unfenced
-                  [-2.2123,  0.1216,  0.1673,  0.0000,   0.0000,   0.0000,   0.0000], # Conservation
-                  [-2.2123,  0.1216,  0.1673,  0.0000,   0.0000,   0.0000,  -0.0511], # Unfenced
-                  [-2.2123,  0.1216,  0.1673,  0.0000,   0.0000,   0.0000,   0.0000], # Warrens
-                  [-2.2123,  0.1216,  0.1673,  0.0000,   0.0000,   0.0000,  -0.0511]] # Unfenced
-    
+    c = [-2.64847, 0.10321] # Intercept and slope for pv_1_3 lag
+    unfenced = -0.39986     # Fixed effect for sites that are unfenced
+    emu =      -0.06297     # Fixed effect for Emu
+    warrens =   0.97787     # Fixed effect for Warrens
+    fixed_effects = [    emu,     emu + unfenced,
+                           0,           unfenced,
+                     warrens, warrens + unfenced]
     pv_1_3 = inputs.lagImage[0]
-    pv_4_6 = inputs.lagImage[1]
-    pv_7_9 = inputs.lagImage[2]
-    pv_10_12 = inputs.lagImage[3]
-    
-    # Make arrays for output
-    f = np.zeros_like(pv_1_3)
-    m = np.zeros_like(pv_1_3)
-    
+    f = np.zeros_like(pv_1_3).astype(np.float32)
     s = inputs.sites[0]
     if np.max(s) > 0:
-        for i in np.unique(s):
-            
-            # forresti model
-            c = c_forresti[i - 1]
-            f[s == i] = (c[0] + c[1]*pv_1_3[s == i] +
-                                c[2]*pv_4_6[s == i] +
-                                c[3]*pv_7_9[s == i] +
-                                c[4]*pv_10_12[s == i] +
-                                c[5] + c[6])
-        
-            # musculus model
-            c = c_musculus[i - 1]
-            m[s == i] = (c[0] + c[1]*pv_1_3[s == i] +
-                                c[2]*pv_4_6[s == i] +
-                                c[3]*pv_7_9[s == i] +
-                                c[4]*pv_10_12[s == i] +
-                                c[5] + c[6])
+        for i in np.unique(s[s != 0]):
+            f[s == i] = c[0] + c[1]*pv_1_3[s == i] + fixed_effects[i-1]
     
-    f[s == 0] = 255
-    m[s == 0] = 255
+    # Now scale between -3.11130 and 2.26638
+    f = (f + 3.11130) / 2.26638
     f[f < 0] = 0
-    m[m < 0] = 0
+    f[f > 1] = 1
+    f[s == 0] = 255
+    
     outputs.forresti = np.array([f])
-    outputs.musculus = np.array([m])
 
 
 def smallMammalModel(imageDate, imageDir):
@@ -161,16 +133,15 @@ def smallMammalModel(imageDate, imageDir):
     controls.setOutputDriverName("GTiff")
     controls.setBurnAttribute("Id")
     outfiles.forresti = os.path.join(imageDir, r'forresti_image_%s.tif'%imageDate)
-    outfiles.musculus = os.path.join(imageDir, r'musculus_image_%s.tif'%imageDate)
     applier.apply(applyModels, infiles, outfiles, otherArgs=otherargs, controls=controls)
 
 
 imageDir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\student_projects\mphil\matt_smith\data\20190414'
 imageDate = '20190414'
-make_lag_image(imageDate, imageDir)
+#make_lag_image(imageDate, imageDir)
 smallMammalModel(imageDate, imageDir)
 
 imageDir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\student_projects\mphil\matt_smith\data\20210419'
 imageDate = '20210419'
-make_lag_image(imageDate, imageDir)
+#make_lag_image(imageDate, imageDir)
 smallMammalModel(imageDate, imageDir)

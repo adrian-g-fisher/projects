@@ -24,7 +24,7 @@ def getPixelValues(info, inputs, outputs, otherargs):
     to clouds obscuring the ground).
     """
     sites = inputs.sites[0]
-    fc = inputs.fc
+    fc = inputs.fc.astype(np.float32)
     sitesPresent = np.unique(sites[sites != 0])
     if otherargs.subtract == True:
         s = 100
@@ -37,6 +37,15 @@ def getPixelValues(info, inputs, outputs, otherargs):
         bare = fc[0][(sites != 0) & (fc[0] != nodata)] - s
         green = fc[1][(sites != 0) & (fc[0] != nodata)] - s
         dead = fc[2][(sites != 0) & (fc[0] != nodata)] - s
+        
+        bare[bare < 0] = 0
+        green[green < 0] = 0
+        dead[dead < 0] = 0
+        
+        bare[bare > 100] = 100
+        green[green > 100] = 100
+        dead[dead > 100] = 100
+        
         for i in range(uids.size):
             otherargs.pixels.append([uids[i], bare[i], green[i], dead[i]])
 

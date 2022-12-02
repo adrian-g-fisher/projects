@@ -176,10 +176,10 @@ def make_plot(csvfile, sumFile):
         for i, iDate in enumerate(droneDates):
             iAlive = droneAlive[i]
             iDead = droneDead[i]
-            f.write('%i,%s,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\n'%(Id, Ident, iDate, iAlive, iDead,
-                                                             fcdata[5, :][dates == iDate],
-                                                             fcdata[7, :][dates == iDate],
-                                                             fcdata[3, :][dates == iDate]))
+            f.write('%i,%s,%.4f,%.4f,%.4f,%.4f,%.4f\n'%(Id, Ident, iDate, iAlive, iDead,
+                                                        fcdata[5, :][dates == iDate],
+                                                        fcdata[7, :][dates == iDate],
+                                                        fcdata[3, :][dates == iDate]))
 
 # FC Version 2
 #sumFile = r'C:\Users\Adrian\OneDrive - UNSW\Documents\papers\preparation\wild_deserts_vegetation_change\comparison_fc.csv'

@@ -38,9 +38,9 @@ fc_AZN = read_csv(os.path.join(workDir, r"comparison_fc_AZN.csv"))
 fig = plt.figure(1)
 fig.set_size_inches((8, 8))
 
-rects  = [[[0.20, 0.65, 0.25, 0.25], [0.60, 0.65, 0.25, 0.25]],
-          [[0.20, 0.35, 0.25, 0.25], [0.60, 0.35, 0.25, 0.25]],
-          [[0.20, 0.05, 0.25, 0.25], [0.60, 0.05, 0.25, 0.25]]]
+rects  = [[[0.30, 0.70, 0.25, 0.25], [0.60, 0.70, 0.25, 0.25]],
+          [[0.30, 0.40, 0.25, 0.25], [0.60, 0.40, 0.25, 0.25]],
+          [[0.30, 0.10, 0.25, 0.25], [0.60, 0.10, 0.25, 0.25]]]
 
 data = [fc_v2, fc_v3, fc_AZN]
 
@@ -53,11 +53,27 @@ for x in range(2):
         ax.set_ylim((0, 100))
         ax.set_xticks([0, 25, 50, 75, 100])
         ax.set_yticks([0, 25, 50, 75, 100])
-        #if x != 
+        if y != 2:
+            ax.set_xticklabels([])
+        if x != 0:
+            ax.set_yticklabels([])
+
+        if x == 0 and y == 0:
+            ax.set_ylabel('Version 2\nLandsat fractional\ncover (%)', fontsize=12)
+        if x == 0 and y == 1:
+            ax.set_ylabel('Version 3\nLandsat fractional\ncover (%)', fontsize=12)            
+        if x == 0 and y == 2:
+            ax.set_ylabel('AZN model\nLandsat fractional\ncover (%)', fontsize=12)
+            
+        if x == 0 and y == 2:
+            ax.set_xlabel('                                              Drone fractional cover (%)', fontsize=12)
         
-        ax.set_ylabel('Cover (%)', fontsize=12)
-        ax.text(1988.5, 35, 'Green vegetation', fontsize=12, horizontalalignment="left")
         ax.plot(drone, satellite, ls='', marker='.', markeredgecolor='0.5', markerfacecolor='None')
-    
+        ax.plot([0, 100], [0, 100], ls='-', color='k', lw=1)
+        
+        
+fig.text(0.42, 0.97, 'Green vegetation', fontsize=12, horizontalalignment="center")
+fig.text(0.72, 0.97, 'Dead vegetation', fontsize=12, horizontalalignment="center")
+
 plt.savefig(os.path.join(workDir, "drone_satellite_comparison"), dpi=300)
 plt.clf()

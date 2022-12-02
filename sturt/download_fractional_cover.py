@@ -7,9 +7,9 @@ from datetime import datetime
 
 # Inputs and outputs
 polygon = r'C:\Users\Adrian\OneDrive - UNSW\Documents\papers\preparation\wild_deserts_vegetation_change\strz_subset.shp'
-#dstDir = r'S:\sturt\landsat\landsat_seasonal_fractional_cover'
+dstDir = r'S:\sturt\landsat\landsat_seasonal_fractional_cover'
 #dstDir = r'S:\sturt\landsat\landsat_seasonal_fractional_cover_v3'
-dstDir = r'S:\sturt\landsat\landsat_seasonal_surface_reflectance'
+#dstDir = r'S:\sturt\landsat\landsat_seasonal_surface_reflectance'
 
 # Read in shapefile and get bounding box
 basename = os.path.basename(polygon).replace(r'.shp', '')
@@ -21,7 +21,7 @@ ds = None
 
 # Construct dateList for all seasonal dates
 start = 198712198802
-end = 202203202205
+end = 202206202208
 dateList = []
 for y1 in range(1987, 2023):
     for m1 in range(3, 13, 3):
@@ -36,24 +36,25 @@ for y1 in range(1987, 2023):
             dateList.append(date)
 
 # For each date make the image subset
-#srcDir = r'/vsicurl/https://dap.tern.org.au/thredds/fileServer/landscapes/remote_sensing/landsat/seasonal_fractional_cover/fractional_cover/aus/'
+srcDir = r'/vsicurl/https://dap.tern.org.au/thredds/fileServer/landscapes/remote_sensing/landsat/seasonal_fractional_cover/fractional_cover/aus/'
 #srcDir = r'/vsicurl/https://dap.tern.org.au/thredds/fileServer/landscapes/remote_sensing/landsat/seasonal_fractional_cover_v3/fractional_cover/seasonal/nsw/'
-srcDir = r'/vsicurl/https://dap.tern.org.au/thredds/fileServer/landscapes/remote_sensing/landsat/surface_reflectance/nsw/'
+#srcDir = r'/vsicurl/https://dap.tern.org.au/thredds/fileServer/landscapes/remote_sensing/landsat/surface_reflectance/nsw/'
 
 for date in dateList:
 
-    #srcImage = r'lztmre_aus_m%i_dima2.vrt'%date
+    srcImage = r'lztmre_aus_m%i_dima2.vrt'%date
     #srcImage = r'lztmre_nsw_m%i_dp1a2.tif'%date
     
-    if date <= 201303201305:
-        srcImage = r'lztmre_nsw_m%i_dbia2.tif'%date
-    elif date >= 202112202202:
-        srcImage = r'lzolre_nsw_m%i_dbia2.tif'%date
-    else:
-        srcImage = r'l8olre_nsw_m%i_dbia2.tif'%date
+    #if date <= 201303201305:
+    #    srcImage = r'lztmre_nsw_m%i_dbia2.tif'%date
+    #elif date >= 202112202202:
+    #    srcImage = r'lzolre_nsw_m%i_dbia2.tif'%date
+    #else:
+    #    srcImage = r'l8olre_nsw_m%i_dbia2.tif'%date
     
     srcFile = os.path.join(srcDir, srcImage)
-    dstFile = os.path.join(dstDir, srcImage.replace('nsw', 'aus').replace(r'.tif', r'_subset.tif'))
+    #dstFile = os.path.join(dstDir, srcImage.replace('nsw', 'aus').replace(r'.tif', r'_subset.tif'))
+    dstFile = os.path.join(dstDir, srcImage.replace(r'.vrt', r'_subset.tif'))
         
     if os.path.exists(dstFile) is False:
         print(srcFile)

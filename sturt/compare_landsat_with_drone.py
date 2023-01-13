@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Drone imagery was always captured March-April (Autumn).
+Drone imagery was always captured March-May (Autumn).
 
 """
 import os

@@ -6,6 +6,9 @@ fc <- read.csv('C:/Users/Adrian/OneDrive - UNSW/Documents/papers/preparation/wil
 fc$satTotal <- fc$satPV + fc$satNPV
 fc$droneTotal <- fc$droneAlive + fc$droneDead
 
+# Add dune-swale class from Ident column
+fc$landform <- sapply(strsplit(as.character(fc$Ident), " "), `[`, 2)
+
 # Develop model for PV
 PVmodel <- lm(data = fc, satPV ~ 0 + droneAlive)
 summary(PVmodel)
@@ -78,11 +81,11 @@ fc2020 <- fc2020[order(fc2020$Id),]
 fc2021 <- fc2021[order(fc2021$Id),]
 fc2022 <- fc2022[order(fc2022$Id),]
 
-fc2018 <- select(fc2018, Id, satPV, satNPV, satBare, satTotal, predicted_PV, predicted_total, predicted_NPV)
-fc2019 <- select(fc2019, Id, satPV, satNPV, satBare, satTotal, predicted_PV, predicted_total, predicted_NPV)
-fc2020 <- select(fc2020, Id, satPV, satNPV, satBare, satTotal, predicted_PV, predicted_total, predicted_NPV)
-fc2021 <- select(fc2021, Id, satPV, satNPV, satBare, satTotal, predicted_PV, predicted_total, predicted_NPV)
-fc2022 <- select(fc2022, Id, satPV, satNPV, satBare, satTotal, predicted_PV, predicted_total, predicted_NPV)
+fc2018 <- select(fc2018, Id, satPV, satNPV, satBare, satTotal, predicted_PV, predicted_total, predicted_NPV, landform)
+fc2019 <- select(fc2019, Id, satPV, satNPV, satBare, satTotal, predicted_PV, predicted_total, predicted_NPV, landform)
+fc2020 <- select(fc2020, Id, satPV, satNPV, satBare, satTotal, predicted_PV, predicted_total, predicted_NPV, landform)
+fc2021 <- select(fc2021, Id, satPV, satNPV, satBare, satTotal, predicted_PV, predicted_total, predicted_NPV, landform)
+fc2022 <- select(fc2022, Id, satPV, satNPV, satBare, satTotal, predicted_PV, predicted_total, predicted_NPV, landform)
 
 names(fc2018)[2] <- 'satPV_2018'
 names(fc2018)[3] <- 'satNPV_2018'
@@ -272,3 +275,94 @@ box2022 <- ggplot(fc2022_mod) +
 
 combined_plot <- plot_grid(box2018, box2019, box2020, box2021, box2022, ncol = 5, align = "h")
 ggsave("C:/Users/Adrian/OneDrive - UNSW/Documents/papers/preparation/wild_deserts_vegetation_change/landsat_boxplots.png", combined_plot, width = 8, height = 2.7)
+
+# Make annual boxplots for dune sites only
+fc2018_dune <- subset(fc2018, landform == 'DUNE')
+fc2019_dune <- subset(fc2019, landform == 'DUNE')
+fc2020_dune <- subset(fc2020, landform == 'DUNE')
+fc2021_dune <- subset(fc2021, landform == 'DUNE')
+fc2022_dune <- subset(fc2022, landform == 'DUNE')
+
+fc2018_mod <- melt(fc2018_dune, id.vars='Id', measure.vars=c('Bare', 'PV', 'NPV'))
+box2018 <- ggplot(fc2018_mod) +
+           geom_boxplot(aes(x=variable, y=value, color=variable)) +
+           labs(x = "", y = "Landsat cover (%)", title = '2018') +
+           coord_cartesian(ylim=c(0, 100)) +
+           theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.position="none")
+
+fc2019_mod <- melt(fc2019_dune, id.vars='Id', measure.vars=c('Bare', 'PV', 'NPV'))
+box2019 <- ggplot(fc2019_mod) +
+           geom_boxplot(aes(x=variable, y=value, color=variable)) +
+           labs(x = "", y = "", title = '2019') +
+           coord_cartesian(ylim=c(0, 100)) +
+           theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.position="none")
+
+fc2020_mod <- melt(fc2020_dune, id.vars='Id', measure.vars=c('Bare', 'PV', 'NPV'))
+box2020 <- ggplot(fc2020_mod) +
+           geom_boxplot(aes(x=variable, y=value, color=variable)) +
+           labs(x = "", y = "", title = '2020') +
+           coord_cartesian(ylim=c(0, 100)) +
+           theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.position="none")
+
+fc2021_mod <- melt(fc2021_dune, id.vars='Id', measure.vars=c('Bare', 'PV', 'NPV'))
+box2021 <- ggplot(fc2021_mod) +
+           geom_boxplot(aes(x=variable, y=value, color=variable)) +
+           labs(x = "", y = "", title = '2021') +
+           coord_cartesian(ylim=c(0, 100)) +
+           theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.position="none")
+
+fc2022_mod <- melt(fc2022_dune, id.vars='Id', measure.vars=c('Bare', 'PV', 'NPV'))
+box2022 <- ggplot(fc2022_mod) +
+           geom_boxplot(aes(x=variable, y=value, color=variable)) +
+           labs(x = "", y = "", title = '2022') +
+           coord_cartesian(ylim=c(0, 100)) +
+           theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.position="none")
+
+combined_plot <- plot_grid(box2018, box2019, box2020, box2021, box2022, ncol = 5, align = "h")
+ggsave("C:/Users/Adrian/OneDrive - UNSW/Documents/papers/preparation/wild_deserts_vegetation_change/landsat_boxplots_dune.png", combined_plot, width = 8, height = 2.7)
+
+# Make annual boxplots for swale sites only
+fc2018_swale <- subset(fc2018, landform == 'SWALE')
+fc2019_swale <- subset(fc2019, landform == 'SWALE')
+fc2020_swale <- subset(fc2020, landform == 'SWALE')
+fc2021_swale <- subset(fc2021, landform == 'SWALE')
+fc2022_swale <- subset(fc2022, landform == 'SWALE')
+
+fc2018_mod <- melt(fc2018_swale, id.vars='Id', measure.vars=c('Bare', 'PV', 'NPV'))
+box2018 <- ggplot(fc2018_mod) +
+           geom_boxplot(aes(x=variable, y=value, color=variable)) +
+           labs(x = "", y = "Landsat cover (%)", title = '2018') +
+           coord_cartesian(ylim=c(0, 100)) +
+           theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.position="none")
+
+fc2019_mod <- melt(fc2019_swale, id.vars='Id', measure.vars=c('Bare', 'PV', 'NPV'))
+box2019 <- ggplot(fc2019_mod) +
+           geom_boxplot(aes(x=variable, y=value, color=variable)) +
+           labs(x = "", y = "", title = '2019') +
+           coord_cartesian(ylim=c(0, 100)) +
+           theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.position="none")
+
+fc2020_mod <- melt(fc2020_swale, id.vars='Id', measure.vars=c('Bare', 'PV', 'NPV'))
+box2020 <- ggplot(fc2020_mod) +
+           geom_boxplot(aes(x=variable, y=value, color=variable)) +
+           labs(x = "", y = "", title = '2020') +
+           coord_cartesian(ylim=c(0, 100)) +
+           theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.position="none")
+
+fc2021_mod <- melt(fc2021_swale, id.vars='Id', measure.vars=c('Bare', 'PV', 'NPV'))
+box2021 <- ggplot(fc2021_mod) +
+           geom_boxplot(aes(x=variable, y=value, color=variable)) +
+           labs(x = "", y = "", title = '2021') +
+           coord_cartesian(ylim=c(0, 100)) +
+           theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.position="none")
+
+fc2022_mod <- melt(fc2022_swale, id.vars='Id', measure.vars=c('Bare', 'PV', 'NPV'))
+box2022 <- ggplot(fc2022_mod) +
+           geom_boxplot(aes(x=variable, y=value, color=variable)) +
+           labs(x = "", y = "", title = '2022') +
+           coord_cartesian(ylim=c(0, 100)) +
+           theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.position="none")
+
+combined_plot <- plot_grid(box2018, box2019, box2020, box2021, box2022, ncol = 5, align = "h")
+ggsave("C:/Users/Adrian/OneDrive - UNSW/Documents/papers/preparation/wild_deserts_vegetation_change/landsat_boxplots_swale.png", combined_plot, width = 8, height = 2.7)
+

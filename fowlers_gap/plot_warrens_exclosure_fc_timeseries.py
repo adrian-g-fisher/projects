@@ -288,3 +288,107 @@ axLeg.plot([60.5, 61.5], [0.5, 0.5], ls='-', c='r', lw=10, alpha=0.3)
 axLeg.text(64, 0.2, r'Fenced (no grazing)', fontsize=14)
 
 plt.savefig(r'warrens_comparison.png', dpi=300)
+
+################################################################################
+# One plot with 4 lines (fenced/unfenced + green/dead)
+################################################################################
+
+fig = plt.figure(4)
+fig.set_size_inches((8, 4))
+
+#fig.text(0.1, 0.95, 'Dead vegetation', fontsize=14)
+#fig.text(0.1, 0.50, 'Green vegetation', fontsize=14)
+
+rects  = [[0.1, 0.2, 0.85, 0.75]]
+
+ax1 = plt.axes(rects[0])
+ax1.set_xlim((datetime.date(2008, month=1, day=1), datetime.date(2022, month=1, day=1)))
+ax1.set_xticks([datetime.date(2008, month=1, day=1),
+                   datetime.date(2010, month=1, day=1),
+                   datetime.date(2012, month=1, day=1),
+                   datetime.date(2014, month=1, day=1),
+                   datetime.date(2016, month=1, day=1),
+                   datetime.date(2018, month=1, day=1),
+                   datetime.date(2020, month=1, day=1),
+                   datetime.date(2022, month=1, day=1)])
+ax1.xaxis.set_minor_locator(mdates.YearLocator(1))
+ax1.grid(which='both', c='0.9')
+ax1.set_ylim((0, 80))
+ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+ax1.set_ylabel('Vegetation cover (%)', fontsize=14)   
+
+poly_id = 5
+dates = datetimes[Id == poly_id]
+inds = dates.argsort()
+green_ts = green[(Id == poly_id), :]
+green_ts = green_ts[inds]
+dead_ts = dead[(Id == poly_id), :]
+dead_ts = dead_ts[inds]
+dates = dates[inds]
+green_ts_fenced = np.ma.masked_equal(green_ts, 999)
+dead_ts_fenced = np.ma.masked_equal(dead_ts, 999)
+
+poly_id = 6
+dates = datetimes[Id == poly_id]
+inds = dates.argsort()
+green_ts = green[(Id == poly_id), :]
+green_ts = green_ts[inds]
+dead_ts = dead[(Id == poly_id), :]
+dead_ts = dead_ts[inds]
+dates = dates[inds]
+green_ts_unfenced = np.ma.masked_equal(green_ts, 999)
+dead_ts_unfenced = np.ma.masked_equal(dead_ts, 999)
+
+lower_dead_fenced = dead_ts_fenced[:, 0] - dead_ts_fenced[:, 1]
+lower_dead_fenced[lower_dead_fenced < 0] = 0
+upper_dead_fenced = dead_ts_fenced[:, 0] + dead_ts_fenced[:, 1]
+upper_dead_fenced[upper_dead_fenced > 100] = 100
+
+lower_dead_unfenced = dead_ts_unfenced[:, 0] - dead_ts_unfenced[:, 1]
+lower_dead_unfenced[lower_dead_unfenced < 0] = 0
+upper_dead_unfenced = dead_ts_unfenced[:, 0] + dead_ts_unfenced[:, 1]
+upper_dead_unfenced[upper_dead_unfenced > 100] = 100
+
+ax1.fill_between(dates, lower_dead_fenced, upper_dead_fenced, alpha=0.5, facecolor='saddlebrown', linewidth=0.0, edgecolor='saddlebrown')
+ax1.fill_between(dates, lower_dead_unfenced, upper_dead_unfenced, alpha=0.5, facecolor='sandybrown', linewidth=0.0, edgecolor='sandybrown')
+
+lower_green_fenced = green_ts_fenced[:, 0] - green_ts_fenced[:, 1]
+lower_green_fenced[lower_green_fenced < 0] = 0
+upper_green_fenced = green_ts_fenced[:, 0] + green_ts_fenced[:, 1]
+upper_green_fenced[upper_green_fenced > 100] = 100
+
+lower_green_unfenced = green_ts_unfenced[:, 0] - green_ts_unfenced[:, 1]
+lower_green_unfenced[lower_green_unfenced < 0] = 0
+upper_green_unfenced = green_ts_unfenced[:, 0] + green_ts_unfenced[:, 1]
+upper_green_unfenced[upper_green_unfenced > 100] = 100
+
+ax1.fill_between(dates, lower_green_fenced, upper_green_fenced, alpha=0.5, facecolor='darkgreen', linewidth=0.0, edgecolor='darkgreen')
+ax1.fill_between(dates, lower_green_unfenced, upper_green_unfenced, alpha=0.5, facecolor='limegreen', linewidth=0.0, edgecolor='limegreen')
+
+# Add line for fence
+ax1.plot([datetime.date(year=2017, month=6, day=30),
+          datetime.date(year=2017, month=6, day=30)],
+          [0, 80], ls='--', c='k', lw=2)
+ax1.text(datetime.date(year=2017, month=7, day=30), 75, r'Fence constructed', fontsize=14)
+
+# Put legend down the bottom for PV and NPV
+axLeg = plt.axes([0, 0, 1, 0.1], frameon=False)
+axLeg.set_xlim((0, 100))
+axLeg.set_ylim((0, 2))
+axLeg.set_ylim((0, 2))
+axLeg.set_xticks([])
+axLeg.set_yticks([])
+
+axLeg.plot([12, 13], [0.6, 0.6], ls='-', c='limegreen', lw=10, alpha=0.5)
+axLeg.text(15, 0.2, r'Green not fenced (grazing)', fontsize=14)
+
+axLeg.plot([12, 13], [1.7, 1.7], ls='-', c='darkgreen', lw=10, alpha=0.5)
+axLeg.text(15, 1.4, r'Green fenced (no grazing)', fontsize=14)
+
+axLeg.plot([57, 58], [0.5, 0.5], ls='-', c='sandybrown', lw=10, alpha=0.5)
+axLeg.text(60, 0.2, r'Brown not fenced (grazing)', fontsize=14)
+
+axLeg.plot([57, 58], [1.7, 1.7], ls='-', c='saddlebrown', lw=10, alpha=0.5)
+axLeg.text(60, 1.4, r'Brown fenced (no grazing)', fontsize=14)
+
+plt.savefig(r'warrens_grazing_effect.png', dpi=300)

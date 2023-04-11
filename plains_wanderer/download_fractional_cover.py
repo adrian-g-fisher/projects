@@ -7,7 +7,7 @@ from datetime import datetime
 
 # Inputs and outputs
 polygon = r'C:\Users\Adrian\OneDrive - UNSW\Documents\plains_wanderer\plains_wanderer_aoi_albers.shp'
-dstDir = r'S:\hay_plain\landsat\landsat_seasonal_fractional_cover_v3'
+dstDir = r'E:\hay_plain\landsat\landsat_seasonal_fractional_cover'
 
 # Read in shapefile and get bounding box
 basename = os.path.basename(polygon).replace(r'.shp', '')
@@ -34,13 +34,11 @@ for y1 in range(1987, 2023):
             dateList.append(date)
 
 # For each date make the image subset
-#srcDir = r'/vsicurl/https://data.tern.org.au/rs/public/data/remote-sensing/landsat/seasonal_fractional_cover_v3/fractional_cover/seasonal/nsw/'
-srcDir = r'/vsicurl/http://qld.auscover.org.au/public/data/landsat/seasonal_fractional_cover_v3/fractional_cover/seasonal/nsw/'
-
+srcDir = r'/vsicurl/https://data.tern.org.au/rs/public/data/remote-sensing/landsat/seasonal_fractional_cover/fractional_cover/aus/'
 for date in dateList:
-    srcImage = r'lztmre_nsw_m%i_dp1a2.tif'%date
+    srcImage = r'lztmre_aus_m%i_dima2.vrt'%date
     srcFile = os.path.join(srcDir, srcImage)
-    dstFile = os.path.join(dstDir, srcImage.replace(r'.tif', r'_subset.tif'))
+    dstFile = os.path.join(dstDir, srcImage.replace(r'.vrt', r'_subset.tif'))
     
     if os.path.exists(dstFile) is False:
         print(srcFile)

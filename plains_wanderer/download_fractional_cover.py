@@ -7,7 +7,7 @@ from datetime import datetime
 
 # Inputs and outputs
 polygon = r'C:\Users\Adrian\OneDrive - UNSW\Documents\plains_wanderer\plains_wanderer_aoi_albers.shp'
-dstDir = r'E:\hay_plain\landsat\landsat_seasonal_fractional_cover'
+dstDir = r'S:\hay_plain\landsat\landsat_seasonal_fractional_cover'
 
 # Read in shapefile and get bounding box
 basename = os.path.basename(polygon).replace(r'.shp', '')
@@ -19,9 +19,9 @@ ds = None
 
 # Construct dateList for all seasonal dates
 start = 198712198802
-end = 202209202211
+end = 202212202302
 dateList = []
-for y1 in range(1987, 2023):
+for y1 in range(1987, 2024):
     for m1 in range(3, 13, 3):
         if m1 < 12:
             y2 = y1

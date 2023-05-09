@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 
-This extracts fractional cover v3 data for the Plains Wanderer sites
+This extracts fractional cover data for the Plains Wanderer sites
 
 Extracts the mean and standard deviation of each fractional cover component
 (green, dead and bare) for each site polygon in the input shapefile. The
@@ -26,7 +26,7 @@ from datetime import datetime
 
 def getPixels(info, inputs, outputs, otherargs):
     """
-    Gets stats from the 8 pixels surrounding a certain site or sites 
+    Gets stats from all pixels in each site polygon
     """
     sites = inputs.sites[0]
     for idvalue in np.unique(sites[sites != 0]):
@@ -58,7 +58,7 @@ def getPixels(info, inputs, outputs, otherargs):
 
 def extract_pixels(polyfile, imagefile, csvfile):
     """
-    This sets up RIOS to extract pixel statistics for the points.
+    This sets up RIOS to extract pixel statistics for the polygons.
     """
     # Extract the pixels
     infiles = applier.FilenameAssociations()
@@ -80,7 +80,7 @@ def extract_pixels(polyfile, imagefile, csvfile):
 
 
 # Get imageList
-imageDir = r'E:\hay_plain\landsat\landsat_seasonal_fractional_cover'
+imageDir = r'S:\hay_plain\landsat\landsat_seasonal_fractional_cover'
 imageList = glob.glob(os.path.join(imageDir, '*.tif'))
 
 # Write the csvfile header
@@ -90,6 +90,6 @@ with open(csvfile, 'w') as f:
             'meanBare,stdevBare,meanGreen,stdevGreen,meanDead,stdevDead\n')
 
 # Iterate over images and get pixel values
-polyfile = (r'C:\Users\Adrian\OneDrive - UNSW\Documents\plains_wanderer\pw_monitoring_sites_albers.shp')
+polyfile = (r'C:\Users\Adrian\OneDrive - UNSW\Documents\plains_wanderer\PW_sites_2_albers.shp')
 for imagefile in imageList:
     extract_pixels(polyfile, imagefile, csvfile)

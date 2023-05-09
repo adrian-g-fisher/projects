@@ -50,7 +50,7 @@ with open(csvfile, 'r') as f:
         id2site[int(ident)] = site
 
 # Plot green and dead cover over time for the 17 sites separately
-for i in range(1, 19):
+for i in range(1, 18):
     
     sitename = id2site[i]
 
@@ -69,7 +69,7 @@ for i in range(1, 19):
     
     ax1 = plt.axes([0.1, 0.2, 0.85, 0.35])
     
-    ax1.set_xlim((datetime.date(1987, month=1, day=1), datetime.date(2023, month=1, day=1)))
+    ax1.set_xlim((datetime.date(1987, month=1, day=1), datetime.date(2023, month=4, day=1)))
     ax1.set_xticks([datetime.date(1990, month=1, day=1),
                     datetime.date(1995, month=1, day=1),
                     datetime.date(2000, month=1, day=1),
@@ -92,7 +92,7 @@ for i in range(1, 19):
 
     ax2 = plt.axes([0.1, 0.60, 0.85, 0.35])
     
-    ax2.set_xlim((datetime.date(1987, month=1, day=1), datetime.date(2023, month=1, day=1)))
+    ax2.set_xlim((datetime.date(1987, month=1, day=1), datetime.date(2023, month=4, day=1)))
     ax2.set_xticks([datetime.date(1990, month=1, day=1),
                     datetime.date(1995, month=1, day=1),
                     datetime.date(2000, month=1, day=1),

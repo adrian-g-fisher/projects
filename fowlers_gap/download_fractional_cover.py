@@ -6,7 +6,7 @@ from osgeo import gdal, ogr
 from datetime import datetime
 
 # Inputs and outputs
-polygon = r'S:\fowlers_gap\gis\fowlers_aoi_albers.shp'
+polygon = r'S:\fowlers_gap\gis\topo\fowlers_aoi_albers.shp'
 dstDir = r'S:\fowlers_gap\imagery\landsat\seasonal_fractional_cover'
 #dstDir = r'S:\fowlers_gap\imagery\landsat\seasonal_fractional_cover_v3'
 
@@ -20,7 +20,7 @@ ds = None
 
 # Construct dateList for all seasonal dates
 start = 198712198802
-end = 202203202205
+end = 202212202302
 dateList = []
 for y1 in range(1987, 2023):
     for m1 in range(3, 13, 3):
@@ -35,7 +35,8 @@ for y1 in range(1987, 2023):
             dateList.append(date)
 
 # For each date make the image subset
-srcDir = r'/vsicurl/https://dap.tern.org.au/thredds/fileServer/landscapes/remote_sensing/landsat/seasonal_fractional_cover/fractional_cover/nsw/'
+srcDir = r'/vsicurl/http://qld.auscover.org.au/public/data/landsat/seasonal_fractional_cover/fractional_cover/nsw/'
+#srcDir = r'/vsicurl/https://dap.tern.org.au/thredds/fileServer/landscapes/remote_sensing/landsat/seasonal_fractional_cover/fractional_cover/nsw/'
 #srcDir = r'/vsicurl/https://dap.tern.org.au/thredds/fileServer/landscapes/remote_sensing/landsat/seasonal_fractional_cover_v3/fractional_cover/seasonal/nsw/'
 
 for date in dateList:

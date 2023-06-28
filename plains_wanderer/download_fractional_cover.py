@@ -34,7 +34,8 @@ for y1 in range(1987, 2024):
             dateList.append(date)
 
 # For each date make the image subset
-srcDir = r'/vsicurl/https://data.tern.org.au/rs/public/data/remote-sensing/landsat/seasonal_fractional_cover/fractional_cover/aus/'
+srcDir = r'/vsicurl/https://data.tern.org.au/rs/public/data/landsat/seasonal_fractional_cover/fractional_cover/aus/'
+
 for date in dateList:
     srcImage = r'lztmre_aus_m%i_dima2.vrt'%date
     srcFile = os.path.join(srcDir, srcImage)

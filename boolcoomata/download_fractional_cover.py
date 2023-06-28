@@ -34,8 +34,9 @@ for y1 in range(1987, 2023):
             dateList.append(date)
 
 # For each date make the image subset
-srcDir = r'/vsicurl/http://qld.auscover.org.au/public/data/landsat/seasonal_fractional_cover/fractional_cover/sa/'
-#srcDir = r'/vsicurl/https://dap.tern.org.au/thredds/fileServer/landscapes/remote_sensing/landsat/seasonal_fractional_cover/fractional_cover/sa/'
+# Use either the QLD or TERN server
+#srcDir = r'/vsicurl/http://qld.auscover.org.au/public/data/landsat/seasonal_fractional_cover/fractional_cover/sa/'
+srcDir = r'/vsicurl/https://data.tern.org.au/rs/public/data/landsat/seasonal_fractional_cover/fractional_cover/sa/'
 
 for date in dateList:
     srcImage = r'lztmre_sa_m%i_dima2.tif'%date

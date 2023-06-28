@@ -32,7 +32,10 @@ for y1 in range(1987, 2022):
             dateList.append(date)
 
 # For each date make the image subset
+# Use either the QLD or TERN server
 srcDir = r'/vsicurl/http://qld.auscover.org.au/public/data/landsat/surface_reflectance/nsw/'
+srcDir = r'/vsicurl/https://data.tern.org.au/rs/public/data/landsat/surface_reflectance/nsw/'
+
 for date in dateList:
     if date <= 201303201305:
         srcImage = r'lztmre_nsw_m%i_dbia2.tif'%date

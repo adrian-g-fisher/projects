@@ -6,7 +6,7 @@ from osgeo import gdal, ogr
 from datetime import datetime
 
 # Inputs and outputs
-polygon = r'C:\Users\Adrian\OneDrive - UNSW\Documents\plains_wanderer\plains_wanderer_aoi_albers.shp'
+polygon = r'S:\hay_plain\plains_wanderer_sites\plains_wanderer_aoi_albers.shp'
 dstDir = r'S:\hay_plain\landsat\landsat_seasonal_surface_reflectance'
 
 # Read in shapefile and get bounding box

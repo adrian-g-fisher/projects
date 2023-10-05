@@ -23,6 +23,7 @@ def calcStats(info, inputs, outputs, otherargs):
     stack = np.array(inputs.fc_list).astype(np.float32)
     green_stack = stack[:, 1, :, :] - 100
     dead_stack = stack[:, 2, :, :] - 100
+    bare_stack = stack[:, 0, :, :] - 100
     
     green_nodata = (stack[:, 1, :, :] == 0)
     green_stack[green_stack < 0] = 0
@@ -33,6 +34,11 @@ def calcStats(info, inputs, outputs, otherargs):
     dead_stack[dead_stack < 0] = 0
     dead_stack[dead_stack > 100] = 100
     dead_stack = np.ma.masked_where(dead_nodata == 1, dead_stack)
+    
+    bare_nodata = (stack[:, 0, :, :] == 0)
+    bare_stack[bare_stack < 0] = 0
+    bare_stack[bare_stack > 100] = 100
+    bare_stack = np.ma.masked_where(bare_nodata == 1, bare_stack)
     
     nodata = (np.sum(green_nodata, axis=0) == stack.shape[0])
     
@@ -54,8 +60,18 @@ def calcStats(info, inputs, outputs, otherargs):
     maxDead = np.max(dead_stack, axis=0)
     maxDead[nodata == 1] = 255
     
+    meanBare = np.mean(bare_stack, axis=0)
+    meanBare[nodata == 1] = 255
+    stdBare = np.std(bare_stack, axis=0)
+    stdBare[nodata == 1] = 255
+    minBare = np.min(bare_stack, axis=0)
+    minBare[nodata == 1] = 255
+    maxBare = np.max(bare_stack, axis=0)
+    maxBare[nodata == 1] = 255
+    
     outputs.stats = np.array([meanGreen, stdGreen, minGreen, maxGreen,
-                              meanDead, stdDead, minDead, maxDead]).astype(np.float32)
+                              meanDead, stdDead, minDead, maxDead,
+                              meanBare, stdBare, minBare, maxBare,]).astype(np.float32)
 
 
 inDir = r'S:\witchelina\seasonal_fractional_cover'
@@ -76,7 +92,8 @@ for (t1, t2) in [[198712, 202302], [199611, 200911], [201003, 202302]]:
     controls.setCalcStats(True)
     controls.setOutputDriverName("GTiff")
     controls.setLayerNames(['PV_mean', 'PV_stdev', 'PV_min', 'PV_max',
-                            'NPV_mean', 'NPV_stdev', 'NPV_min', 'NPV_max'])
+                            'NPV_mean', 'NPV_stdev', 'NPV_min', 'NPV_max',
+                            'Bare_mean', 'Bare_stdev', 'Bare_min', 'Bare_max'])
     outfiles.stats = os.path.join(outDir, r'timeseries_stats_%i%i.tif'%(t1, t2))
     applier.apply(calcStats, infiles, outfiles, otherArgs=otherargs, controls=controls)
     print('Created %s'%outfiles.stats)

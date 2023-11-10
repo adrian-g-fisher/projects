@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 """
-Calculates three statistic images from the time series of seasonal fracional
-cover:
-- 36 year (141 seasons) time series (198712-202302)
-- 13 year (52 seasons) time series as a sheep grazing property (199609-200911)
-- 13 year (52 seasons) time series as a conservation property  (201003-202302)
+Calculates annual statistic images from the time series of seasonal fracional
+cover.
 """
 
 import os
@@ -75,8 +72,10 @@ def calcStats(info, inputs, outputs, otherargs):
 
 
 inDir = r'S:\witchelina\seasonal_fractional_cover'
-outDir = r'S:\witchelina\timeseries_statistic_images'
-for (t1, t2) in [[198712, 202302], [199611, 200911], [201003, 202302]]:
+outDir = r'S:\witchelina\annual_statistic_images'
+for y in range(1988, 2023):
+    t1 = (y * 100) + 2
+    t2 = (y * 100) + 12
     imageList = np.array(glob.glob(os.path.join(inDir, r'*_subset.tif')))
     startList = np.array([int(os.path.basename(f).split('_')[2][1:7]) for f in imageList])
     endList = np.array([int(os.path.basename(f).split('_')[2][7:13]) for f in imageList])
@@ -94,6 +93,6 @@ for (t1, t2) in [[198712, 202302], [199611, 200911], [201003, 202302]]:
     controls.setLayerNames(['PV_mean', 'PV_stdev', 'PV_min', 'PV_max',
                             'NPV_mean', 'NPV_stdev', 'NPV_min', 'NPV_max',
                             'Bare_mean', 'Bare_stdev', 'Bare_min', 'Bare_max'])
-    outfiles.stats = os.path.join(outDir, r'timeseries_stats_%i%i.tif'%(t1, t2))
+    outfiles.stats = os.path.join(outDir, r'annual_stats_%i.tif'%y)
     applier.apply(calcStats, infiles, outfiles, otherArgs=otherargs, controls=controls)
     print('Created %s'%outfiles.stats)

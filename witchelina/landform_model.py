@@ -8,9 +8,14 @@ import sys
 import glob
 import joblib
 import numpy as np
+import matplotlib.pyplot as plt
 from osgeo import gdal, ogr, osr
 from rios import applier, rat
 from sklearn.ensemble import RandomForestClassifier
+
+params = {'text.usetex': False, 'mathtext.fontset': 'stixsans',
+          'font.sans-serif': 'Arial', 'font.family': 'sans-serif'}
+plt.rcParams.update(params)
 
 
 def getPixelValues(info, inputs, outputs, otherargs):
@@ -23,44 +28,95 @@ def getPixelValues(info, inputs, outputs, otherargs):
         ids = points[points != 0]
         for i in range(ids.size):
             stats = np.ndarray.flatten(inputs.ts_image[:, points == ids[i]])
-            otherargs.pixels[ids[i]-1, :] = stats
+            otherargs.pixels[ids[i]-1, 0] = ids[i]
+            otherargs.pixels[ids[i]-1, 1:] = stats
+
+def extract_training():
+    """
+    Gets the pixel values for points and saves to a CSV file.
+    """
+    pointfile = r'S:\witchelina\awp_distance\classification_trainingdata\Paradise_CrkStn_trainingdatapoints.shp'
+    driver = ogr.GetDriverByName("ESRI Shapefile")
+    dataSource = driver.Open(pointfile, 0)
+    layer = dataSource.GetLayer()
+    pointIds = []
+    pointClasses = []
+    for feature in layer:
+        pointIds.append(int(feature.GetField("Id")))
+        pointClasses.append(feature.GetField("Class"))
+    pointIds = np.array(pointIds)
+    pointClasses = np.array(pointClasses)
+    
+    imagefile = r'S:\witchelina\timeseries_statistic_images\timeseries_stats_198712202302.tif'
+    infiles = applier.FilenameAssociations()
+    outfiles = applier.FilenameAssociations()
+    otherargs = applier.OtherInputs()
+    controls = applier.ApplierControls()
+    controls.setBurnAttribute("Id")
+    controls.setVectorDatatype(np.uint16)
+    infiles.points = pointfile
+    infiles.ts_image = imagefile
+    otherargs.pixels = np.zeros((200, 13), dtype=np.float32)
+    applier.apply(getPixelValues, infiles, outfiles, otherArgs=otherargs, controls=controls)
+    pixelValues =  otherargs.pixels
+    pixelValues = pixelValues[pixelValues[:, 0].argsort()]
+    colnames = ['ID', 'Landform',
+                'PV_mean', 'PV_stdev', 'PV_min', 'PV_max',
+                'NPV_mean', 'NPV_stdev', 'NPV_min', 'NPV_max',
+                'Bare_mean', 'Bare_stdev', 'Bare_min', 'Bare_max']
+
+    with open('landform_training.csv', 'w') as f:
+        f.write('%s\n'%','.join(colnames))
+        for i in range(pointIds.size):
+            line = '%i'%pixelValues[i, 0]
+            line = '%s,%i'%(line, pointClasses[i])
+            for x in range(1, 13):
+                line = '%s,%.4f'%(line, pixelValues[i, x])
+            f.write('%s\n'%line)
 
 
-# Get the attributes from the shapefile
-pointfile = "data\landcover_points.shp"
-driver = ogr.GetDriverByName("ESRI Shapefile")
-dataSource = driver.Open(pointfile, 0)
-layer = dataSource.GetLayer()
-pointIds = []
-pointClasses = []
-fields = ['Id', 'class']
-for feature in layer:
-    pointIds.append(int(feature.GetField("Id")))
-    pointClasses.append(feature.GetField("class"))
-pointIds = np.array(pointIds)
-pointClasses = np.array(pointClasses)
+def graph_training():
+    """
+    Reads in the training data and makes boxplots showing how different
+    statistics can separate the two classes.
+    1 - Stony hills and plains
+    2 - Watercourses and swamps
+    """
+    pixelvalues = np.genfromtxt('landform_training.csv', delimiter=',',
+                                names=True)
+    
+    statistics = [['PV_mean', 'PV_stdev', 'PV_min', 'PV_max'],
+                  ['NPV_mean', 'NPV_stdev', 'NPV_min', 'NPV_max'],
+                  ['Bare_mean', 'Bare_stdev', 'Bare_min', 'Bare_max']]
+                  
+    fig, axs = plt.subplots(3, 4)
+    fig.set_size_inches((8, 8))
 
-# Get the pixel values from the time series image
-infiles = applier.FilenameAssociations()
-outfiles = applier.FilenameAssociations()
-otherargs = applier.OtherInputs()
-controls = applier.ApplierControls()
-controls.setBurnAttribute("Id")
-controls.setVectorDatatype(np.uint16)
-infiles.points = pointfile
-infiles.ts_image = os.path.join(dstDir, r'')
-otherargs.pixels = np.zeros((30, 8), dtype=np.float32)
-applier.apply(getPixelValues, infiles, outfiles, otherArgs=otherargs, controls=controls)
-pixelValues = otherargs.pixels
+    for i in range(3):
+        for j in range(4):
+            axs[i, j].set_title(statistics[i][j])
+            
+            hills = pixelvalues[statistics[i][j]][pixelvalues['Landform'] == 1]
+            creek = pixelvalues[statistics[i][j]][pixelvalues['Landform'] == 2]
+            bp = axs[i, j].boxplot([hills, creek], patch_artist=True)
+            plt.setp(bp['boxes'], color='black')
+            plt.setp(bp['whiskers'], color='black')
+            plt.setp(bp['fliers'], color='black', marker='+')
+            plt.setp(bp['medians'], color='black')
+            colors = ['pink', 'lightblue']
+            for patch, color in zip(bp['boxes'], colors):
+                patch.set_facecolor(color)
+                
+            axs[i, j].set_xticks([])
+            axs[i, j].set_xticklabels([])
+    
+    axs[2, 2].legend([bp["boxes"][0], bp["boxes"][1]],
+                     ['Stony hills and plains', 'Watercourses and swamps'],
+                     ncol = 2, frameon=False, bbox_to_anchor=(1.6, -0.01))
+    
+    plt.subplots_adjust(wspace=0.4)
+    plt.savefig(r'landform_boxplots.png', dpi=300)
 
-# Graph time series statistics for each landform to assess seperability
-
-
-
-
-################################################################################
-# Train and test a random forest landform classification
-################################################################################
 
 def calc_accuracy(measured, modelled, uniqueClasses):
     """
@@ -99,14 +155,27 @@ def calc_accuracy(measured, modelled, uniqueClasses):
     return accuracy
 
 
-def train_rf_models(ids, variables, classes, n):
+def train_rf_models():
     """
     Trains the random forest models and saves the model files, iterating n times
     """
+    pixelvalues = np.genfromtxt('landform_training.csv', delimiter=',',
+                                names=True)
+    ids = pixelvalues['ID'].astype(np.uint8)
+    classes = pixelvalues['Landform'].astype(np.uint8)
+    variables = np.transpose(np.vstack([pixelvalues['PV_mean'], pixelvalues['PV_stdev'],
+                           pixelvalues['PV_min'], pixelvalues['PV_max'],
+                           pixelvalues['NPV_mean'], pixelvalues['NPV_stdev'],
+                           pixelvalues['NPV_min'], pixelvalues['NPV_max'],
+                           pixelvalues['Bare_mean'], pixelvalues['Bare_stdev'],
+                           pixelvalues['Bare_min'], pixelvalues['Bare_max']]))
+    
+    n = 100
+    
     uniqueClasses = np.unique(classes)
     # Create array for accuracy statistics for each iteration, which are
-    # overall_accuracy, producers accuracy for the six classes and users
-    # accuracy for the six classes
+    # overall_accuracy, producers accuracy for the two classes and users
+    # accuracy for the two classes
     accuracyStats = np.zeros((n, 2*uniqueClasses.size + 1), dtype=np.float32)
     
     for i in range(n):
@@ -130,7 +199,7 @@ def train_rf_models(ids, variables, classes, n):
         accuracyStats[i, :] = calc_accuracy(classes[testing], predictions, uniqueClasses)
         
         # Save the model file
-        modelDir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\dingo_fence\classify_landforms\rfmodels'
+        modelDir = r'S:\witchelina\awp_distance\classification_trainingdata\rfmodels'
         if os.path.exists(modelDir) is False:
             os.mkdir(modelDir)
         joblib.dump(rfc, os.path.join(modelDir, 'rfmodel_%03d.pkl'%(i+1)))
@@ -153,23 +222,9 @@ def train_rf_models(ids, variables, classes, n):
                                           np.percentile(accuracyStats[:, uniqueClasses.size+i+1], 97.5)))
 
 
-# Get training data in integer format
-classes = np.zeros_like(n)
-classes[l == 'claypan'] = 1
-classes[l == 'dune'] = 2
-classes[l == 'swale'] = 3
-
-# Train the random forest model
-train_rf_models(n, stats, classes, 100)
-
-
-################################################################################
-# Apply the classifer
-################################################################################
-
 def model_classes(info, inputs, outputs):
     """
-    Called through RIOS to create camphor classification and probability image.
+    Called through RIOS to create classification and probability image.
     """
     # Sort out nodata values of the input images
     nodataValue = info.getNoDataValueFor(inputs.stats, band=1)
@@ -181,7 +236,7 @@ def model_classes(info, inputs, outputs):
     
     # Get the model files
     modelFiles = []
-    modelDir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\dingo_fence\classify_landforms\rfmodels'
+    modelDir = r'S:\witchelina\awp_distance\classification_trainingdata\rfmodels'
     for modelFile in glob.glob(os.path.join(modelDir, '*.pkl')):
         modelFiles.append(modelFile)
     
@@ -211,19 +266,29 @@ def model_classes(info, inputs, outputs):
     outputs.probability = np.array([probability])
 
 
-statsImage = r'E:\dingo_fence_landsat_fc\timeseries_stats.img'
-infiles = applier.FilenameAssociations()
-infiles.stats = statsImage
-outfiles = applier.FilenameAssociations()
-outfiles.classes = statsImage.replace('_stats.img', '_classes.img')
-outfiles.probability =  statsImage.replace('_stats.img', '_probability.img')
-controls = applier.ApplierControls()
-controls.setStatsIgnore(0)
-controls.setWindowXsize(20)
-controls.setWindowYsize(20)
-applier.apply(model_classes, infiles, outfiles, controls=controls)
+def apply_rf_models():
+    """
+    Applies the random forest model to the image data.
+    """
+    statsImage = r'S:\witchelina\timeseries_statistic_images\timeseries_stats_198712202302.tif'
+    outdir = r'S:\witchelina\awp_distance\classification_trainingdata'
+    infiles = applier.FilenameAssociations()
+    infiles.stats = statsImage
+    outfiles = applier.FilenameAssociations()
+    outfiles.classes = os.path.join(outdir, 'landform_classes.img')
+    outfiles.probability =  os.path.join(outdir, 'landform_probability.img')
+    controls = applier.ApplierControls()
+    controls.setStatsIgnore(0)
+    controls.setWindowXsize(20)
+    controls.setWindowYsize(20)
+    applier.apply(model_classes, infiles, outfiles, controls=controls)
+    clrTbl = np.array([[1, 204, 204, 204, 255],
+                       [2, 255, 167, 127, 255]])
+    rat.setColorTable(outfiles.classes, clrTbl)
 
-clrTbl = np.array([[1, 204, 204, 204, 255],
-                   [2, 255, 167, 127, 255],
-                   [3, 255, 255, 190, 255]])
-rat.setColorTable(outfiles.classes, clrTbl)
+
+# Run the different functions
+#extract_training()
+#graph_training()
+#train_rf_models()
+apply_rf_models()

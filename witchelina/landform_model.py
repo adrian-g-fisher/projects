@@ -182,11 +182,11 @@ def train_rf_models():
     
         # Do a random split into training and testing samples (66/34)
         # stratifying by class.
-        sample_hills = np.ones(ids.shape[0]/2, dtype=np.uint8)
+        sample_hills = np.ones(int(ids.shape[0]/2), dtype=np.uint8)
         sample_hills[:int(0.66*ids.shape[0]/2)] = 0
         np.random.shuffle(sample_hills)
         
-        sample_creeks = np.ones(ids.shape[0]/2, dtype=np.uint8)
+        sample_creeks = np.ones(int(ids.shape[0]/2), dtype=np.uint8)
         sample_creeks[:int(0.66*ids.shape[0]/2)] = 0
         np.random.shuffle(sample_creeks)
         
@@ -297,5 +297,5 @@ def apply_rf_models():
 # Run the different functions
 #extract_training()
 #graph_training()
-#train_rf_models()
-apply_rf_models()
+train_rf_models()
+#apply_rf_models()

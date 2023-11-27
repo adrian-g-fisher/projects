@@ -181,7 +181,7 @@ def train_rf_models():
     for i in range(n):
     
         # Do a random split into training and testing samples (66/34)
-        # If you want to startify by class then you need to change this
+        # stratifying by class (assumed 50/50).
         sample = np.ones(ids.shape[0], dtype=np.uint8)
         sample[:int(0.66*ids.shape[0])] = 0
         np.random.shuffle(sample)

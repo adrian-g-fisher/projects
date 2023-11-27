@@ -271,7 +271,7 @@ def apply_rf_models():
     Applies the random forest model to the image data.
     """
     statsImage = r'S:\witchelina\timeseries_statistic_images\timeseries_stats_198712202302.tif'
-    outdir = r'S:\witchelina\awp_distance\classification_trainingdata'
+    outdir = r'C:\Users\Adrian\Documents\witchelina'
     infiles = applier.FilenameAssociations()
     infiles.stats = statsImage
     outfiles = applier.FilenameAssociations()

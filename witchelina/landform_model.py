@@ -297,5 +297,5 @@ def apply_rf_models():
 # Run the different functions
 #extract_training()
 #graph_training()
-train_rf_models()
-#apply_rf_models()
+#train_rf_models()
+apply_rf_models()

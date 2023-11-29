@@ -294,8 +294,68 @@ def apply_rf_models():
     rat.setColorTable(outfiles.classes, clrTbl)
 
 
+def random_selection(info, inputs, outputs):
+    """
+    Called through RIOS to select validation pixels.
+    """
+    hills = (inputs.landforms[0] == 1) & (inputs.paradise[0] == 1)
+    creeks = (inputs.landforms[0] == 2) & (inputs.paradise[0] == 1)
+    validation = np.zeros_like(hills)
+    i = 0
+    while i < 100:
+        row = np.random.randint(0, hills.shape[0])
+        col = np.random.randint(0, hills.shape[1])
+        if (hills[row, col] == 1) & (validation[row, col] == 0):
+            validation[row, col] = 1
+            i += 1
+    i = 0
+    while i < 100:
+        row = np.random.randint(0, creeks.shape[0])
+        col = np.random.randint(0, creeks.shape[1])
+        if (creeks[row, col] == 1) & (validation[row, col] == 0):
+            validation[row, col] = 1
+            i += 1
+    outputs.validation = np.array([validation])
+
+
+def create_validation():
+    """
+    Makes a polygon shapefile from a random selection of 100 hill and 100 creek
+    pixels.
+    """
+    infiles = applier.FilenameAssociations()
+    infiles.paradise = r'S:\witchelina\adrian\paradise_witchelina.shp'
+    infiles.landforms = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\landform_classification\landform_classes.img'
+    outfiles = applier.FilenameAssociations()
+    outfiles.validation = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\landform_classification\validation.img'
+    controls = applier.ApplierControls()
+    controls.setStatsIgnore(0)
+    controls.setWindowXsize(4200)
+    controls.setWindowYsize(4200)
+    applier.apply(random_selection, infiles, outfiles, controls=controls)
+    
+    src_ds = gdal.Open(outfiles.validation)
+    srcband = src_ds.GetRasterBand(1)
+    shapefile = outfiles.validation.replace('.img', '.shp')
+    if os.path.exists(shapefile):
+        os.remove(shapefile)
+    dst_layername = os.path.basename(shapefile).replace('.shp', '')
+    drv = ogr.GetDriverByName("ESRI Shapefile")
+    dst_ds = drv.CreateDataSource(shapefile)
+    dst_layer = dst_ds.CreateLayer(dst_layername, srs=None )
+    gdal.Polygonize(srcband, None, dst_layer, -1, [], callback=None )
+    dst_ds.Destroy()
+    spatialRef = osr.SpatialReference()
+    spatialRef.ImportFromEPSG(3577)
+    spatialRef.MorphToESRI()
+    with open(shapefile.replace('.shp', '.prj'), 'w') as f:
+        f.write(spatialRef.ExportToWkt())
+    
+
 # Run the different functions
 #extract_training()
 #graph_training()
 #train_rf_models()
-apply_rf_models()
+#apply_rf_models()
+#create_validation()
+validate()

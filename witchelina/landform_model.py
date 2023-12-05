@@ -146,6 +146,7 @@ def calc_accuracy(measured, modelled, uniqueClasses):
                     producers[row] = errorMatrix[row, col] / np.sum(errorMatrix[:, col])
                 else:
                     producers[row] = 0
+    
     overall = overall / float(np.sum(errorMatrix))
     
     accuracy = np.zeros((uniqueClasses.size * 2 + 1), dtype=np.float32)
@@ -351,6 +352,117 @@ def create_validation():
     with open(shapefile.replace('.shp', '.prj'), 'w') as f:
         f.write(spatialRef.ExportToWkt())
     
+    
+def extract_validation(info, inputs, outputs, otherargs):
+    """
+    Called through RIOS to extract validation polygon values.
+    """
+    validation = inputs.validation[0]
+    valPresent = np.unique(validation[validation != 0])
+    if len(valPresent) > 0:
+        ids = validation[validation != 0]
+        for i in range(ids.size):
+            otherargs.pixels[ids[i]-1, 0] = ids[i]
+            otherargs.pixels[ids[i]-1, 1] = inputs.landforms[0][validation == ids[i]]
+            otherargs.pixels[ids[i]-1, 2] = inputs.probability[0][validation == ids[i]]
+    
+def mask_probability(info, inputs, outputs, otherargs):
+    """
+    Called through RIOS to mask watercourses based on probability.
+    """
+    new = inputs.landforms[0]
+    new[inputs.probability[0] < 95] = 1
+    new[inputs.paradise[0] == 0] = 0
+    outputs.new = np.array([new])
+
+            
+def run_validate():
+    """
+    Extracts class and probability values for validation pixels and creates a
+    roc curve for mapping the watercourses/swamps.
+    1 - Stony hills and plains
+    2 - Watercourses and swamps
+    """
+    # Get classification data
+    infiles = applier.FilenameAssociations()
+    infiles.validation = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\landform_classification\validation.shp'
+    infiles.landforms = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\landform_classification\landform_classes.img'
+    infiles.probability = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\landform_classification\landform_probability.img'
+    outfiles = applier.FilenameAssociations()
+    controls = applier.ApplierControls()
+    controls.setBurnAttribute("Id")
+    otherargs = applier.OtherInputs()
+    otherargs.pixels = np.zeros((200, 3), dtype=np.float32)
+    applier.apply(extract_validation, infiles, outfiles, otherArgs=otherargs, controls=controls)
+    ids = otherargs.pixels[:, 0]
+    classification = otherargs.pixels[:, 1]
+    probability = otherargs.pixels[:, 2]
+    
+    # Get reference data
+    driver = ogr.GetDriverByName("ESRI Shapefile")
+    dataSource = driver.Open(infiles.validation, 0)
+    layer = dataSource.GetLayer()
+    pointIds = []
+    pointReference = []
+    for feature in layer:
+        pointIds.append(int(feature.GetField("Id")))
+        pointReference.append(feature.GetField("Reference"))
+    pointIds = np.array(pointIds)
+    pointReference = np.array(pointReference)
+    reference = pointReference[pointIds.argsort()]
+    
+    #accuracy = calc_accuracy(reference, classification, np.unique(classification))
+    #print(accuracy)
+    #                   Reference
+    # Classification    Hills     Creeks
+    #          Hills      97          3
+    #         Creeks      50         50
+    #    
+    # Overall accuracy = 74%
+    # Producers accuracy for stony hills = 66% (omission - 34% of stony hills are missed)
+    # Producers accuracy for watercourses = 94% (omission)
+    # Users accuracy for stony hills = 97% (commission)
+    # Users accuracy for watercourses = 50% (commission - 50% of pixels classified as watercourses are actually stony hills)
+    #
+    # Need to increase the producers accuracy for stony hills and users accuracy for water courses.
+    
+    # Use probability threshold to classify hills
+    accuracy_matrix = np.zeros((51, 6), dtype=np.float32)
+    thresholds = range(50, 101)
+    for i in range(51):
+        t = thresholds[i]
+        newClassification = np.copy(classification)
+        newClassification[probability < t] = 1
+        accuracy = calc_accuracy(reference, newClassification, np.unique(classification))
+        accuracy_matrix[i, 0] = t
+        accuracy_matrix[i, 1:] = accuracy
+    
+    np.savetxt("accuracy_thresholds.csv", accuracy_matrix, delimiter=",")
+    
+    # print(accuracy_matrix)
+    #
+    # When t = 95
+    # Overall accuracy = 85%
+    # Producers accuracy for stony hills = 95%  (omission - 5% of stony hills are missed)
+    # Producers accuracy for watercourses = 55% (omission - 45% of watercourses are missed)
+    # Users accuracy for stony hills = 85%      (commission - 15% of pixels classified as hills are actually watercourses)
+    # Users accuracy for watercourses = 81%     (commission - 19% of pixels classified as watercourses are actually stony hills)
+
+    # Create new classification
+    infiles = applier.FilenameAssociations()
+    infiles.landforms = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\landform_classification\landform_classes.img'
+    infiles.probability = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\landform_classification\landform_probability.img'
+    infiles.paradise = r'S:\witchelina\adrian\paradise_witchelina.shp'
+    outfiles = applier.FilenameAssociations()
+    outfiles.new = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\landform_classification\landforms_optimum.img'
+    controls = applier.ApplierControls()
+    controls.setStatsIgnore(0)
+    otherargs = applier.OtherInputs()
+    applier.apply(mask_probability, infiles, outfiles, otherArgs=otherargs, controls=controls)
+    clrTbl = np.array([[1, 204, 204, 204, 255],
+                       [2, 0, 255, 197, 255]])
+    rat.setColorTable(outfiles.new, clrTbl)
+
 
 # Run the different functions
 #extract_training()
@@ -358,4 +470,4 @@ def create_validation():
 #train_rf_models()
 #apply_rf_models()
 #create_validation()
-validate()
+run_validate()

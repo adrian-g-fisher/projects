@@ -29,7 +29,7 @@ def extract_rainfall(shapefile):
         Name = str(row['Code'])
         
         # Check if its already extracted
-        outdir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\gis_data\dune_areas_hesse\Analysis_2003-2016\rainfall'
+        outdir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\gis_data\dune_areas_hesse\Analysis_2000-2022\rainfall'
         outfile = os.path.join(outdir, 'rainfall_%s.csv'%(Name))
         if os.path.exists(outfile) is False:
         
@@ -38,7 +38,7 @@ def extract_rainfall(shapefile):
                 f.write('ID,Date,Mean_rain,Stdev_rain,Pixel_count\n')
         
             # Go through each year and open NetCFD
-            for year in range(1995, 2017):
+            for year in range(1995, 2023):
         
                 # Load the monthly rainfall data for all months in the year
                 nc_fo = r'S:\aust\bom_climate_grids\bom_monthly_rainfall\1second\NetCDF\agcd_v2_precip_total_r001_monthly_{:d}.nc'.format(year)

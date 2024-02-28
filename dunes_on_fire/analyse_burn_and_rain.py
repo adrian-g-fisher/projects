@@ -25,6 +25,8 @@ rainCSVdir = r"C:\Users\Adrian\OneDrive - UNSW\Documents\gis_data\dune_areas_hes
 rainCSVs = [os.path.join(rainCSVdir, "rainfall_%s.csv"%x) for x in duneAreas]
 
 # Iterate over dune areas
+climateList = []
+seasonList = []
 for i, duneArea in enumerate(duneAreas):
     
     # Read in rainfall data
@@ -44,8 +46,11 @@ for i, duneArea in enumerate(duneAreas):
     # Create figure of monthly rainfall and burnt area
     fig = plt.figure(i)
     fig.set_size_inches((8, 2))
-    fig.text(0.1, 0.9, "%s (%s)"%(" ".join(duneArea.split('_')[0:-1]), duneArea.split('_')[-1]))
-    ax1 = plt.axes([0.1, 0.15, 0.8, 0.6])
+    area = " ".join(duneArea.split('_')[0:-1])
+    climate = duneArea.split('_')[-1]
+    climateList.append(climate)
+    fig.text(0.1, 0.9, "%s (%s)"%(area, climate))
+    ax1 = plt.axes([0.1, 0.15, 0.79, 0.6])
     ax1.set_xlim((datetime.date(2003, month=1, day=1),
                   datetime.date(2016, month=12, day=31)))
     ax1.xaxis.set_major_locator(mdates.YearLocator(2))
@@ -69,7 +74,7 @@ for i, duneArea in enumerate(duneAreas):
     for m in range(1, 13):
         rainMeans[m-1] = np.mean(rainData["Mean_rain"][(rainMonths == m) &
                             (rainDates >= datetime.date(2003, month=1, day=1))])
-    ax3 = plt.axes([0.5, 0.83, 0.20, 0.15])
+    ax3 = plt.axes([0.7, 0.83, 0.19, 0.14])
     bars = ax3.bar(range(12), rainMeans, color='lightskyblue', width=1, align='center')
     ax3.tick_params(axis='y', length=2, pad=2, labelsize=8)
     ax3.tick_params(axis='x', length=1, pad=1)
@@ -97,18 +102,34 @@ for i, duneArea in enumerate(duneAreas):
     ax4.set_xticklabels(['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'], fontsize=8)
     ax4.set_xlim([-0.5, 11.5])
     if np.max(burnMeans) < 1.0:
-        ax3.set_ylim((0.0, 1.0))
+        ax4.set_ylim((0.0, 1.0))
     
     outDir = r"C:\Users\Adrian\OneDrive - UNSW\Documents\gis_data\dune_areas_hesse\Analysis_2003-2016\timeseries_monthly"
     plt.savefig(os.path.join(outDir, r'%s.png'%duneArea), dpi=300)
     plt.close(fig)
     
-    # Do different dunefields have distinct fire seasons?
-    
-
-    # 
-    
-    
+    # Calculate fire season for each area
+    summer = burnMeans[11] + burnMeans[0] + burnMeans[1]
+    autumn = burnMeans[2] + burnMeans[3] + burnMeans[4]
+    winter = burnMeans[5] + burnMeans[6] + burnMeans[7]
+    spring = burnMeans[8] + burnMeans[9] + burnMeans[10]
+    if summer + autumn + winter + spring == 0:
+        seasonList.append('No burn')
+    elif summer > max([autumn, winter, spring]):
+        seasonList.append('Summer')
+    elif autumn > max([summer, winter, spring]):
+        seasonList.append('Autumn')
+    elif winter > max([summer, autumn, spring]):
+        seasonList.append('Winter')
+    elif spring > max([summer, autumn, winter]):
+        seasonList.append('Spring')
+    else:
+        seasonList.append('No season')
     
     # Does burnt area correlate with previous rainfall?
+
+
+
+
+# How to plot fire season vs climate?
 

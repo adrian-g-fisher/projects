@@ -65,6 +65,9 @@ def MODIS_make_monthly_images(imagefile):
     """
     This sets up RIOS to create monthly images from an annual image.
     """
+    
+    print(os.path.basename(imagefile))
+    
     outdir = r"S:\aust\modis_burned_area\monthly_tiffs"
     year = int(imagefile.replace(r".tif", "").split(r"_")[-2][3:7])
     doy = int(imagefile.replace(r".tif", "").split(r"_")[-2][7:10])
@@ -74,9 +77,6 @@ def MODIS_make_monthly_images(imagefile):
         startday = (startdate - datetime.date(year, 1, 1)).days + 1
         if startday == doy:
             month = m
-    
-    print(os.path.basename(imagefile), year, month)
-    
     infiles = applier.FilenameAssociations()
     outfiles = applier.FilenameAssociations()
     otherargs = applier.OtherInputs()

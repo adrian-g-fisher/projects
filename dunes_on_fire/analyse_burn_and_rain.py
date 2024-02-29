@@ -18,10 +18,10 @@ plt.rcParams.update(params)
 
 
 # Get matching csv files for dune areas
-burntCSVdir = r"C:\Users\Adrian\OneDrive - UNSW\Documents\gis_data\dune_areas_hesse\Analysis_2003-2016\burntarea"
+burntCSVdir = r"C:\Users\Adrian\OneDrive - UNSW\Documents\gis_data\dune_areas_hesse\Analysis_2000-2022\burntarea"
 burntCSVs = glob.glob(os.path.join(burntCSVdir, "*.csv"))
 duneAreas = [os.path.basename(x).replace(".csv", "").replace("burntarea_", "") for x in burntCSVs]
-rainCSVdir = r"C:\Users\Adrian\OneDrive - UNSW\Documents\gis_data\dune_areas_hesse\Analysis_2003-2016\rainfall"
+rainCSVdir = r"C:\Users\Adrian\OneDrive - UNSW\Documents\gis_data\dune_areas_hesse\Analysis_2000-2022\rainfall"
 rainCSVs = [os.path.join(rainCSVdir, "rainfall_%s.csv"%x) for x in duneAreas]
 
 # Iterate over dune areas
@@ -51,23 +51,25 @@ for i, duneArea in enumerate(duneAreas):
     climateList.append(climate)
     fig.text(0.1, 0.9, "%s (%s)"%(area, climate))
     ax1 = plt.axes([0.1, 0.15, 0.79, 0.6])
-    ax1.set_xlim((datetime.date(2003, month=1, day=1),
-                  datetime.date(2016, month=12, day=31)))
-    ax1.xaxis.set_major_locator(mdates.YearLocator(2))
-    ax1.xaxis.set_minor_locator(mdates.YearLocator(1))
-    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+    ax1.set_xlim((datetime.date(2000, month=11, day=1),
+                  datetime.date(2022, month=12, day=31)))
+
     ax1.set_ylabel('Mean precipitation\n(mm)')  
     ax1.bar(rainDates, rainData["Mean_rain"], color='lightskyblue',
             width=datetime.timedelta(days=31))
     if np.max(rainData["Mean_rain"]) < 100.0:
         ax1.set_ylim((0.0, 100.0))
+    
     ax2 = ax1.twinx()
     ax2.set_ylabel('Burnt area\n(%)')  
     ax2.bar(burnDates, burnData["Burnt_area_percent"], color='red', alpha=0.5,
             width=datetime.timedelta(days=31))
     if np.max(burnData["Burnt_area_percent"]) < 1.0:
         ax2.set_ylim((0.0, 1.0))
-
+    ax2.xaxis.set_major_locator(mdates.YearLocator(base=2))
+    ax2.xaxis.set_minor_locator(mdates.YearLocator(base=1))
+    ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+    
     # Histogram of mean monthly rainfall
     rainMonths = np.array([x.month for x in rainDates])
     rainMeans = np.zeros(12, dtype=np.float32)
@@ -104,7 +106,7 @@ for i, duneArea in enumerate(duneAreas):
     if np.max(burnMeans) < 1.0:
         ax4.set_ylim((0.0, 1.0))
     
-    outDir = r"C:\Users\Adrian\OneDrive - UNSW\Documents\gis_data\dune_areas_hesse\Analysis_2003-2016\timeseries_monthly"
+    outDir = r"C:\Users\Adrian\OneDrive - UNSW\Documents\gis_data\dune_areas_hesse\Analysis_2000-2022\timeseries_monthly"
     plt.savefig(os.path.join(outDir, r'%s.png'%duneArea), dpi=300)
     plt.close(fig)
     
@@ -126,9 +128,11 @@ for i, duneArea in enumerate(duneAreas):
     else:
         seasonList.append('No season')
     
-    # Does burnt area correlate with previous rainfall?
-
-
+    # Does monthly burnt area correlate with previous rainfall?
+    # Test lag periods and cumulative periods for highest linear correlation with burnt area
+    # - Do we expect a linear relationship?
+    # - What do we do about all the zero values?
+    
 
 
 # How to plot fire season vs climate?

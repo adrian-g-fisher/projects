@@ -47,15 +47,15 @@ def make_season_and_frequency(imageList, monthsList):
     """
     This sets up RIOS
     """
-    outdir = r"S:\global\global_fire_atlas"
+    outdir = r"S:\aust\modis_burned_area"
     infiles = applier.FilenameAssociations()
     outfiles = applier.FilenameAssociations()
     otherargs = applier.OtherInputs()
     controls = applier.ApplierControls()
     infiles.images = imageList
     otherargs.months = monthsList
-    outfiles.season = os.path.join(outdir, r"burnt_area_season.tif")
-    outfiles.frequency = os.path.join(outdir, r"burnt_area_frequency.tif")
+    outfiles.season = os.path.join(outdir, r"burnt_area_season_2000-2022.tif")
+    outfiles.frequency = os.path.join(outdir, r"burnt_area_frequency_2000-2022.tif")
     controls.setStatsIgnore(0)
     controls.setCalcStats(True)
     controls.setOutputDriverName("GTiff")
@@ -63,7 +63,7 @@ def make_season_and_frequency(imageList, monthsList):
     applier.apply(create_outputs, infiles, outfiles, otherArgs=otherargs, controls=controls)
 
 
-imagedir = r"S:\global\global_fire_atlas\monthly_tiffs"
+imagedir = r"S:\aust\modis_burned_area\monthly_tiffs"
 imageList = glob.glob(os.path.join(imagedir, r"*.tif"))
 monthsList = np.array([int(x[-6:-4]) for x in imageList])
 make_season_and_frequency(imageList, monthsList)

@@ -35,15 +35,15 @@ def extract_burntarea(shapefile):
     layer.ResetReading()
     
     # Iterate over ID values creating csv files to save results
-    for ID in range(1, 38):
+    for ID in range(1, 79):
         Name = ID2Name[ID]
-        outdir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\gis_data\dune_areas_hesse\burntarea'
+        outdir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\gis_data\dune_areas_hesse\Analysis_2000-2022\burntarea'
         outfile = os.path.join(outdir, 'burntarea_%s.csv'%(Name))
         with open(outfile, 'w') as f:
             f.write('ID,Date,Burnt_area_percent,Pixel_count\n')
     
     # Iterate over burnt images
-    for imagefile in glob.glob(r"S:\global\global_fire_atlas\monthly_tiffs\*.tif"):
+    for imagefile in glob.glob(r"S:\aust\modis_burned_area\monthly_tiffs\*.tif"):
         date = imagefile.replace(r".tif", "").split(r"_")[-1]
         
         print(date)
@@ -56,10 +56,10 @@ def extract_burntarea(shapefile):
         controls.setBurnAttribute("ID")
         infiles.burnt = imagefile
         infiles.poly = shapefile
-        otherargs.counts = np.zeros((2, 37), dtype=np.uint64)
+        otherargs.counts = np.zeros((2, 78), dtype=np.uint64)
         applier.apply(get_burnt, infiles, outfiles, otherArgs=otherargs, controls=controls)
         
-        for i, ID in enumerate(range(1, 38)):
+        for i, ID in enumerate(range(1, 79)):
             Name = ID2Name[ID]
             burntpixels = otherargs.counts[0, i]
             totalpixels = otherargs.counts[1, i]

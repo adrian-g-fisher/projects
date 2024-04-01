@@ -132,7 +132,8 @@ for i, duneArea in enumerate(duneAreas):
     # Test lag periods and cumulative periods for highest linear correlation with burnt area
     # - Do we expect a linear relationship?
     # - What do we do about all the zero values?
-    
+    #
+    # First do a logistic regression for burn/no-burn?
 
 
 # How to plot fire season vs climate?

@@ -19,8 +19,6 @@ end = 2022
 dateList = range(start, end+1)
 
 #Inputs Outputs
-
-dstDir = r'S:\aust\bom_climate_grids\bom_monthly_rainfall\1second\NetCDF'
 dstDir = r'S:\aust\bom_climate_grids\bom_monthly_rainfall\1second\NetCDF'
 #srcDir = r'https://dapds00.nci.org.au/thredds/fileServer/zv2/agcd/v2/precip/total/r001/01month/'
 srcDir = r'https://dapds00.nci.org.au/thredds/fileServer/zv2/agcd/v2-0-1/precip/total/r001/01month/'

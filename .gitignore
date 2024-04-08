@@ -10,3 +10,5 @@ fowlers_gap/warrens_longterm_grazing_effect.png
 witchelina/accuracy_thresholds.csv
 witchelina/accuracy_thresholds.xlsx
 dunes_on_fire/tmpft0tssf2.img
+sentinel2_water/best_waterindex_roc_curves.png
+sentinel2_water/reference_data.csv

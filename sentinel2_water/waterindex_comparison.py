@@ -71,7 +71,8 @@ def load_data(datafile):
                             float(l[10]), float(l[11])])  
             indexes.append([float(l[12]), float(l[13]), float(l[14])])
     ref = np.asarray(ref).astype(np.float32)
-    reflect = np.asarray(reflect).astype(np.float32) * 10000
+    reflect = np.asarray(reflect).astype(np.float32) / 10000.0
+    reflect[reflect < 0] = 0
     plot = np.asarray(plot)
     zone = np.asarray(zone)
     indexes = np.asarray(indexes)
@@ -91,13 +92,13 @@ def calculate_models(reflect, indexes):
     model_values[:, 0] = indexes[:, 0]
     model_values[:, 1] = indexes[:, 1]
     model_values[:, 2] = indexes[:, 2]
+    # reflect[:, 0] is red    
     # reflect[:, 2] is green
-    # reflect[:, 0] is red
     # reflect[:, 5] is nir
     # reflect[:, 6] is swir1
     # reflect[:, 7] is swir2
-    c = [1.7204, 0.0171, 0.0003, -0.0070, -0.0045, -0.0071]
-    model_values[:, 4] = (c[0] + c[1]*reflect[:, 2] + c[2]*reflect[:,0] +
+    c = [1.7204, 171, 3, -70, -45, -71]
+    model_values[:, 3] = (c[0] + c[1]*reflect[:, 2] + c[2]*reflect[:,0] +
                           c[3]*reflect[:,5] + c[4]*reflect[:,6] +
                           c[5]*reflect[:,7])
     
@@ -146,8 +147,12 @@ def ROC_optimum(ref_data, index_data, names):
         index_i = index_data[:, i]
         
         # Subset pure water values and pure non-water values
-        water = index_i[ref_data == 100]
-        nonwater = index_i[ref_data == 0]
+        #water = index_i[ref_data == 100]
+        #nonwater = index_i[ref_data == 0]
+        
+        # Subset all water and non-water values
+        water = index_i[ref_data > 50]
+        nonwater = index_i[ref_data <= 50]
         
         # Create reference values
         ref = np.concatenate([np.where(water >= -999, 1, 0),
@@ -189,13 +194,13 @@ def ROC_optimum(ref_data, index_data, names):
     fig.set_size_inches((6, 4))
     rect  = [0.12, 0.12, 0.6, 0.85]
     ax = plt.axes(rect)
-    ax.set_xlim((-0.5, 6.5))
-    ax.set_ylim((93.5, 100.5))
+    #ax.set_xlim((-0.5, 6.5))
+    #ax.set_ylim((93.5, 100.5))
     ax.set_xlabel('False positive rate (%)', fontsize=12)
     ax.set_ylabel('True positive rate (%)', fontsize=12)
     
-    # Plot curves and optimum points for top ten models
-    colors = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c"]
+    # Plot curves and optimum points
+    colors = ["palegreen", "coral", "deepskyblue", "orchid"]
     fancy_names = [r'$MNDWI_{Xu}$', r'$MuWIC$', r'$TWI$', r'$WI_{Fisher}$']
     for i in range(4):
         d = D[i]
@@ -204,15 +209,15 @@ def ROC_optimum(ref_data, index_data, names):
                 d[:,2][d[:,0] == optimum_thresholds[i]], marker="o", color='k')
     
     plt.legend(loc=(1, 0.2), fontsize=12, frameon=False, handletextpad=0.2)
-    plt.savefig("best_waterindex_roc_curves.png")
+    #plt.savefig("waterindex_roc_curves_purepixels.png")
+    plt.savefig("waterindex_roc_curves_allpixels.png")
     plt.clf()
     
     # Calculate area under the curve (AUC) using the trapezoidal rule
     AUC = []
     for i in range(4):
         fpr_tpr = D[i][:,2:4]/100.0
-        if i != 0:
-           fpr_tpr = np.flipud(fpr_tpr) # Flip array
+        fpr_tpr = np.flipud(fpr_tpr)
         fpr_tpr = np.vstack([np.array([[0.0, 0.0]]), fpr_tpr, np.array([[1.0, 1.0]])])
         row_diff = np.diff(fpr_tpr, axis=0)
         unique_rows = np.ones(len(fpr_tpr), dtype='bool')
@@ -220,7 +225,7 @@ def ROC_optimum(ref_data, index_data, names):
         fpr_tpr = fpr_tpr[unique_rows]
         auc = metrics.auc(fpr_tpr[:, 1], fpr_tpr[:, 0]) * 100
         AUC.append(auc)
-        
+    
     return (optimum_thresholds, AUC)
 
 
@@ -260,21 +265,17 @@ def calculate_statistics(ref_data, index_data, thresholds):
 
 def make_histograms(ref, index_data, thresh):
 
-    fancy_names = [r'$WI_{2006}$', r'$WI_{2015}$', r'$AWEI_{shadow}$',
-                   r'$AWEI_{no shadow}$', r'$NDWI_{McFeeters}$', r'$NDWI_{Xu}$',
-                   r'$TCW_{Crist}$']
+    fancy_names = [r'$MNDWI_{Xu}$', r'$MuWIC$', r'$TWI$', r'$WI_{Fisher}$']
 
     rectangles = [[0.06, 0.912, 0.89, 0.085], [0.06, 0.770, 0.89, 0.085],
-                  [0.06, 0.628, 0.89, 0.085], [0.06, 0.486, 0.89, 0.085],
-                  [0.06, 0.344, 0.89, 0.085], [0.06, 0.202, 0.89, 0.085],
-                  [0.06, 0.060, 0.89, 0.085]]
+                  [0.06, 0.628, 0.89, 0.085], [0.06, 0.486, 0.89, 0.085]]
 
-    ranges = [[40, 100], [-50, 50], [-1, 1], [-1, 1], [-1, 1], [-1, 1], [-0.25, 0.1]]
+    #ranges = [[-1, 1], [-1, 1], [-1, 1], [-0.25, 0.1]]
 
     fig = plt.figure(1)
     fig.set_size_inches((5, 8))
 
-    for i in range(7):
+    for i in range(4):
         index_i = index_data[:, i]
         water = index_i[ref == 200]
         nonwater = index_i[ref <= 100]
@@ -293,98 +294,7 @@ def make_histograms(ref, index_data, thresh):
         ax.set_ylabel('Density', fontsize=12)
 
     plt.savefig("best_waterindex_histograms.png")
-    plt.savefig("figure_5.eps")
     plt.clf()
-
-
-def calculate_errors(ads40, a_red, ref, dbg, model_values, thresholds):
-    
-    dbg = dbg/10000.0
-   
-    # Classify water
-    water_type = np.zeros_like(ads40)
-    r = np.where(ref < 200, np.where(ref > 100, 1, 0), 0)
-    water_type[r == 1] = 'mixed'
-    water_type[ref <= 100] = 'non-water'
-    ocean_ads = ['sydney_l5_ref.img', 'wingham_l5_ref.img', 'wingham_l7_ref.img']
-    for a in ocean_ads:
-        n = np.where(ads40 == a, np.where(ref == 200, np.where(a_red == 0, 1, 0), 0), 0)
-        water_type[n == 1] = 'ocean'
-    clear = np.where(dbg[:,0] - dbg[:,1] > -0.011, np.where(dbg[:,0] + dbg[:,1] < 0.053, 1, 0), 0)
-    water_type = np.where(clear == 1, np.where(water_type == '0', 'clear', water_type), water_type)
-
-    clear_diff = (dbg[:,0] - dbg[:,1])[water_type == "clear"]
-    clear_sum = (dbg[:,0] + dbg[:,1])[water_type == "clear"]
-    total = dbg[:,1] + dbg[:,2]
-    diff = dbg[:,1] - dbg[:,2]
-    darkgreen = np.where((total - diff * 6) < 0, 1, 0)
-    green = np.where((total - diff * 6) >= 0, np.where((total - diff * 28) < 0, 1, 0), 0)
-    greenbrown = np.where((total - diff * 28) >= 0, np.where((total + diff * 28) >= 0, 1, 0), 0)
-    brown = np.where((total + diff * 28) < 0, np.where((total + diff * 6) >= 0, 1, 0), 0)
-    darkbrown = np.where((total + diff * 6) < 0, 1, 0)
-    water_type = np.where(water_type == '0', np.where(darkgreen == 1, 'dark-green', water_type), water_type)
-    water_type = np.where(water_type == '0', np.where(green == 1, 'green', water_type), water_type)
-    water_type = np.where(water_type == '0', np.where(greenbrown == 1, 'green-brown', water_type), water_type)
-    water_type = np.where(water_type == '0', np.where(brown == 1, 'brown', water_type), water_type)
-    water_type = np.where(water_type == '0', np.where(darkbrown == 1, 'dark-brown', water_type), water_type)
-    
-    # Calculate omission errors
-    watertypes = ["ocean", "clear", "dark-green", "green", "green-brown", "brown", "dark-brown"]
-    omi = np.zeros((7, 8), dtype=float)
-    for i in range(7):
-        t = thresholds[i]
-        index = model_values[:,i]
-        for j, w in enumerate(watertypes):
-            I = index[water_type == w]
-            if i == 0:
-                error = np.shape(I[I > t])[0]
-            else:
-                error = np.shape(I[I < t])[0]
-            n = np.shape(water_type[water_type == w])[0]
-            if n == 0:
-                e = 0
-            else:
-                e = 100 * (error / float(n))
-            omi[j, 0] = n
-            omi[j, i+1] = e
-    
-    # Classify land
-    land_type = np.zeros_like(water_type)
-    land_type = np.where(water_type == 'non-water', np.where(ref == 100, 'land', land_type), land_type)
-    land_type = np.where(water_type == 'non-water', np.where(ref == 3, 'cloud-shadow', land_type), land_type)
-    land_type = np.where(water_type == 'non-water', np.where(ref == 4, 'topographic-shadow', land_type), land_type)
-    land_type = np.where(water_type == 'non-water', np.where(ref == 5, 'quarries', land_type), land_type)
-    land_type = np.where(water_type == 'non-water', np.where(ref == 6, 'urban', land_type), land_type)
-    s = (dbg[:,3] + dbg[:,2])
-    s = np.where(s == 0, np.min(s[s != 0]), s)
-    ndvi = (dbg[:,3] - dbg[:,2]) / s.astype(float)
-    land_type = np.where(water_type == 'non-water', np.where(ref == 100, np.where(ndvi < 0.2, "bare ground", land_type), land_type), land_type)
-    land_type = np.where(water_type == 'non-water', np.where(ref == 100, np.where(ndvi >= 0.2, np.where(ndvi < 0.5, "sparse vegetation", land_type), land_type), land_type), land_type)
-    land_type = np.where(water_type == 'non-water', np.where(ref == 100, np.where(ndvi >= 0.5, "dense vegetation", land_type), land_type), land_type)
-    
-    sample = ndvi[land_type == "dense vegetation"]
-    with open("ndvi_dense_vegetation_analysis.txt", "w") as test:
-        for sam in range(np.size(sample)):
-            test.write("%12f\n"%sample[sam])
-    
-    # Calculate commission errors
-    landtypes = ['bare ground', 'sparse vegetation', 'dense vegetation', 'cloud-shadow', 'topographic-shadow', 'quarries', 'urban']
-    com = np.zeros((7, 8), dtype=float)
-    for i in range(7):
-        t = thresholds[i]
-        index = model_values[:,i]
-        for j, l in enumerate(landtypes):
-            I = index[land_type == l]
-            if i == 0:
-                error = np.shape(I[I < t])[0]
-            else:
-                error = np.shape(I[I > t])[0]        
-            n = np.shape(land_type[land_type == l])[0]
-            e = 100 * (error / float(n))
-            com[j, 0] = n
-            com[j, i+1] = e
-    
-    return (omi, com)
 
 
 def mixed_ROC_optimum(ref_data, index_data, thresholds):

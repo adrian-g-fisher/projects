@@ -12,3 +12,5 @@ witchelina/accuracy_thresholds.xlsx
 dunes_on_fire/tmpft0tssf2.img
 sentinel2_water/best_waterindex_roc_curves.png
 sentinel2_water/reference_data.csv
+sentinel2_water/waterindex_roc_curves_purepixels.png
+sentinel2_water/waterindex_roc_curves_allpixels.png

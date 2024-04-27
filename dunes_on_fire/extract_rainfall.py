@@ -20,7 +20,7 @@ def extract_rainfall(shapefile):
     shp_df = gpd.read_file(shapefile)
     for index, row in shp_df.iterrows():
     
-        print(f'Feature: {index + 1}/{len(shp_df)}')  
+        # print(f'Feature: {index + 1}/{len(shp_df)}')  
         
         # Get site ID
         ID = str(row['Id'])
@@ -32,7 +32,9 @@ def extract_rainfall(shapefile):
         outdir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\gis_data\dune_areas_hesse\Analysis_2000-2022\rainfall'
         outfile = os.path.join(outdir, 'rainfall_%s.csv'%(Name))
         if os.path.exists(outfile) is False:
-        
+            
+            print(Name)
+            
             # Create a csv file to save results
             with open(outfile, 'w') as f:
                 f.write('ID,Date,Mean_rain,Stdev_rain,Pixel_count\n')

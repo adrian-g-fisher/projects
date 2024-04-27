@@ -1,0 +1,81 @@
+name,area,climate,rain_season,fire_season,pv_season,npv_season
+Abydos_Arid,Abydos,Arid,Summer,Summer,Autumn,Winter
+Amadeus_Arid,Amadeus,Arid,Summer,Spring,Winter,Winter
+Arkaroola_Arid,Arkaroola,Arid,Summer,No burn,Winter,Winter
+Bancannia_Arid,Bancannia,Arid,Summer,Summer,Winter,Winter
+Barkly_Arid,Barkly,Arid,Summer,Spring,Autumn,Winter
+Barkly_Semiarid,Barkly,Semiarid,Summer,No burn,Autumn,Spring
+Blue_Mountains_Humid,Blue Mountains,Humid,Summer,Summer,Autumn,Summer
+Bulloo_Arid,Bulloo,Arid,Summer,Summer,Winter,Winter
+Carpentaria_Humid,Carpentaria,Humid,Summer,Spring,Autumn,Spring
+Channel_Country_Arid,Channel Country,Arid,Summer,Spring,Autumn,Winter
+Cobar_Semiarid,Cobar,Semiarid,Spring,Summer,Winter,Spring
+Eastern_Highlands_Humid,Eastern Highlands,Humid,Summer,Summer,Autumn,Winter
+Eyre_Arid,Eyre,Arid,Winter,Summer,Winter,Autumn
+Eyre_Semiarid,Eyre,Semiarid,Winter,Summer,Winter,Summer
+Gambier_Coorong_longitudinal_Humid,Gambier Coorong longitudinal,Humid,Winter,Summer,Winter,Summer
+Gambier_Coorong_longitudinal_Semiarid,Gambier Coorong longitudinal,Semiarid,Winter,Spring,Winter,Summer
+Gambier_Coorong_transgressive_Humid,Gambier Coorong transgressive,Humid,Winter,Summer,Winter,Summer
+Gambier_Coorong_transgressive_Semiarid,Gambier Coorong transgressive,Semiarid,Winter,Autumn,Winter,Summer
+Gascoyne_Semiarid,Gascoyne,Semiarid,Winter,Autumn,Winter,Summer
+Gawler_Arid,Gawler,Arid,Summer,Summer,Winter,Autumn
+Gawler_Semiarid,Gawler,Semiarid,Summer,No burn,Winter,Autumn
+Gippsland_longitudinal_Humid,Gippsland longitudinal,Humid,Spring,Summer,Winter,Summer
+GSD_Arid,Great Sandy Desert,Arid,Summer,Spring,Autumn,Winter
+GSD_Humid,Great Sandy Desert,Humid,Summer,Spring,Autumn,Winter
+GSD_Semiarid,Great Sandy Desert,Semiarid,Summer,Spring,Autumn,Winter
+GVD_Arid,Great Victoria Desert,Arid,Summer,Spring,Winter,Winter
+GVD_Semiarid,Great Victoria Desert,Semiarid,Winter,Summer,Winter,Winter
+Hunter_Humid,Hunter,Humid,Autumn,Spring,Autumn,Spring
+Kangaroo_Yorke_Humid,Kangaroo Yorke,Humid,Winter,Summer,Winter,Summer
+Kangaroo_Yorke_Semiarid,Kangaroo Yorke,Semiarid,Winter,No burn,Winter,Summer
+Macdonnell_Arid,Macdonnell,Arid,Summer,Spring,Autumn,Winter
+Mallee_Arid,Mallee,Arid,Spring,Summer,Winter,Autumn
+Mallee_Semiarid,Mallee,Semiarid,Spring,Summer,Winter,Summer
+Marree_Arid,Marree,Arid,Summer,No burn,Winter,Winter
+Northern_coast_transgressive_Humid,Northern coast transgressive,Humid,Summer,Spring,Autumn,Spring
+Northwest_coast_transgressive_Humid,Northwest coast transgressive,Humid,Summer,Spring,Autumn,Winter
+Northwest_coast_transgressive_Semiarid,Northwest coast transgressive,Semiarid,Summer,Spring,Autumn,Winter
+North_Gascoyne_Arid,North Gascoyne,Arid,Summer,Summer,Winter,Winter
+North_Strzelecki_Arid,North Strzelecki,Arid,Summer,Spring,Winter,Winter
+Paroo_Darling_Arid,Paroo Darling,Arid,Summer,Spring,Winter,Winter
+Paroo_Darling_Semiarid,Paroo Darling,Semiarid,Summer,Summer,Winter,Winter
+Pedirka_Arid,Pedirka,Arid,Summer,Summer,Winter,Winter
+Petermann_Arid,Petermann,Arid,Summer,Spring,Autumn,Winter
+Pilbara_Arid,Pilbara,Arid,Summer,Summer,Autumn,Winter
+Port_Phillip_Humid,Port Phillip,Humid,Winter,Autumn,Winter,Summer
+Riverina_Semiarid,Riverina,Semiarid,Spring,Autumn,Winter,Summer
+Roxby_Arid,Roxby,Arid,Summer,Summer,Winter,Winter
+Sandover_Plenty_Arid,Sandover Plenty,Arid,Summer,Spring,Autumn,Winter
+Saxby_Semiarid,Saxby,Semiarid,Summer,Summer,Autumn,Spring
+Simpson_Arid,Simpson,Arid,Summer,Spring,Winter,Winter
+Southern_gulfs_Semiarid,Southern gulfs,Semiarid,Winter,No burn,Winter,Spring
+South_Gascoyne_Arid,South Gascoyne,Arid,Winter,Summer,Winter,Autumn
+South_Strzelecki_Arid,South Strzelecki,Arid,Summer,Summer,Winter,Winter
+Subtropical_east_coast_Humid,Subtropical east coast,Humid,Summer,Spring,Autumn,Spring
+Swan_Plain_inland_Humid,Swan Plain inland,Humid,Winter,Spring,Winter,Summer
+Swan_Plain_inland_Semiarid,Swan Plain inland,Semiarid,Winter,Summer,Winter,Summer
+Tasmania_coast_Humid,Tasmania coast,Humid,Winter,Summer,Winter,Summer
+Tasmania_inland_Humid,Tasmania inland,Humid,Winter,Spring,Spring,Summer
+Temperate_east_coast_Humid,Temperate east coast,Humid,Autumn,Spring,Autumn,Spring
+Tirari_Arid,Tirari,Arid,Summer,No burn,Winter,Winter
+Torrens_Arid,Torrens,Arid,Summer,No burn,Winter,Winter
+Torrens_Semiarid,Torrens,Semiarid,Summer,No burn,Winter,Autumn
+Tropical_east_coast_Humid,Tropical east coast,Humid,Summer,Spring,Autumn,Spring
+Upper_Darling_Semiarid,Upper Darling,Semiarid,Summer,Autumn,Winter,Spring
+Urisino_Arid,Urisino,Arid,Summer,Autumn,Winter,Winter
+Urisino_Semiarid,Urisino,Semiarid,Summer,Summer,Winter,Winter
+Victorian_coast_transgressive_Humid,Victorian coast transgressive,Humid,Winter,Summer,Winter,Summer
+Victoria_Bonaparte_Humid,Victoria Bonaparte,Humid,Summer,Spring,Autumn,Spring
+Victoria_Bonaparte_Semiarid,Victoria Bonaparte,Semiarid,Summer,Spring,Autumn,Winter
+Warrego_Semiarid,Warrego,Semiarid,Summer,Spring,Winter,Winter
+Western_bight_Humid,Western bight,Humid,Winter,Summer,Winter,Summer
+Western_bight_Semiarid,Western bight,Semiarid,Winter,Spring,Winter,Summer
+West_coast_transgressive_Arid,West coast transgressive,Arid,Winter,Summer,Winter,Autumn
+West_coast_transgressive_Humid,West coast transgressive,Humid,Winter,Summer,Winter,Summer
+West_coast_transgressive_Semiarid,West coast transgressive,Semiarid,Winter,Summer,Winter,Summer
+William_Creek_Arid,William Creek,Arid,Summer,No burn,Winter,Winter
+Wiso_Semiarid,Wiso,Semiarid,Summer,Spring,Autumn,Winter
+Yilgarn_Arid,Yilgarn,Arid,Summer,Summer,Winter,Winter
+Yilgarn_Humid,Yilgarn,Humid,Winter,Spring,Winter,Summer
+Yilgarn_Semiarid,Yilgarn,Semiarid,Winter,Summer,Winter,Summer

@@ -54,8 +54,8 @@ def make_season_and_frequency(imageList, monthsList):
     controls = applier.ApplierControls()
     infiles.images = imageList
     otherargs.months = monthsList
-    outfiles.season = os.path.join(outdir, r"burnt_area_season_2000-2022.tif")
-    outfiles.frequency = os.path.join(outdir, r"burnt_area_frequency_2000-2022.tif")
+    outfiles.season = os.path.join(outdir, r"burnt_area_season_200011-202313.tif")
+    outfiles.frequency = os.path.join(outdir, r"burnt_area_frequency_200011-202312.tif")
     controls.setStatsIgnore(0)
     controls.setCalcStats(True)
     controls.setOutputDriverName("GTiff")

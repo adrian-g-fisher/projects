@@ -147,12 +147,12 @@ def ROC_optimum(ref_data, index_data, names):
         index_i = index_data[:, i]
         
         # Subset pure water values and pure non-water values
-        #water = index_i[ref_data == 100]
-        #nonwater = index_i[ref_data == 0]
+        water = index_i[ref_data == 100]
+        nonwater = index_i[ref_data == 0]
         
         # Subset all water and non-water values
-        water = index_i[ref_data > 50]
-        nonwater = index_i[ref_data <= 50]
+        #water = index_i[ref_data > 50]
+        #nonwater = index_i[ref_data <= 50]
         
         # Create reference values
         ref = np.concatenate([np.where(water >= -999, 1, 0),
@@ -209,8 +209,8 @@ def ROC_optimum(ref_data, index_data, names):
                 d[:,2][d[:,0] == optimum_thresholds[i]], marker="o", color='k')
     
     plt.legend(loc=(1, 0.2), fontsize=12, frameon=False, handletextpad=0.2)
-    #plt.savefig("waterindex_roc_curves_purepixels.png")
-    plt.savefig("waterindex_roc_curves_allpixels.png")
+    plt.savefig("waterindex_roc_curves_purepixels.png")
+    #plt.savefig("waterindex_roc_curves_allpixels.png")
     plt.clf()
     
     # Calculate area under the curve (AUC) using the trapezoidal rule
@@ -242,8 +242,8 @@ def calculate_statistics(ref_data, index_data, thresholds):
         index_i = index_data[:, i]
         
         # Subset pure water values and pure non-water values
-        water = index_i[ref_data == 200]
-        nonwater = index_i[ref_data <= 100]
+        water = index_i[ref_data == 100]
+        nonwater = index_i[ref_data == 0]
         
         # Create reference values
         ref = np.concatenate([np.where(water >= -999, 1, 0),
@@ -259,7 +259,7 @@ def calculate_statistics(ref_data, index_data, thresholds):
         (acc, prods, fpr, users) = getErrors(ref, pred)
         i_stats = [thresholds[i], acc, prods, users, fpr]
         stats.append(i_stats)
-        
+    
     return np.asarray(stats).astype(float)
 
 
@@ -267,10 +267,12 @@ def make_histograms(ref, index_data, thresh):
 
     fancy_names = [r'$MNDWI_{Xu}$', r'$MuWIC$', r'$TWI$', r'$WI_{Fisher}$']
 
-    rectangles = [[0.06, 0.912, 0.89, 0.085], [0.06, 0.770, 0.89, 0.085],
-                  [0.06, 0.628, 0.89, 0.085], [0.06, 0.486, 0.89, 0.085]]
+    rectangles = [[0.06, 0.912, 0.89, 0.1],
+                  [0.06, 0.770, 0.89, 0.1],
+                  [0.06, 0.628, 0.89, 0.1],
+                  [0.06, 0.486, 0.89, 0.1]]
 
-    #ranges = [[-1, 1], [-1, 1], [-1, 1], [-0.25, 0.1]]
+    ranges = [[-1, 1], [-1, 1], [-1, 1], [-0.25, 0.1]]
 
     fig = plt.figure(1)
     fig.set_size_inches((5, 8))
@@ -509,15 +511,16 @@ validation_data = "reference_data.csv"
 # Calculate optimum thresholds for pure pixels
 (optimum_thresholds, pure_AUC) = ROC_optimum(reference, models, names)
 
-sys.exit()
-
-##########
-
 # Calculate accuracy statistics using optimum thresholds
 pure_stats = calculate_statistics(reference, models, optimum_thresholds)
 
 # Create histograms of the indexes separated into water/non-water
 make_histograms(reference, models, optimum_thresholds)
+
+sys.exit()
+
+##########
+
 
 # Calculate optimum thresholds for reference water content of mixed pixels
 (mixed_thresholds, mixed_stats, mixed_AUC) = mixed_ROC_optimum(reference, models, optimum_thresholds)

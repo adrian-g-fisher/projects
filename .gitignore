@@ -14,3 +14,4 @@ sentinel2_water/best_waterindex_roc_curves.png
 sentinel2_water/reference_data.csv
 sentinel2_water/waterindex_roc_curves_purepixels.png
 sentinel2_water/waterindex_roc_curves_allpixels.png
+dunes_on_fire/schema.ini

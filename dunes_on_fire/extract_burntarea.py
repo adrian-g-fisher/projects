@@ -18,11 +18,13 @@ def get_burnt(info, inputs, outputs, otherargs):
         for p in polysPresent:
             otherargs.counts[0, p-1] += np.sum((poly == p) & (burn == 1))
             otherargs.counts[1, p-1] += np.sum(poly == p)
-    
+
+
 def extract_burntarea(shapefile):
     """
     Uses RIOS to extract monthly burnt area for dunefield polygons.
     """
+    
     # Read in ID values and Names from shapefile
     driver = ogr.GetDriverByName("ESRI Shapefile")
     dataSource = driver.Open(shapefile, 0)
@@ -33,11 +35,12 @@ def extract_burntarea(shapefile):
         Name = feature.GetField("Code")
         ID2Name[ID] = Name
     layer.ResetReading()
+    n = len(ID2Name)
     
     # Iterate over ID values creating csv files to save results
-    for ID in range(1, 79):
+    for ID in range(1, n+1):
         Name = ID2Name[ID]
-        outdir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\gis_data\dune_areas_hesse\Analysis_2000-2022\burntarea'
+        outdir = r'C:\Users\Adrian\Documents\temp'
         outfile = os.path.join(outdir, 'burntarea_%s.csv'%(Name))
         with open(outfile, 'w') as f:
             f.write('ID,Date,Burnt_area_percent,Pixel_count\n')
@@ -52,18 +55,20 @@ def extract_burntarea(shapefile):
         outfiles = applier.FilenameAssociations()
         otherargs = applier.OtherInputs()
         controls = applier.ApplierControls()
-        controls.setFootprintType(applier.INTERSECTION)
-        controls.setBurnAttribute("ID")
+        controls.setBurnAttribute("Id")
         infiles.burnt = imagefile
         infiles.poly = shapefile
-        otherargs.counts = np.zeros((2, 78), dtype=np.uint64)
+        otherargs.counts = np.zeros((2, n), dtype=np.uint64)
         applier.apply(get_burnt, infiles, outfiles, otherArgs=otherargs, controls=controls)
         
-        for i, ID in enumerate(range(1, 79)):
+        for i, ID in enumerate(range(1, n+1)):
             Name = ID2Name[ID]
             burntpixels = otherargs.counts[0, i]
             totalpixels = otherargs.counts[1, i]
-            burn_percent = 100 * (burntpixels / totalpixels)
+            if totalpixels > 0:
+                burn_percent = 100 * (burntpixels / totalpixels)
+            else:
+                burn_percent = -999
             outfile = os.path.join(outdir, 'burntarea_%s.csv'%(Name))
             with open(outfile, 'a') as f:
                 f.write('%s,%s,%.2f,%i\n'%(ID, date, burn_percent, totalpixels))

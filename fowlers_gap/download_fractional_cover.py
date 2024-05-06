@@ -20,9 +20,9 @@ ds = None
 
 # Construct dateList for all seasonal dates
 start = 198712198802
-end = 202212202302
+end = 202312202402
 dateList = []
-for y1 in range(1987, 2023):
+for y1 in range(1987, 2025):
     for m1 in range(3, 13, 3):
         if m1 < 12:
             y2 = y1
@@ -36,8 +36,8 @@ for y1 in range(1987, 2023):
 
 # For each date make the image subset
 # Use either the QLD or TERN server
-srcDir = r'/vsicurl/http://qld.auscover.org.au/public/data/landsat/seasonal_fractional_cover/fractional_cover/nsw/'
-#srcDir = r'/vsicurl/https://data.tern.org.au/rs/public/data/landsat/seasonal_fractional_cover/fractional_cover/nsw/'
+#srcDir = r'/vsicurl/http://qld.auscover.org.au/public/data/landsat/seasonal_fractional_cover/fractional_cover/nsw/'
+srcDir = r'/vsicurl/https://data.tern.org.au/rs/public/data/landsat/seasonal_fractional_cover/fractional_cover/nsw/'
 #srcDir = r'/vsicurl/https://data.tern.org.au/rs/public/data/landsat/seasonal_fractional_cover_v3/fractional_cover/seasonal/nsw/'
 
 for date in dateList:

@@ -38,8 +38,7 @@ Id = np.array(Id)
 green = np.array(green)
 dead = np.array(dead)
 datetimes = np.array([datetime.date(year=int(str(d)[:4]),
-                                    month=int(str(d)[4:6]), day=15) +
-                                    datetime.timedelta(days=30) for d in dates])
+                                    month=int(str(d)[4:6]), day=15) for d in dates])
 
 titles = ["Exclosure", "Outside"]          
 

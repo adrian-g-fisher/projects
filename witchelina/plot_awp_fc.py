@@ -22,7 +22,7 @@ params = {'text.usetex': False, 'mathtext.fontset': 'stixsans',
 plt.rcParams.update(params)
 
 # Read in data
-csvfile = r'E:\witchelina_awp\shapefiles\AWP_120_Final_csv.csv'
+csvfile = r'C:\Users\Adrian\Documents\witchelina\AWP_120_Final_csv.csv'
 data = np.genfromtxt(csvfile, delimiter=',', names=True)
             
 # Annual change

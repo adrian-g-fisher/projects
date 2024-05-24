@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 This makes a multiband image from single band images.
 """
@@ -5,6 +6,9 @@ This makes a multiband image from single band images.
 import os
 import sys
 import argparse
+import glob
+from osgeo import gdal
+gdal.UseExceptions()
 
 
 def mergeBands(projName, inDir, outDir):
@@ -16,20 +20,20 @@ def mergeBands(projName, inDir, outDir):
     bands = [r'blue', r'green', r'red', r'red edge', r'nir']
     images = []
     for b in bands:
-        image = os.path.join(inDir, r'pix4d_transparent_reflectance_%s.tif'%b)
+        image = glob.glob(os.path.join(inDir, r'*_transparent_reflectance_%s.tif'%b.replace(' ', '*')))[0]
         if b == r'red edge':
             old = image
             image = image.replace(' ', '_')        
             if os.path.exists(old) is True:
                 os.rename(old, image)
         images.append(image)
-    
     dstFile = os.path.join(outDir, r'%s_multiband.tif'%projName)
     VRT = dstFile.replace('.tif', '.vrt')
-    cmd = r'gdalbuildvrt -separate %s %s'%(VRT, ' '.join(images))
-    os.system(cmd)
-    cmd = r'gdal_translate %s %s'%(VRT, dstFile)
-    os.system(cmd)
+    outds = gdal.BuildVRT(VRT, images, separate=True)
+    outds = gdal.Translate(dstFile, outds)
+    for i in range(len(bands)):
+        band = outds.GetRasterBand(i+1)
+        band.SetDescription(bands[i])
     os.remove(VRT)
     print("Processing completed")
 

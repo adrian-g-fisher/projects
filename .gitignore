@@ -15,3 +15,4 @@ sentinel2_water/reference_data.csv
 sentinel2_water/waterindex_roc_curves_purepixels.png
 sentinel2_water/waterindex_roc_curves_allpixels.png
 dunes_on_fire/schema.ini
+fowlers_gap/satellite_phenocam.png

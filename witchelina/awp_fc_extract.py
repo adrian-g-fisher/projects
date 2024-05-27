@@ -19,9 +19,10 @@ artifical water.
 import os
 import sys
 import glob
+import pyproj
 import numpy as np
 from osgeo import ogr
-from rios import applier
+from rios import applier, cuiprogress
 from scipy import ndimage
 
 
@@ -106,14 +107,32 @@ def extractValues(info, inputs, outputs, otherargs):
             paddock_id = inputs.paddocks[0][labels == ID][0]
             paddock_name = otherargs.ID2Name[paddock_id]
             easting = eastings[labels == ID]
-            northing = northings[labels == ID] * -1
+            northing = northings[labels == ID]
             distance = inputs.distance[0][labels == ID]
+            
+            stats = []
+            for b in range(12):
+                stats.append(inputs.beforeStats[b][labels == ID])
+            for b in range(12):
+                stats.append(inputs.afterStats[b][labels == ID])
+            for y in range(35):
+                statsimage = inputs.annualImages[y]
+                for b in range(12):
+                    stats.append(statsimage[b][labels == ID])
+            
             with open(otherargs.csvfile, 'a') as f:
-                f.write('%i,%i,%i,%s,%0.1f\n'%(ID+otherargs.num, easting, northing, paddock_name, distance))
+                line = '%i,%i,%i,%s,%0.1f'%(ID+otherargs.num,
+                                              easting, northing,
+                                              paddock_name, distance)
+                for s in stats:
+                    line = '%s,%.2f'%(line, s)
+                f.write('%s\n'%line)
         otherargs.num += num_samples
 
 
-def extract_sample_values(csvfile, sample_image, paddock_shapefile, distance_image, ID2Name):
+def extract_sample_values(csvfile, sample_image, paddock_shapefile,
+                          distance_image, ID2Name, beforeImage, afterImage,
+                          annual_image_dir):
     """
     """
     infiles = applier.FilenameAssociations()
@@ -121,9 +140,14 @@ def extract_sample_values(csvfile, sample_image, paddock_shapefile, distance_ima
     otherargs = applier.OtherInputs()
     controls = applier.ApplierControls()
     controls.setBurnAttribute("ID")
+    controls.progress = cuiprogress.CUIProgressBar()
     infiles.samples = sample_image
     infiles.distance = distance_image
     infiles.paddocks = paddock_shapefile
+    infiles.beforeStats = beforeImage
+    infiles.afterStats = afterImage
+    infiles.annualImages = [os.path.join(annual_image_dir,
+                      'annual_stats_%i.tif'%year) for year in range(1988, 2023)]
     otherargs.num = 0
     otherargs.ID2Name = ID2Name
     otherargs.csvfile = csvfile
@@ -131,21 +155,21 @@ def extract_sample_values(csvfile, sample_image, paddock_shapefile, distance_ima
 
 
 # Hardcode all the input files and directories
-awp_shapefile = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\awp_grazing_pressure\redo_analyses_epsg3577\awp_epsg3577.shp'
-paradise_shapefile = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\awp_grazing_pressure\redo_analyses_epsg3577\paradise_epsg3577.shp'
-paddock_shapefile = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\awp_grazing_pressure\redo_analyses_epsg3577\paradise_paddocks_epsg3577.shp'
-paddock_buffer = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\awp_grazing_pressure\redo_analyses_epsg3577\paradise_paddocks_lines_buffer100m_epsg3577.shp' # 100 m buffer
-landform_image = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\awp_grazing_pressure\redo_analyses_epsg3577\landforms_optimum.img' # 1 = chenopods
-annual_image_dir = r'S:\witchelina\annual_statistic_images'           # tif files
-before_after_image_dir = r'S:\witchelina\timeseries_statistic_images' # tif files
+inDir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\awp_grazing_pressure\redo_analyses_epsg3577'
+awp_shapefile = os.path.join(inDir, r'awp_epsg3577.shp')
+paradise_shapefile = os.path.join(inDir, r'paradise_epsg3577.shp')
+paddock_shapefile = os.path.join(inDir, r'paradise_paddocks_epsg3577.shp')
+paddock_buffer = os.path.join(inDir, r'paradise_paddocks_lines_buffer100m_epsg3577.shp') # 100 m buffer
+landform_image = os.path.join(inDir, r'landforms_optimum.img') # 1 = chenopods
+annual_image_dir = r'C:\Users\Adrian\Documents\temp\annual_statistic_images' # tif files
 
 # Create distance to water raster
-landsat_image = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\awp_grazing_pressure\redo_analyses_epsg3577\timeseries_stats_198712202302.tif'
-distance_image = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\awp_grazing_pressure\redo_analyses_epsg3577\distance.tif'
+landsat_image = os.path.join(inDir, r'timeseries_stats_198712202302.tif')
+distance_image = os.path.join(inDir, r'distance.tif')
 #create_distance_raster(awp_shapefile, paddock_shapefile, landsat_image, distance_image)
 
 # Create sample points
-sample_image = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\awp_grazing_pressure\redo_analyses_epsg3577\sample_pixels.tif'
+sample_image = os.path.join(inDir, r'sample_pixels.tif')
 #create_sample_points(distance_image, landform_image, paddock_buffer, sample_image)
 
 # Make dictionary for paddock names and IDs
@@ -160,9 +184,21 @@ for feature in layer:
 layer.ResetReading()
 
 # Extract sample values to CSV
-csvfile = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\awp_grazing_pressure\redo_analyses_epsg3577\awp_analysis_epsg3577.csv'
+band_names = ['PV_mean', 'PV_stdev', 'PV_min', 'PV_max',
+              'NPV_mean', 'NPV_stdev', 'NPV_min', 'NPV_max',
+              'Bare_mean', 'Bare_stdev', 'Bare_min', 'Bare_max']
+dates = ['before_grazing', 'after_grazing'] + list(range(1988, 2023))
+csvfile = os.path.join(inDir, r'awp_analysis_epsg3577.csv')
+header = 'ID,Easting,Northing,Paddock,Distance'
+for date in dates:
+    for band in band_names:
+         colname = '%s_%s'%(band, str(date))
+         header = '%s,%s'%(header, colname)
 
 with open(csvfile, 'w') as f:
-    f.write('ID,Easting,Northing,Paddock,Distance\n') 
+    f.write('%s\n'%header)
 
-extract_sample_values(csvfile, sample_image, paddock_shapefile, distance_image, ID2Name)
+beforeImage = os.path.join(inDir, r'timeseries_stats_199611200911.tif')
+afterImage = os.path.join(inDir, r'timeseries_stats_201003202302.tif')
+extract_sample_values(csvfile, sample_image, paddock_shapefile, distance_image,
+                      ID2Name, beforeImage, afterImage, annual_image_dir)

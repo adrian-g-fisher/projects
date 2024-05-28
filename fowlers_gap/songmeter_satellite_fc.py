@@ -142,6 +142,7 @@ def make_cool_plot():
     """
     indir = r'C:\Users\Adrian\Documents\GitHub\fowlers_songmeter_analysis\data'
     
+    # Get Landsat data
     landsat_csv = r'fowlersgap_landsat_conservation_warrens.csv'
     landsat = np.genfromtxt(os.path.join(indir, landsat_csv), names=True, delimiter=',')
     landsatDates = []
@@ -158,7 +159,10 @@ def make_cool_plot():
     landsat["stdevGreen"] = np.ma.masked_equal(landsat["stdevGreen"], 999)
     landsat["meanDead"] = np.ma.masked_equal(landsat["meanDead"], 999)
     landsat["stdevDead"] = np.ma.masked_equal(landsat["stdevDead"], 999)
+    landsat["meanBare"] = np.ma.masked_equal(landsat["meanBare"], 999)
+    landsat["stdevBare"] = np.ma.masked_equal(landsat["stdevBare"], 999)
     
+    # Get MODIS data
     modis_csv = r'fowlersgap_modis_conservation_warrens.csv'
     modis = np.genfromtxt(os.path.join(indir, modis_csv), names=True, delimiter=',')
     modisDates = np.array([datetime.date(year=int(str(x)[0:4]),
@@ -166,28 +170,29 @@ def make_cool_plot():
                                            for x in modis['date']], dtype=np.datetime64)
     modis = rfn.append_fields(modis, 'Date', modisDates)
     
+    # Get phenocam data
     pheno1_csv = r'fowlersgap_phenocam_conservation_fenced_daily.csv'
     pheno1 = np.genfromtxt(os.path.join(indir, pheno1_csv), names=True, delimiter=',',
                            dtype=None, converters={0: pheno_date})
     pheno1 = np.ma.array(pheno1, mask=pheno1["gcc"] > 900)
-    
     pheno2_csv = r'fowlersgap_phenocam_warrens_1_daily.csv'
     pheno2 = np.genfromtxt(os.path.join(indir, pheno2_csv), names=True, delimiter=',',
                            dtype=None, converters={0: pheno_date})
     pheno2 = np.ma.array(pheno2, mask=pheno2["gcc"] > 900)
-    
     pheno3_csv = r'fowlersgap_phenocam_warrens_5_daily.csv'
     pheno3 = np.genfromtxt(os.path.join(indir, pheno3_csv), names=True, delimiter=',',
                            dtype=None, converters={0: pheno_date})
     pheno3 = np.ma.array(pheno3, mask=pheno3["gcc"] > 900)
-    
     pheno4_csv = r'fowlersgap_phenocam_warrens_fenced_daily.csv'
     pheno4 = np.genfromtxt(os.path.join(indir, pheno4_csv), names=True, delimiter=',',
                            dtype=None, converters={0: pheno_date})
     pheno4 = np.ma.array(pheno4, mask=pheno4["gcc"] > 900)
     
-    # Make 3 panel plot with Landsat, MODIS and Phenocam
-    fig, axs = plt.subplots(3, sharex=True)
+    # Get rainfall data
+    
+    
+    # Make 4 panel plot with Landsat, MODIS, Phenocam and rainfall
+    fig, axs = plt.subplots(4, sharex=True)
     fig.set_size_inches((8, 5))
     
     axs[0].fill_between(landsat['Date'],
@@ -200,6 +205,11 @@ def make_cool_plot():
                         landsat['meanDead'] + landsat['stdevDead'],
                         alpha=0.2, facecolor='saddlebrown', linewidth=0.0, edgecolor='saddlebrown')
     axs[0].plot(landsat['Date'], landsat['meanDead'], color='saddlebrown', linewidth=1)
+    axs[0].fill_between(landsat['Date'],
+                        100 - (landsat['meanBare'] - landsat['stdevBare']),
+                        100 - (landsat['meanBare'] + landsat['stdevBare']),
+                        alpha=0.2, facecolor='k', linewidth=0.0, edgecolor='k')
+    axs[0].plot(landsat['Date'], 100 - landsat['meanBare'], color='k', linewidth=1)
     axs[0].set_ylabel('Landsat\nfractional\ncover (%)')
     
     axs[1].fill_between(modis['Date'],
@@ -212,12 +222,18 @@ def make_cool_plot():
                         modis['meanDead'] + modis['stdevDead'],
                         alpha=0.2, facecolor='saddlebrown', linewidth=0.0, edgecolor='saddlebrown')
     axs[1].plot(modis['Date'], modis['meanDead'], color='saddlebrown', linewidth=1)
+    axs[1].fill_between(modis['Date'],
+                        100 - (modis['meanBare'] - modis['stdevBare']),
+                        100 - (modis['meanBare'] + modis['stdevBare']),
+                        alpha=0.2, facecolor='k', linewidth=0.0, edgecolor='k')
+    axs[1].plot(modis['Date'], 100 - modis['meanBare'], color='k', linewidth=1)
+    
     axs[1].set_ylabel('MODIS\nfractional\ncover (%)')
     
-    axs[2].plot(pheno1['date'], pheno1['gcc'], color='darkgreen', linewidth=1)
-    axs[2].plot(pheno2['date'], pheno2['gcc'], color='darkgreen', linewidth=1)
-    axs[2].plot(pheno3['date'], pheno3['gcc'], color='darkgreen', linewidth=1)
-    axs[2].plot(pheno4['date'], pheno4['gcc'], color='darkgreen', linewidth=1)
+    axs[2].plot(pheno1['date'], pheno1['gcc'], color='darkgreen', linewidth=0.5)
+    axs[2].plot(pheno2['date'], pheno2['gcc'], color='darkgreen', linewidth=0.5)
+    axs[2].plot(pheno3['date'], pheno3['gcc'], color='darkgreen', linewidth=0.5)
+    axs[2].plot(pheno4['date'], pheno4['gcc'], color='darkgreen', linewidth=0.5)
     axs[2].set_xlim([datetime.date(2022, 4, 1), datetime.date(2023, 4, 1)])
     axs[2].set_ylabel('Phenocam\ngreen chromatic\ncoordinate')
     

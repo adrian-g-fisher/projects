@@ -170,11 +170,16 @@ def make_cool_plot():
                                            for x in modis['date']], dtype=np.datetime64)
     modis = rfn.append_fields(modis, 'Date', modisDates)
     
+    # Get Sentinel-2 NDVI data
+    sentinel2_csv = r'fowlersgap_sentinel2NDVI_conservations_warrens.csv'
+    sentinel2 = np.genfromtxt(os.path.join(indir, sentinel2_csv), names=True, delimiter=',')
+    sentinel2Dates = np.array([datetime.date(year=int(str(x)[0:4]),
+                                             month=int(str(x)[4:6]),
+                                             day=int(str(x)[6:8]))
+                                             for x in sentinel2['date']], dtype=np.datetime64)
+    sentinel2 = rfn.append_fields(sentinel2, 'Date', sentinel2Dates)
+    
     # Get phenocam data
-    pheno1_csv = r'fowlersgap_phenocam_conservation_fenced_daily.csv'
-    pheno1 = np.genfromtxt(os.path.join(indir, pheno1_csv), names=True, delimiter=',',
-                           dtype=None, converters={0: pheno_date})
-    pheno1 = np.ma.array(pheno1, mask=pheno1["gcc"] > 900)
     pheno2_csv = r'fowlersgap_phenocam_warrens_1_daily.csv'
     pheno2 = np.genfromtxt(os.path.join(indir, pheno2_csv), names=True, delimiter=',',
                            dtype=None, converters={0: pheno_date})
@@ -189,55 +194,104 @@ def make_cool_plot():
     pheno4 = np.ma.array(pheno4, mask=pheno4["gcc"] > 900)
     
     # Get rainfall data
+    raindir = r'C:\Users\Adrian\Documents\GitHub\fowlers_songmeter_analysis\data\IDCJAC0009_046128_1800'
+    rain_csv = r'IDCJAC0009_046128_1800_Data.csv'
+    rain = np.genfromtxt(os.path.join(raindir, rain_csv), names=True, delimiter=',')
+    rainDates = np.array([datetime.date(year=int(rain['Year'][i]),
+                                        month=int(rain['Month'][i]),
+                                        day=int(rain['Day'][i]))
+                                        for i in range(rain['Year'].size)], dtype=np.datetime64)
+    rain = rfn.append_fields(rain, 'Date', rainDates)
+    rain["Rainfall_amount_millimetres"][np.isnan(rain["Rainfall_amount_millimetres"])] = 0
+    rain = rain[rain['Date'] > datetime.date(year=2004, month=10, day=25)]
     
-    
-    # Make 4 panel plot with Landsat, MODIS, Phenocam and rainfall
-    fig, axs = plt.subplots(4, sharex=True)
+    # Make 5 panel plot with Landsat, MODIS, Sentinel-2, Phenocam and rainfall
+    fig, axs = plt.subplots(5, sharex=True)
     fig.set_size_inches((8, 5))
     
     axs[0].fill_between(landsat['Date'],
                         landsat['meanGreen'] - landsat['stdevGreen'],
                         landsat['meanGreen'] + landsat['stdevGreen'],
                         alpha=0.2, facecolor='darkgreen', linewidth=0.0, edgecolor='darkgreen')
-    axs[0].plot(landsat['Date'], landsat['meanGreen'], color='darkgreen', linewidth=1)
+    axs[0].plot(landsat['Date'], landsat['meanGreen'], color='darkgreen', linewidth=1,
+                marker='o', markersize=2)
     axs[0].fill_between(landsat['Date'],
                         landsat['meanDead'] - landsat['stdevDead'],
                         landsat['meanDead'] + landsat['stdevDead'],
                         alpha=0.2, facecolor='saddlebrown', linewidth=0.0, edgecolor='saddlebrown')
-    axs[0].plot(landsat['Date'], landsat['meanDead'], color='saddlebrown', linewidth=1)
+    axs[0].plot(landsat['Date'], landsat['meanDead'], color='saddlebrown', linewidth=1,
+                marker='o', markersize=2)
     axs[0].fill_between(landsat['Date'],
                         100 - (landsat['meanBare'] - landsat['stdevBare']),
                         100 - (landsat['meanBare'] + landsat['stdevBare']),
                         alpha=0.2, facecolor='k', linewidth=0.0, edgecolor='k')
-    axs[0].plot(landsat['Date'], 100 - landsat['meanBare'], color='k', linewidth=1)
+    axs[0].plot(landsat['Date'], 100 - landsat['meanBare'], color='k', linewidth=1,
+                marker='o', markersize=2)
     axs[0].set_ylabel('Landsat\nfractional\ncover (%)')
     
     axs[1].fill_between(modis['Date'],
                         modis['meanGreen'] - modis['stdevGreen'],
                         modis['meanGreen'] + modis['stdevGreen'],
                         alpha=0.2, facecolor='darkgreen', linewidth=0.0, edgecolor='darkgreen')
-    axs[1].plot(modis['Date'], modis['meanGreen'], color='darkgreen', linewidth=1)
+    axs[1].plot(modis['Date'], modis['meanGreen'], color='darkgreen', linewidth=1,
+                marker='o', markersize=2)
     axs[1].fill_between(modis['Date'],
                         modis['meanDead'] - modis['stdevDead'],
                         modis['meanDead'] + modis['stdevDead'],
                         alpha=0.2, facecolor='saddlebrown', linewidth=0.0, edgecolor='saddlebrown')
-    axs[1].plot(modis['Date'], modis['meanDead'], color='saddlebrown', linewidth=1)
+    axs[1].plot(modis['Date'], modis['meanDead'], color='saddlebrown', linewidth=1,
+                marker='o', markersize=2)
     axs[1].fill_between(modis['Date'],
                         100 - (modis['meanBare'] - modis['stdevBare']),
                         100 - (modis['meanBare'] + modis['stdevBare']),
                         alpha=0.2, facecolor='k', linewidth=0.0, edgecolor='k')
-    axs[1].plot(modis['Date'], 100 - modis['meanBare'], color='k', linewidth=1)
-    
+    axs[1].plot(modis['Date'], 100 - modis['meanBare'], color='k', linewidth=1,
+                marker='o', markersize=2)
     axs[1].set_ylabel('MODIS\nfractional\ncover (%)')
     
-    axs[2].plot(pheno1['date'], pheno1['gcc'], color='darkgreen', linewidth=0.5)
-    axs[2].plot(pheno2['date'], pheno2['gcc'], color='darkgreen', linewidth=0.5)
-    axs[2].plot(pheno3['date'], pheno3['gcc'], color='darkgreen', linewidth=0.5)
-    axs[2].plot(pheno4['date'], pheno4['gcc'], color='darkgreen', linewidth=0.5)
-    axs[2].set_xlim([datetime.date(2022, 4, 1), datetime.date(2023, 4, 1)])
-    axs[2].set_ylabel('Phenocam\ngreen chromatic\ncoordinate')
+    axs[2].fill_between(sentinel2['Date'],
+                        sentinel2['NDVI_mean'] - sentinel2['NDVI_stdev'],
+                        sentinel2['NDVI_mean'] + sentinel2['NDVI_stdev'],
+                        alpha=0.2, facecolor='darkgreen', linewidth=0.0, edgecolor='darkgreen')
+    axs[2].plot(sentinel2['Date'], sentinel2['NDVI_mean'], color='darkgreen', linewidth=1,
+                marker='o', markersize=2)
+    axs[2].set_ylabel('Sentinel-2\nNDVI')
     
-    plt.savefig(r'satellite_phenocam.png', dpi=300)
+    axs[3].plot(pheno2['date'], pheno2['gcc'], color='lime', linewidth=0.5,
+                label='warrens 1')
+    axs[3].plot(pheno3['date'], pheno3['gcc'], color='yellowgreen', linewidth=0.5,
+                label='warrens 5')
+    axs[3].plot(pheno4['date'], pheno4['gcc'], color='darkgreen', linewidth=0.5,
+                label='warrens fenced')
+    axs[3].legend(loc='upper left', fontsize='xx-small', frameon=False)
+    axs[3].set_ylabel('Phenocam\ngreen chromatic\ncoordinate')
+
+    axs[4].bar(rain['Date'], rain['Rainfall_amount_millimetres'],
+               color='blue', width=1)
+    axs[4].set_ylabel('Daily\nprecipitation\n(mm)')
+    
+    # Legend
+    axLeg = plt.axes([0, 0.9, 1, 0.1], frameon=False)
+    axLeg.set_xlim((0, 100))
+    axLeg.set_ylim((0, 2))
+    axLeg.set_xticks([])
+    axLeg.set_yticks([])
+    axLeg.plot([13.5, 14.5], [0.5, 0.5], ls='-', c='saddlebrown', lw=7, alpha=0.2)
+    axLeg.plot([13.0, 15.0], [0.5, 0.5], ls='-', c='saddlebrown', lw=1)
+    axLeg.text(16, 0.3, r'Non-photosynthetic vegetation', fontsize=10)
+    axLeg.plot([45.5, 46.5], [0.5, 0.5], ls='-', c='darkgreen', lw=7, alpha=0.2)
+    axLeg.plot([45.0, 47.0], [0.5, 0.5], ls='-', c='darkgreen', lw=1)
+    axLeg.text(48, 0.3, r'Photosynthetic vegetation', fontsize=10)
+    axLeg.plot([74.5, 75.5], [0.5, 0.5], ls='-', c='k', lw=7, alpha=0.2)
+    axLeg.plot([74.0, 76.0], [0.5, 0.5], ls='-', c='k', lw=1)
+    axLeg.text(77, 0.3, r'Total vegetation', fontsize=10)
+    
+    axs[4].set_xlim([datetime.date(2004, 1, 1), datetime.date(2024, 1, 1)])
+    plt.savefig(r'satellite_phenocam_2004-2024.png', dpi=300)
+    
+    axs[4].set_xlim([datetime.date(2022, 3, 1), datetime.date(2023, 4, 1)])
+    plt.savefig(r'satellite_phenocam_2022-2023.png', dpi=300)
+
 
 # Get MODIS data
 #extract_modis_fc()

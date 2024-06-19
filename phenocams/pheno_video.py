@@ -14,7 +14,7 @@ import datetime
 from moviepy.video.io import ImageSequenceClip
 
 
-def main(baseDir, outDir):
+def main(baseDir, outDir, fps):
     """
     """
     for siteDir in glob.glob(os.path.join(baseDir, '*')):
@@ -61,9 +61,8 @@ def main(baseDir, outDir):
             selected_images.append(selected_image)
         
         # Make video
-        fps = 1 # 1 frame per second
         clip = ImageSequenceClip.ImageSequenceClip(selected_images, fps=fps)
-        clip.write_videofile(videofile)
+        clip.write_videofile(videofile, fps=fps)
 
 
 def getCmdargs():
@@ -76,6 +75,8 @@ def getCmdargs():
                    help=("Input directory with subdirectories for each camera"))
     p.add_argument("-o", "--outDir", dest="outDir", default=None,
                    help=("Output directory for video files"))
+    p.add_argument("-f", "--fps", dest="fps", default=1,
+                   help=("Frames per second (default=1)"))
     cmdargs = p.parse_args()
     if (cmdargs.inDir is None and cmdargs.outDir is None):
         p.print_help()
@@ -86,4 +87,4 @@ def getCmdargs():
 
 if __name__ == "__main__":
     cmdargs = getCmdargs()
-    main(cmdargs.inDir, cmdargs.outDir)
+    main(cmdargs.inDir, cmdargs.outDir, float(cmdargs.fps))

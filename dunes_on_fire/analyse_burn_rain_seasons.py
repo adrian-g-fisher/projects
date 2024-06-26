@@ -4,6 +4,8 @@
 - For each dune area make graphs of monthly burnt area (%) vs previous seasonal rainfall (mm)
 - Make graphs for 1-12 seasons prior to the burn, using different accumulation periods of 1-8 seasons
 
+
+
 """
 import os
 import sys

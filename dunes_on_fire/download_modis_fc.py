@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-This downloads MODIS fractiuonal cover from CSIRO
+This downloads MODIS fractional cover from CSIRO
 
 The images from 202302 onwards have a different name
 

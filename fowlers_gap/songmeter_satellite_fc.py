@@ -19,6 +19,58 @@ params = {'text.usetex': False, 'mathtext.fontset': 'stixsans',
 plt.rcParams.update(params)
 
 
+def getModisSurfaceRefl(info, inputs, outputs, otherargs):
+    """
+    """
+    poly = inputs.poly[0]
+    sr = inputs.sr.astype(np.float32)
+    red = sr[0][poly != 0]/10000.0
+    nir = sr[1][poly != 0]/10000.0
+    blue = sr[2][poly != 0]/10000.0
+    green = sr[3][poly != 0]/10000.0
+    ndvi = (nir - red) / (nir + red)
+    outfile = os.path.join(otherargs.outdir, 'modis_surface_reflectance.csv')
+    with open(outfile, 'a') as f:
+        line = '%s,%i'%(otherargs.date, red.size)
+        line = '%s,%.2f,%.2f'%(line, np.mean(ndvi), np.std(ndvi))
+        line = '%s,%.2f,%.2f,%.2f,%.2f\n'%(line, np.mean(blue), np.mean(green), np.mean(red), np.mean(nir))
+        f.write(line)
+
+
+def extract_modis_refl():
+    """
+    Uses RIOS to extract monthly MODIS surface reflectance and NDVI for sample polygons.
+    """
+    shapefile = r'C:\Users\Adrian\OneDrive - UNSW\Documents\songmeter_analysis\conservation_warrens_wgs84.shp'
+    baseRaster = r'C:\Users\Adrian\OneDrive - UNSW\Documents\grant_applications\2024_01_discovery_brown_food_webs\modis_test\modis_fc_200101.tif'
+    outdir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\songmeter_analysis'
+    outfile = os.path.join(outdir, 'modis_surface_reflectance.csv')
+    with open(outfile, 'w') as f:
+        f.write('date,pixels,meanNDVI,stdevNDVI,meanBlue,meanGreen,meanRed,meanNIR\n')
+
+    # Iterate over images
+    for imagefile in glob.glob(r"S:\aust\modis_surface_reflectance\modis_monthly_surface_reflectance\*.tif"):
+        year = imagefile.replace(r".tif", "").split(r"_")[-1][0:4]
+        month = imagefile.replace(r".tif", "").split(r"_")[-1][4:6]
+        date = year + month
+        infiles = applier.FilenameAssociations()
+        outfiles = applier.FilenameAssociations()
+        otherargs = applier.OtherInputs()
+        controls = applier.ApplierControls()
+        infiles.sr = imagefile
+        infiles.base = baseRaster
+        infiles.poly = shapefile
+        otherargs.date = date
+        otherargs.outdir = outdir
+        controls.setReferenceImage(baseRaster)
+        controls.setResampleMethod('cubic')
+        controls.setFootprintType(applier.BOUNDS_FROM_REFERENCE)
+        controls.setWindowXsize(100)
+        controls.setWindowYsize(100)
+        applier.apply(getModisSurfaceRefl, infiles, outfiles,
+                      otherArgs=otherargs, controls=controls)
+
+
 def getModisPixelValues(info, inputs, outputs, otherargs):
     """
     """
@@ -42,9 +94,7 @@ def extract_modis_fc():
     """
     shapefile = r'C:\Users\Adrian\OneDrive - UNSW\Documents\songmeter_analysis\conservation_warrens_wgs84.shp'
     baseRaster = r'C:\Users\Adrian\OneDrive - UNSW\Documents\grant_applications\2024_01_discovery_brown_food_webs\modis_test\modis_fc_200101.tif'
-    outdir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\songmeter_analysis'
-    
-    # Iterate over ID values creating csv files to save results
+    outdir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\songmeter_analysis' 
     outfile = os.path.join(outdir, 'modis_fractionalcover.csv')
     with open(outfile, 'w') as f:
         f.write('date,pixels,meanBare,stdevBare,meanGreen,stdevGreen,meanDead,stdevDead\n')
@@ -170,6 +220,14 @@ def make_cool_plot():
                                            for x in modis['date']], dtype=np.datetime64)
     modis = rfn.append_fields(modis, 'Date', modisDates)
     
+    # Get MODIS NDVI data
+    modis_NDVI_csv = r'fowlersgap_modis_surface_reflectance.csv'
+    modis_NDVI = np.genfromtxt(os.path.join(indir, modis_NDVI_csv), names=True, delimiter=',')
+    modis_NDVI_Dates = np.array([datetime.date(year=int(str(x)[0:4]),
+                                               month=int(str(x)[4:6]), day=15)
+                                               for x in modis_NDVI['date']], dtype=np.datetime64)
+    modis_NDVI = rfn.append_fields(modis_NDVI, 'Date', modis_NDVI_Dates)
+    
     # Get Sentinel-2 NDVI data
     sentinel2_csv = r'fowlersgap_sentinel2NDVI_conservations_warrens.csv'
     sentinel2 = np.genfromtxt(os.path.join(indir, sentinel2_csv), names=True, delimiter=',')
@@ -205,57 +263,62 @@ def make_cool_plot():
     rain["Rainfall_amount_millimetres"][np.isnan(rain["Rainfall_amount_millimetres"])] = 0
     rain = rain[rain['Date'] > datetime.date(year=2004, month=10, day=25)]
     
-    # Make 5 panel plot with Landsat, MODIS, Sentinel-2, Phenocam and rainfall
+    # Make 5 panel plot with MODIS-FC, MODIS-NDVI, MODIS-RGB, Phenocam and rainfall
     fig, axs = plt.subplots(5, sharex=True)
     fig.set_size_inches((8, 5))
     
-    axs[0].fill_between(landsat['Date'],
-                        landsat['meanGreen'] - landsat['stdevGreen'],
-                        landsat['meanGreen'] + landsat['stdevGreen'],
-                        alpha=0.2, facecolor='darkgreen', linewidth=0.0, edgecolor='darkgreen')
-    axs[0].plot(landsat['Date'], landsat['meanGreen'], color='darkgreen', linewidth=1,
-                marker='o', markersize=2)
-    axs[0].fill_between(landsat['Date'],
-                        landsat['meanDead'] - landsat['stdevDead'],
-                        landsat['meanDead'] + landsat['stdevDead'],
-                        alpha=0.2, facecolor='saddlebrown', linewidth=0.0, edgecolor='saddlebrown')
-    axs[0].plot(landsat['Date'], landsat['meanDead'], color='saddlebrown', linewidth=1,
-                marker='o', markersize=2)
-    axs[0].fill_between(landsat['Date'],
-                        100 - (landsat['meanBare'] - landsat['stdevBare']),
-                        100 - (landsat['meanBare'] + landsat['stdevBare']),
-                        alpha=0.2, facecolor='k', linewidth=0.0, edgecolor='k')
-    axs[0].plot(landsat['Date'], 100 - landsat['meanBare'], color='k', linewidth=1,
-                marker='o', markersize=2)
-    axs[0].set_ylabel('Landsat\nfractional\ncover (%)')
+    #axs[0].fill_between(landsat['Date'],
+    #                    landsat['meanGreen'] - landsat['stdevGreen'],
+    #                    landsat['meanGreen'] + landsat['stdevGreen'],
+    #                    alpha=0.2, facecolor='darkgreen', linewidth=0.0, edgecolor='darkgreen')
+    #axs[0].plot(landsat['Date'], landsat['meanGreen'], color='darkgreen', linewidth=1,
+    #            marker='o', markersize=2)
+    #axs[0].fill_between(landsat['Date'],
+    #                    landsat['meanDead'] - landsat['stdevDead'],
+    #                    landsat['meanDead'] + landsat['stdevDead'],
+    #                    alpha=0.2, facecolor='saddlebrown', linewidth=0.0, edgecolor='saddlebrown')
+    #axs[0].plot(landsat['Date'], landsat['meanDead'], color='saddlebrown', linewidth=1,
+    #            marker='o', markersize=2)
+    #axs[0].fill_between(landsat['Date'],
+    #                    100 - (landsat['meanBare'] - landsat['stdevBare']),
+    #                    100 - (landsat['meanBare'] + landsat['stdevBare']),
+    #                    alpha=0.2, facecolor='k', linewidth=0.0, edgecolor='k')
+    #axs[0].plot(landsat['Date'], 100 - landsat['meanBare'], color='k', linewidth=1,
+    #            marker='o', markersize=2)
+    #axs[0].set_ylabel('Landsat\nfractional\ncover (%)')
     
-    axs[1].fill_between(modis['Date'],
+    axs[0].fill_between(modis['Date'],
                         modis['meanGreen'] - modis['stdevGreen'],
                         modis['meanGreen'] + modis['stdevGreen'],
                         alpha=0.2, facecolor='darkgreen', linewidth=0.0, edgecolor='darkgreen')
-    axs[1].plot(modis['Date'], modis['meanGreen'], color='darkgreen', linewidth=1,
+    axs[0].plot(modis['Date'], modis['meanGreen'], color='darkgreen', linewidth=1,
                 marker='o', markersize=2)
-    axs[1].fill_between(modis['Date'],
+    axs[0].fill_between(modis['Date'],
                         modis['meanDead'] - modis['stdevDead'],
                         modis['meanDead'] + modis['stdevDead'],
                         alpha=0.2, facecolor='saddlebrown', linewidth=0.0, edgecolor='saddlebrown')
-    axs[1].plot(modis['Date'], modis['meanDead'], color='saddlebrown', linewidth=1,
+    axs[0].plot(modis['Date'], modis['meanDead'], color='saddlebrown', linewidth=1,
                 marker='o', markersize=2)
-    axs[1].fill_between(modis['Date'],
+    axs[0].fill_between(modis['Date'],
                         100 - (modis['meanBare'] - modis['stdevBare']),
                         100 - (modis['meanBare'] + modis['stdevBare']),
                         alpha=0.2, facecolor='k', linewidth=0.0, edgecolor='k')
-    axs[1].plot(modis['Date'], 100 - modis['meanBare'], color='k', linewidth=1,
+    axs[0].plot(modis['Date'], 100 - modis['meanBare'], color='k', linewidth=1,
                 marker='o', markersize=2)
-    axs[1].set_ylabel('MODIS\nfractional\ncover (%)')
+    axs[0].set_ylabel('MODIS\nfractional\ncover (%)')
     
-    axs[2].fill_between(sentinel2['Date'],
-                        sentinel2['NDVI_mean'] - sentinel2['NDVI_stdev'],
-                        sentinel2['NDVI_mean'] + sentinel2['NDVI_stdev'],
+    axs[1].fill_between(modis_NDVI['Date'],
+                        modis_NDVI['meanNDVI'] - modis_NDVI['stdevNDVI'],
+                        modis_NDVI['meanNDVI'] + modis_NDVI['stdevNDVI'],
                         alpha=0.2, facecolor='darkgreen', linewidth=0.0, edgecolor='darkgreen')
-    axs[2].plot(sentinel2['Date'], sentinel2['NDVI_mean'], color='darkgreen', linewidth=1,
+    axs[1].plot(modis_NDVI['Date'], modis_NDVI['meanNDVI'], color='darkgreen', linewidth=1,
                 marker='o', markersize=2)
-    axs[2].set_ylabel('Sentinel-2\nNDVI')
+    axs[1].set_ylabel('MODIS\nNDVI')
+    
+    axs[2].plot(modis_NDVI['Date'], modis_NDVI['meanRed'], color='red', linewidth=1, marker='o', markersize=2)
+    axs[2].plot(modis_NDVI['Date'], modis_NDVI['meanBlue'], color='blue', linewidth=1, marker='o', markersize=2)
+    axs[2].plot(modis_NDVI['Date'], modis_NDVI['meanGreen'], color='green', linewidth=1, marker='o', markersize=2)
+    axs[2].set_ylabel('MODIS\nsurface\nreflectance')
     
     axs[3].plot(pheno2['date'], pheno2['gcc'], color='lime', linewidth=0.5,
                 label='warrens 1')
@@ -264,7 +327,7 @@ def make_cool_plot():
     axs[3].plot(pheno4['date'], pheno4['gcc'], color='darkgreen', linewidth=0.5,
                 label='warrens fenced')
     axs[3].legend(loc='upper left', fontsize='xx-small', frameon=False)
-    axs[3].set_ylabel('Phenocam\ngreen chromatic\ncoordinate')
+    axs[3].set_ylabel('Phenocam\ngreen\nchromatic\ncoordinate')
 
     axs[4].bar(rain['Date'], rain['Rainfall_amount_millimetres'],
                color='blue', width=1)
@@ -293,11 +356,14 @@ def make_cool_plot():
     plt.savefig(r'satellite_phenocam_2022-2023.png', dpi=300)
 
 
-# Get MODIS data
+# Get MODIS FC data
 #extract_modis_fc()
 
-# Get Landsat data
+# Get Landsat FC data
 #extract_landsat_fc()
+
+# Get MODIS surface reflectance
+#extract_modis_refl()
 
 # Make cool plot
 make_cool_plot()

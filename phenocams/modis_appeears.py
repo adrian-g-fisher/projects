@@ -162,8 +162,43 @@ def monthly_mosaics():
                     infiles.qc = list(qcImages)
                     outfiles.gm = outImage
                     applier.apply(mask_cloud_and_make_medoid, infiles, outfiles, otherArgs=otherargs, controls=controls)
-                    
                     print("Created %s"%os.path.basename(outImage))
+                
+                if os.path.basename(outImage) == 'mod09a1061_sr_500m_202210.tif':
+                    print(os.path.basename(outImage))
+                    for inImage in srImages:
+                        print(os.path.basename(inImage))
+                    
+
+def make_mask_example():
+    qcImage = r'S:\aust\modis_surface_reflectance\MODIS_Terra_8day_MOD09A1-061_state\MOD09A1.061_sur_refl_state_500m_doy2022297_aid0001.tif'
+    
+    infiles = applier.FilenameAssociations()
+    outfiles = applier.FilenameAssociations()
+    otherargs = applier.OtherInputs()
+    controls = applier.ApplierControls()
+    controls.setStatsIgnore(0)
+    controls.setCalcStats(True)
+    controls.setOutputDriverName("GTiff")
+    infiles.qc = qcImage
+    outfiles.mask = r'S:\aust\modis_surface_reflectance\test.tif'
+    applier.apply(make_mask, infiles, outfiles, otherArgs=otherargs, controls=controls)
+
+
+def make_mask(info, inputs, outputs, otherargs):
+    qa = unpackqa.unpack_to_array(inputs.qc, product=MOD09A1_info)[0]
+    mask = np.zeros((qa.shape[0], qa.shape[1]), dtype=np.uint8)
+    mask[qa[:, :, 0] == 1] = 1 # cloud
+    mask[qa[:, :, 0] == 2] = 2 # mixed
+    mask[qa[:, :, 0] == 3] = 3 # assumed clear
+    mask[qa[:, :, 1] == 1] = 4 # cloud shadow
+    mask[qa[:, :, 4] == 1] = 5 # small cirrus
+    mask[qa[:, :, 4] == 2] = 6 # average cirrus
+    mask[qa[:, :, 4] == 3] = 7 # high cirrus
+    mask[qa[:, :, 5] == 1] = 8 # cloud
+    outputs.mask = np.array([mask])
+
 
 #stackbands()
-monthly_mosaics()
+#monthly_mosaics()
+#make_mask_example()

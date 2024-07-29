@@ -73,7 +73,7 @@ def calcStats(info, inputs, outputs, otherargs):
 
 inDir = r'S:\witchelina\seasonal_fractional_cover'
 outDir = r'S:\witchelina\annual_statistic_images'
-for y in range(1988, 2023):
+for y in range(1988, 2024):
     t1 = (y * 100) + 3
     t2 = (y * 100) + 12
     imageList = np.array(glob.glob(os.path.join(inDir, r'*_subset.tif')))
@@ -94,5 +94,6 @@ for y in range(1988, 2023):
                             'Bare_mean', 'Bare_stdev', 'Bare_min', 'Bare_max'])
     outfiles.stats = os.path.join(outDir, r'annual_stats_%i.tif'%y)
     
-    applier.apply(calcStats, infiles, outfiles, otherArgs=otherargs, controls=controls)
-    print('Created %s from %i images'%(outfiles.stats, len(imageList))
+    if os.path.exists(outfiles.stats) is False:
+        applier.apply(calcStats, infiles, outfiles, otherArgs=otherargs, controls=controls)
+        print('Created %s from %i images'%(outfiles.stats, len(imageList)))

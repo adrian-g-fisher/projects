@@ -12,7 +12,7 @@ artifical water.
     - Easting and northing
     - Paddock name
     - Distance to water
-    - PV/NPV/BS, mean/stdev/min/max, before/after grazing, annual (1988-2022)
+    - PV/NPV/BS, mean/stdev/min/max, before/after grazing, annual (1988-2023)
 """
 
 
@@ -147,11 +147,12 @@ def extract_sample_values(csvfile, sample_image, paddock_shapefile,
     infiles.beforeStats = beforeImage
     infiles.afterStats = afterImage
     infiles.annualImages = [os.path.join(annual_image_dir,
-                      'annual_stats_%i.tif'%year) for year in range(1988, 2023)]
+                      'annual_stats_%i.tif'%year) for year in range(1988, 2024)]
     otherargs.num = 0
     otherargs.ID2Name = ID2Name
     otherargs.csvfile = csvfile
     applier.apply(extractValues, infiles, outfiles, otherArgs=otherargs, controls=controls)
+    print("Extraction completed")
 
 
 # Hardcode all the input files and directories
@@ -187,8 +188,8 @@ layer.ResetReading()
 band_names = ['PV_mean', 'PV_stdev', 'PV_min', 'PV_max',
               'NPV_mean', 'NPV_stdev', 'NPV_min', 'NPV_max',
               'Bare_mean', 'Bare_stdev', 'Bare_min', 'Bare_max']
-dates = ['before_grazing', 'after_grazing'] + list(range(1988, 2023))
-csvfile = os.path.join(inDir, r'awp_analysis_epsg3577.csv')
+dates = ['before_grazing', 'after_grazing'] + list(range(1988, 2024))
+csvfile = os.path.join(inDir, r'awp_analysis_epsg3577_fixednodata.csv')
 header = 'ID,Easting,Northing,Paddock,Distance'
 for date in dates:
     for band in band_names:

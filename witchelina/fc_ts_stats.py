@@ -81,6 +81,14 @@ for (t1, t2) in [[198712, 202302], [199611, 200911], [201003, 202302]]:
     startList = np.array([int(os.path.basename(f).split('_')[2][1:7]) for f in imageList])
     endList = np.array([int(os.path.basename(f).split('_')[2][7:13]) for f in imageList])
     imageList = list(imageList[(startList >= t1) & (endList <= t2)])
+    
+    print(t1, t2)
+    for i in imageList:
+        print(i)
+    print('\n')
+    
+    
+    
     infiles = applier.FilenameAssociations()
     infiles.fc_list = imageList
     outfiles = applier.FilenameAssociations()
@@ -95,5 +103,5 @@ for (t1, t2) in [[198712, 202302], [199611, 200911], [201003, 202302]]:
                             'NPV_mean', 'NPV_stdev', 'NPV_min', 'NPV_max',
                             'Bare_mean', 'Bare_stdev', 'Bare_min', 'Bare_max'])
     outfiles.stats = os.path.join(outDir, r'timeseries_stats_%i%i.tif'%(t1, t2))
-    applier.apply(calcStats, infiles, outfiles, otherArgs=otherargs, controls=controls)
-    print('Created %s'%outfiles.stats)
+    #applier.apply(calcStats, infiles, outfiles, otherArgs=otherargs, controls=controls)
+    #print('Created %s'%outfiles.stats)

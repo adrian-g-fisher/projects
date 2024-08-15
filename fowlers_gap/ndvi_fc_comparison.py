@@ -27,6 +27,7 @@ def makeLandsatNDVI(info, inputs, outputs, otherargs):
     ndvi[red == 32767] = 2
     outputs.ndvi = np.array([ndvi]).astype(np.float32)
 
+
 def make_landsat_ndvi_images():
     srcDir = r"C:\Users\Adrian\Documents\fowlers_gap_ndvi\dbg"
     dstDir = r"C:\Users\Adrian\Documents\fowlers_gap_ndvi\ndvi"
@@ -70,12 +71,14 @@ def NDVIvsPV(info, inputs, outputs, otherargs):
     rsquared = r**2
     pred = intercept + slope * ndvi
     rmse = np.sqrt(np.mean((pv - pred)**2))
-    ax.text(-0.95, 95, 'y = %.2f + %.2fx'%(intercept, slope), fontsize=8)
-    ax.text(-0.95, 90, '$r^2$ = %.2f'%rsquared, fontsize=8)
-    ax.text(-0.95, 85, 'RMSE = %.2f'%rmse, fontsize=8)
-    ax.text(-0.95, 80, 'n = %i'%pv.size, fontsize=8)
+    ax.text(-0.95, 95, 'y = %.2f + %.2fx'%(intercept, slope), fontsize=8, bbox={"ec":"white", "fc": "white", "pad": 0})
+    ax.text(-0.95, 88, '$r^2$ = %.2f'%rsquared, fontsize=8, bbox={"ec":"white", "fc": "white", "pad": 0})
+    ax.text(-0.95, 81, 'RMSE = %.2f'%rmse, fontsize=8, bbox={"ec":"white", "fc": "white", "pad": 0})
+    ax.text(-0.95, 74, 'n = %i'%pv.size, fontsize=8, bbox={"ec":"white", "fc": "white", "pad": 0})
     plt.savefig(otherargs.plot, dpi=300)
     plt.close()
+    otherargs.ndvi.append(ndvi)
+    otherargs.pv.append(pv)
     
 
 def compare_landsat_ndvi_pv():
@@ -83,6 +86,8 @@ def compare_landsat_ndvi_pv():
     subset = r"C:\Users\Adrian\Documents\fowlers_gap_ndvi\l8olre_p096r081_20160928_dbg_subset.img"
     ndviDir = r"C:\Users\Adrian\Documents\fowlers_gap_ndvi\ndvi"
     fcDir = r"C:\Users\Adrian\Documents\fowlers_gap_ndvi\dil"
+    NDVI = []
+    PV = []
     for i, ndvi_image in enumerate(glob.glob(os.path.join(ndviDir, "*.img"))):
         fc_image = os.path.join(fcDir, os.path.basename(ndvi_image).replace("_dbgm4_ndvi", "_dilm4"))
         infiles = applier.FilenameAssociations()
@@ -98,7 +103,31 @@ def compare_landsat_ndvi_pv():
         controls.setReferenceImage(infiles.aoi)
         controls.setWindowXsize(1002)
         controls.setWindowYsize(1002)
+        otherargs.ndvi = NDVI
+        otherargs.pv = PV
         applier.apply(NDVIvsPV, infiles, outfiles, otherArgs=otherargs, controls=controls)
+        
+    ndvi = np.concatenate(otherargs.ndvi)
+    pv = np.concatenate(otherargs.pv)
+    fig = plt.figure()
+    fig.set_size_inches((3, 3))
+    ax = plt.axes([0.2, 0.2, 0.7, 0.7])
+    h = ax.hist2d(ndvi, pv, bins=[80, 80], range=[[-1, 1], [0, 100]], norm=mpl.colors.LogNorm())
+    ax.set_xlabel('NDVI')            
+    ax.set_ylabel('PV (%)')
+    ax.set_xlim([-1, 1])
+    ax.set_ylim([0, 100])
+    (slope, intercept, r, p, se) = stats.linregress(ndvi, pv)
+    ax.plot([-1, 1], [-slope+intercept, slope+intercept], ls='-', c='r', lw=0.5)
+    rsquared = r**2
+    pred = intercept + slope * ndvi
+    rmse = np.sqrt(np.mean((pv - pred)**2))
+    ax.text(-0.95, 95, 'y = %.2f + %.2fx'%(intercept, slope), fontsize=8, bbox={"ec":"white", "fc": "white", "pad": 0})
+    ax.text(-0.95, 88, '$r^2$ = %.2f'%rsquared, fontsize=8, bbox={"ec":"white", "fc": "white", "pad": 0})
+    ax.text(-0.95, 81, 'RMSE = %.2f'%rmse, fontsize=8, bbox={"ec":"white", "fc": "white", "pad": 0})
+    ax.text(-0.95, 74, 'n = %i'%pv.size, fontsize=8, bbox={"ec":"white", "fc": "white", "pad": 0})
+    plt.savefig(r"C:\Users\Adrian\Documents\fowlers_gap_ndvi\plots\total_ndvi_pv.png", dpi=300)
+    plt.close()
 
 
 def makeDroneNDVI(info, inputs, outputs, otherargs):
@@ -204,15 +233,52 @@ def plot_landsat_vs_drone():
     rsquared = r**2
     pred = intercept + slope * d['drone_ndvi']
     rmse = np.sqrt(np.mean((d['landsat_ndvi'] - pred)**2))
-    ax.text(0.01, 0.33, '$r^2$ = %.2f'%rsquared, fontsize=8)
-    ax.text(0.01, 0.31, 'RMSE = %.2f'%rmse, fontsize=8)
-    ax.text(0.01, 0.29, 'n = %i'%d['drone_ndvi'].size, fontsize=8)
+    ax.text(0.01, 0.33, 'y = %.2f + %.2fx'%(intercept, slope), fontsize=8)
+    ax.text(0.01, 0.31, '$r^2$ = %.2f'%rsquared, fontsize=8)
+    ax.text(0.01, 0.29, 'RMSE = %.2f'%rmse, fontsize=8)
+    ax.text(0.01, 0.27, 'n = %i'%d['drone_ndvi'].size, fontsize=8)
     plt.savefig(output, dpi=300)
     plt.close()
+
+
+def makeDronePV(info, inputs, outputs, otherargs):
+    """
+    """
+    ndvi = inputs.ndvi[0]
+    nodata = (ndvi == 2)
+    pv = (90.71*ndvi) - 5.61
+    pv[pv < 0] = 0
+    pv[pv > 100] = 100
+    pv[ndvi == 2] = 255
+    outputs.pv = np.array([pv]).astype(np.uint8)
+
+
+def make_drone_pv_images():
+    droneList = ['S:\\fowlers_gap\\imagery\\drone\\2023\\202303\\mosaics\\conservation_control\\conservation_control_20230318_multiband.tif',
+                 'S:\\fowlers_gap\\imagery\\drone\\2023\\202303\\mosaics\\conservation_exclosure\\conservation_exclosure_20230318_multiband.tif',
+                 'S:\\fowlers_gap\\imagery\\drone\\2023\\202303\\mosaics\\warrens_control\\warrens_control_20230318_multiband.tif',
+                 'S:\\fowlers_gap\\imagery\\drone\\2023\\202303\\mosaics\\warrens_exclosure\\warrens_exclosure_20230318_multiband.tif']
+    
+    ndviDir = r"C:\Users\Adrian\Documents\fowlers_gap_ndvi\drone_ndvi"
+    pvDir = r"C:\Users\Adrian\Documents\fowlers_gap_ndvi\drone_pv"
+    for inimage in droneList:
+        ndvi_image = os.path.join(ndviDir, os.path.basename(inimage).replace(".tif", "_ndvi.img"))
+        pv_image = os.path.join(pvDir, os.path.basename(inimage).replace(".tif", "_pv.img"))
+        if os.path.exists(pv_image) is False:
+            infiles = applier.FilenameAssociations()
+            infiles.ndvi = ndvi_image
+            outfiles = applier.FilenameAssociations()
+            outfiles.pv = pv_image
+            otherargs = applier.OtherInputs()
+            controls = applier.ApplierControls()
+            controls.setStatsIgnore(255)
+            controls.setCalcStats(True)
+            applier.apply(makeDronePV, infiles, outfiles, otherArgs=otherargs, controls=controls)
 
 
 #make_landsat_ndvi_images()
 #compare_landsat_ndvi_pv()
 #make_drone_ndvi_images()
 #scale_drone_to_landsat()
-plot_landsat_vs_drone()
+#plot_landsat_vs_drone()
+make_drone_pv_images()

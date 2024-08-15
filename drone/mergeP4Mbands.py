@@ -34,6 +34,10 @@ def mergeBands(projName, inDir, outDir):
     for i in range(len(bands)):
         band = outds.GetRasterBand(i+1)
         band.SetDescription(bands[i])
+    
+    gdal.SetConfigOption("COMPRESS_OVERVIEW", "DEFLATE")
+    outds.BuildOverviews()
+    
     os.remove(VRT)
     print("Processing completed")
 

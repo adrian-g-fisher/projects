@@ -147,6 +147,18 @@ def make_drone_ndvi_images():
                  'S:\\fowlers_gap\\imagery\\drone\\2023\\202303\\mosaics\\conservation_exclosure\\conservation_exclosure_20230318_multiband.tif',
                  'S:\\fowlers_gap\\imagery\\drone\\2023\\202303\\mosaics\\warrens_control\\warrens_control_20230318_multiband.tif',
                  'S:\\fowlers_gap\\imagery\\drone\\2023\\202303\\mosaics\\warrens_exclosure\\warrens_exclosure_20230318_multiband.tif']
+                 'S:\\fowlers_gap\\imagery\\drone\\2024\\202403_ausplots\\conservation\\conausplot_20240321_multiband.tif',
+                 'S:\\fowlers_gap\\imagery\\drone\\2024\\202403_ausplots\\emuexclosure\\emuausplot_20240323_multiband.tif',
+                 'S:\\fowlers_gap\\imagery\\drone\\2024\\202403_ausplots\\southsandstone\\southsandausplot_20240322_multiband.tif',
+                 'S:\\fowlers_gap\\imagery\\drone\\2024\\202403_ausplots\\emugrazed\\emugrazedausplot_20240322_multiband.tif',
+                 'S:\\fowlers_gap\\imagery\\drone\\2024\\202403_exclosures\\mosaics\\concon_20240310_multiband.tif',
+                 'S:\\fowlers_gap\\imagery\\drone\\2024\\202403_exclosures\\mosaics\\conex_20240310_multiband.tif',
+                 'S:\\fowlers_gap\\imagery\\drone\\2024\\202403_exclosures\\mosaics\\warcon_20240310_multiband.tif',
+                 'S:\\fowlers_gap\\imagery\\drone\\2024\\202403_exclosures\\mosaics\\warex_20240311_multiband.tif',
+                 'S:\\fowlers_gap\\imagery\\drone\\2022\\p4m_conausplot_20220514\\p4m_conausplot_20220514_multiband.tif',
+                 'S:\\fowlers_gap\\imagery\\drone\\2022\\p4m_emuausplot_20220512\\p4m_emuausplot_20220512_multiband.tif',
+                 'S:\\fowlers_gap\\imagery\\drone\\2022\\p4m_fg03_20220513\\p4m_fg03_20220513_multiband.tif',
+                 
     
     dstDir = r"C:\Users\Adrian\Documents\fowlers_gap_ndvi\drone_ndvi"
     for inimage in droneList:

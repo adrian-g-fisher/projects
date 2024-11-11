@@ -3,6 +3,10 @@
 
 Makes a timelapse video from daily images
 
+conda create -c conda-forge -n pheno numpy pillow matplotlib scipy moviepy
+
+conda activate pheno
+
 """
 
 import argparse
@@ -14,7 +18,7 @@ import datetime
 from moviepy.video.io import ImageSequenceClip
 
 
-def main(baseDir, outDir, fps):
+def main(baseDir, outDir, fps, imageDirName):
     """
     """
     for siteDir in glob.glob(os.path.join(baseDir, '*')):
@@ -23,10 +27,10 @@ def main(baseDir, outDir, fps):
         videofile = os.path.join(outDir, r'%s_daily_timelapse.mp4'%site)
         
         # Get image list
-        imageDir = os.path.join(siteDir, 'images')
-        imageList = glob.glob(os.path.join(imageDir, '*.JPG'))
+        imageDir = os.path.join(siteDir, imageDirName)
+        imageList = glob.glob(os.path.join(imageDir, '**/*.JPG'), recursive=True)
         imageList = np.array(imageList)
-        
+
         # Get datetime list
         dates = []
         times = []
@@ -75,8 +79,10 @@ def getCmdargs():
                    help=("Input directory with subdirectories for each camera"))
     p.add_argument("-o", "--outDir", dest="outDir", default=None,
                    help=("Output directory for video files"))
-    p.add_argument("-f", "--fps", dest="fps", default=1,
-                   help=("Frames per second (default=1)"))
+    p.add_argument("-f", "--fps", dest="fps", default=4,
+                   help=("Frames per second (default=4)"))
+    p.add_argument("-m", "--imageDir", dest="imageDir", default='images',
+                   help=("Name of directory with images (default='images')")) 
     cmdargs = p.parse_args()
     if (cmdargs.inDir is None and cmdargs.outDir is None):
         p.print_help()
@@ -87,4 +93,4 @@ def getCmdargs():
 
 if __name__ == "__main__":
     cmdargs = getCmdargs()
-    main(cmdargs.inDir, cmdargs.outDir, float(cmdargs.fps))
+    main(cmdargs.inDir, cmdargs.outDir, float(cmdargs.fps), cmdargs.imageDir)

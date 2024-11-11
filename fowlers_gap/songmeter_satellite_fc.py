@@ -93,8 +93,7 @@ def extract_modis_fc():
     """
     Uses RIOS to extract monthly MODIS fractional cover for sample polygons.
     """
-    shapefile = r'C:\Users\Adrian\OneDrive - UNSW\Documents\songmeter_analysis\conservation_warrens_wgs84.shp'
-    baseRaster = r'C:\Users\Adrian\OneDrive - UNSW\Documents\grant_applications\2024_01_discovery_brown_food_webs\modis_test\modis_fc_200101.tif'
+    polys = r'C:\Users\Adrian\OneDrive - UNSW\Documents\songmeter_analysis\polys_wgs84.tif'
     outdir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\songmeter_analysis' 
     outfile = os.path.join(outdir, 'modis_fractionalcover.csv')
     with open(outfile, 'w') as f:
@@ -105,16 +104,18 @@ def extract_modis_fc():
         year = imagefile.replace(r".tif", "").split(r".")[-4][1:]
         month = imagefile.replace(r".tif", "").split(r".")[-3]
         date = year + month
+        
+        print(date)
+        
         infiles = applier.FilenameAssociations()
         outfiles = applier.FilenameAssociations()
         otherargs = applier.OtherInputs()
         controls = applier.ApplierControls()
         infiles.fc = imagefile
-        infiles.base = baseRaster
-        infiles.poly = shapefile
+        infiles.poly = polys
         otherargs.date = date
         otherargs.outdir = outdir
-        controls.setReferenceImage(baseRaster)
+        controls.setReferenceImage(polys)
         controls.setFootprintType(applier.BOUNDS_FROM_REFERENCE)
         controls.setWindowXsize(100)
         controls.setWindowYsize(100)
@@ -419,7 +420,7 @@ def fit_pheno_curve():
     
 
 # Get MODIS FC data
-#extract_modis_fc()
+extract_modis_fc()
 
 # Get Landsat FC data
 #extract_landsat_fc()
@@ -431,5 +432,5 @@ def fit_pheno_curve():
 #fit_pheno_curve()
 
 # Make cool plot
-make_cool_plot()
+#make_cool_plot()
 

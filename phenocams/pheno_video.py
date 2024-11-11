@@ -26,47 +26,49 @@ def main(baseDir, outDir, fps, imageDirName):
         print(site)
         videofile = os.path.join(outDir, r'%s_daily_timelapse.mp4'%site)
         
-        # Get image list
-        imageDir = os.path.join(siteDir, imageDirName)
-        imageList = glob.glob(os.path.join(imageDir, '**/*.JPG'), recursive=True)
-        imageList = np.array(imageList)
+        if os.path.exists(videofile) is False:
+            
+            # Get image list
+            imageDir = os.path.join(siteDir, imageDirName)
+            imageList = glob.glob(os.path.join(imageDir, '**/*.JPG'), recursive=True)
+            imageList = np.array(imageList)
 
-        # Get datetime list
-        dates = []
-        times = []
-        for i in imageList:
-            im = Image.open(i)
-            exifdata = im.getexif()
-            for tag_id in exifdata:
-                tag = ExifTags.TAGS.get(tag_id, tag_id)
-                if tag == r'DateTime':
-                    dt = exifdata.get(tag_id)
-                    if isinstance(dt, bytes):
-                        dt = dt.decode()
-            (d, t) = dt.split(r' ')
-            d = d.replace(r':', r'')
-            d = datetime.date(year=int(d[:4]), month=int(d[4:6]), day=int(d[6:]))
-            t = datetime.datetime(year=d.year, month=d.month, day=d.day,
+            # Get datetime list
+            dates = []
+            times = []
+            for i in imageList:
+                im = Image.open(i)
+                exifdata = im.getexif()
+                for tag_id in exifdata:
+                    tag = ExifTags.TAGS.get(tag_id, tag_id)
+                    if tag == r'DateTime':
+                        dt = exifdata.get(tag_id)
+                        if isinstance(dt, bytes):
+                            dt = dt.decode()
+                (d, t) = dt.split(r' ')
+                d = d.replace(r':', r'')
+                d = datetime.date(year=int(d[:4]), month=int(d[4:6]), day=int(d[6:]))
+                t = datetime.datetime(year=d.year, month=d.month, day=d.day,
                                   hour=int(t[:2]), minute=int(t[3:5]), second=int(t[6:]))
-            dates.append(d)
-            times.append(t)
-        dates = np.array(dates)
-        times = np.array(times)
+                dates.append(d)
+                times.append(t)
+            dates = np.array(dates)
+            times = np.array(times)
         
-        # For each day select the image closest to 12:00
-        selected_images = []
-        for d in np.unique(dates):
-            midday = datetime.datetime(year=d.year, month=d.month, day=d.day,
+            # For each day select the image closest to 12:00
+            selected_images = []
+            for d in np.unique(dates):
+                midday = datetime.datetime(year=d.year, month=d.month, day=d.day,
                                        hour=12, minute=0, second=0)
-            day_times = times[dates == d]
-            dif = np.array([abs((dtime - midday).total_seconds()) for dtime in day_times])
-            selected_time = day_times[dif == min(dif)]
-            selected_image = imageList[times == selected_time][0]
-            selected_images.append(selected_image)
+                day_times = times[dates == d]
+                dif = np.array([abs((dtime - midday).total_seconds()) for dtime in day_times])
+                selected_time = day_times[dif == min(dif)]
+                selected_image = imageList[times == selected_time][0]
+                selected_images.append(selected_image)
         
-        # Make video
-        clip = ImageSequenceClip.ImageSequenceClip(selected_images, fps=fps)
-        clip.write_videofile(videofile, fps=fps)
+            # Make video
+            clip = ImageSequenceClip.ImageSequenceClip(selected_images, fps=fps)
+            clip.write_videofile(videofile, fps=fps)
 
 
 def getCmdargs():

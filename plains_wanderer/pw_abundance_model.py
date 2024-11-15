@@ -103,11 +103,20 @@ def predict_PW(fieldseason_image, previous_1_season_image, previous_2_season_ima
     controls.setProgress(cuiprogress.CUIProgressBar())
     applier.apply(apply_pw_model, infiles, outfiles, otherArgs=otherargs, controls=controls)
 
-
+# Start processing at 2000
 # Get each seasonal landsat fractional cover image and apply the PW abundance model
 imagedir = r"S:\hay_plain\landsat\landsat_seasonal_fractional_cover"
 imageList = np.array(glob.glob(os.path.join(imagedir, r"*.tif")))
+
+dateList = []
 for image in imageList:
+    y = int(os.path.basename(image).split("_")[2][1:5])
+    m = int(os.path.basename(image).split("_")[2][5:7])
+    dateList.append(datetime.date(year=y, month=m, day=1))
+dateList = np.array(dateList)
+
+startDate = datetime.date(year=2000, month=1, day=1)
+for image in imageList[(dateList >= startDate)]:
     y = int(os.path.basename(image).split("_")[2][1:5])
     m = int(os.path.basename(image).split("_")[2][5:7])
     

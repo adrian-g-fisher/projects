@@ -115,8 +115,10 @@ for image in imageList:
     dateList.append(datetime.date(year=y, month=m, day=1))
 dateList = np.array(dateList)
 
-startDate = datetime.date(year=2000, month=1, day=1)
-for image in imageList[(dateList >= startDate)]:
+#startDate = datetime.date(year=2000, month=1, day=1)
+#for image in imageList[(dateList >= startDate)]:
+    
+for image in imageList:
     y = int(os.path.basename(image).split("_")[2][1:5])
     m = int(os.path.basename(image).split("_")[2][5:7])
     
@@ -142,7 +144,7 @@ for image in imageList[(dateList >= startDate)]:
         start_m = 9
         end_y = y - 1
         end_m = 11
-    if m == 6:
+    elif m == 6:
         start_y = y - 1
         start_m = 12
         end_y = y
@@ -158,7 +160,10 @@ for image in imageList[(dateList >= startDate)]:
                                                                            end_y,
                                                                            end_m))
     
-    # If previous image exists, then run model
+    # If previous image exists, and output file is not present, then run the model
     if os.path.exists(prev_1s_image) is True and os.path.exists(prev_2s_image) is True:
-        print(os.path.basename(image))
-        predict_PW(image, prev_1s_image, prev_2s_image)
+        outfile = os.path.join(r'S:\hay_plain\pw_abundance_model',
+                               os.path.basename(image).replace(".tif", "_PW.tif"))
+        if os.path.exists(outfile) is False:
+            print(os.path.basename(image))
+            predict_PW(image, prev_1s_image, prev_2s_image)

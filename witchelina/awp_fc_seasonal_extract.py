@@ -12,7 +12,7 @@ artifical water.
     - Easting and northing
     - Paddock name
     - Distance to water
-    - PV/NPV/BS, mean/stdev/min/max, annual (1988-2023)
+    - Seasonal PV/NPV/BS (1988-2023)
 """
 
 
@@ -111,8 +111,8 @@ def extractValues(info, inputs, outputs, otherargs):
             distance = inputs.distance[0][labels == ID]
             
             stats = []
-            bands = inputs.annualImages.size
-            for y in range(bands):
+            years = len(inputs.annualImages)
+            for y in range(years):
                 statsimage = inputs.annualImages[y]
                 for b in range(12):
                     stats.append(statsimage[b][labels == ID])
@@ -128,8 +128,7 @@ def extractValues(info, inputs, outputs, otherargs):
 
 
 def extract_sample_values(csvfile, sample_image, paddock_shapefile,
-                          distance_image, ID2Name, beforeImage, afterImage,
-                          annual_image_dir):
+                          distance_image, ID2Name, annual_image_dir):
     """
     """
     infiles = applier.FilenameAssociations()
@@ -157,7 +156,7 @@ paradise_shapefile = os.path.join(inDir, r'paradise_epsg3577.shp')
 paddock_shapefile = os.path.join(inDir, r'paradise_paddocks_epsg3577.shp')
 paddock_buffer = os.path.join(inDir, r'paradise_paddocks_lines_buffer100m_epsg3577.shp') # 100 m buffer
 landform_image = os.path.join(inDir, r'landforms_optimum.img') # 1 = chenopods
-annual_image_dir = r'C:\Users\Adrian\Documents\temp\annual_statistic_images' # tif files
+seasonal_image_dir = r'S:\witchelina\seasonal_fractional_cover' # tif files
 
 # Create distance to water raster
 landsat_image = os.path.join(inDir, r'timeseries_stats_198712202302.tif')
@@ -180,12 +179,13 @@ for feature in layer:
 layer.ResetReading()
 
 # Extract sample values to CSV
-band_names = ['PV_mean', 'PV_stdev', 'PV_min', 'PV_max',
-              'NPV_mean', 'NPV_stdev', 'NPV_min', 'NPV_max',
-              'Bare_mean', 'Bare_stdev', 'Bare_min', 'Bare_max']
-dates = list(range(1988, 2024))
-csvfile = os.path.join(inDir, r'awp_analysis_epsg3577_1988_2023.csv')
+band_names = ['PV, 'NPV', 'Bare']
+csvfile = os.path.join(inDir, r'awp_seasonal_analysis_epsg3577_1988_2023.csv')
 header = 'ID,Easting,Northing,Paddock,Distance'
+
+# Get seasonal dates
+
+
 for date in dates:
     for band in band_names:
          colname = '%s_%s'%(band, str(date))
@@ -194,5 +194,4 @@ for date in dates:
 with open(csvfile, 'w') as f:
     f.write('%s\n'%header)
 
-extract_sample_values(csvfile, sample_image, paddock_shapefile, distance_image,
-                      ID2Name, beforeImage, afterImage, annual_image_dir)
+extract_sample_values(csvfile, sample_image, paddock_shapefile, distance_image, ID2Name, annual_image_dir)

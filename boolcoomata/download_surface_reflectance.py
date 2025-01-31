@@ -7,7 +7,7 @@ from datetime import datetime
 
 # Inputs and outputs
 polygon = r'S:\boolcoomata\shapefiles\boolcoomatta_aoi_albers.shp'
-dstDir = r'S:\boolcoomata\seasonal_fractional_cover'
+dstDir = r'S:\boolcoomata\seasonal_surface_reflectance'
 
 # Read in shapefile and get bounding box
 basename = os.path.basename(polygon).replace(r'.shp', '')
@@ -21,7 +21,7 @@ ds = None
 start = 198712198802
 end = 202406202408
 dateList = []
-for y1 in range(1987, 2025):
+for y1 in range(2022, 2025):
     for m1 in range(3, 13, 3):
         if m1 < 12:
             y2 = y1
@@ -34,12 +34,10 @@ for y1 in range(1987, 2025):
             dateList.append(date)
 
 # For each date make the image subset
-# Use either the QLD or TERN server
-#srcDir = r'/vsicurl/http://qld.auscover.org.au/public/data/landsat/seasonal_fractional_cover/fractional_cover/sa/'
-srcDir = r'/vsicurl/https://data.tern.org.au/rs/public/data/landsat/seasonal_fractional_cover/fractional_cover/sa/'
-
+srcDir = r'/vsicurl/https://data.tern.org.au/rs/public/data/remote-sensing/landsat/surface_reflectance/sa/'
+                  
 for date in dateList:
-    srcImage = r'lztmre_sa_m%i_dima2.tif'%date
+    srcImage = r'lzolre_sa_m%i_dbia2.tif'%date
     srcFile = os.path.join(srcDir, srcImage)
     dstFile = os.path.join(dstDir, srcImage.replace(r'.tif', r'_subset.tif'))
     

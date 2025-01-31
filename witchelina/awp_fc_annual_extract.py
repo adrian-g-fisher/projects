@@ -111,8 +111,8 @@ def extractValues(info, inputs, outputs, otherargs):
             distance = inputs.distance[0][labels == ID]
             
             stats = []
-            bands = inputs.annualImages.size
-            for y in range(bands):
+            years = len(inputs.annualImages)
+            for y in range(years):
                 statsimage = inputs.annualImages[y]
                 for b in range(12):
                     stats.append(statsimage[b][labels == ID])
@@ -128,8 +128,7 @@ def extractValues(info, inputs, outputs, otherargs):
 
 
 def extract_sample_values(csvfile, sample_image, paddock_shapefile,
-                          distance_image, ID2Name, beforeImage, afterImage,
-                          annual_image_dir):
+                          distance_image, ID2Name, annual_image_dir):
     """
     """
     infiles = applier.FilenameAssociations()
@@ -194,5 +193,4 @@ for date in dates:
 with open(csvfile, 'w') as f:
     f.write('%s\n'%header)
 
-extract_sample_values(csvfile, sample_image, paddock_shapefile, distance_image,
-                      ID2Name, beforeImage, afterImage, annual_image_dir)
+extract_sample_values(csvfile, sample_image, paddock_shapefile, distance_image, ID2Name, annual_image_dir)

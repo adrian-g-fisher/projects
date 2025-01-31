@@ -165,7 +165,9 @@ for cover in ['PV', 'NPV', 'Bare']:
             ax = plt.axes([0.2, 0.2, 0.7, 0.7])
             ax.set_facecolor('k')
             ax.set_title(date, fontsize=10)
+            
             h = ax.hist2d(d[~np.isnan(fc)], fc[~np.isnan(fc)], bins=[80, 80], range=[[0, 8], [0, 100]], cmap='Greys')
+            
             ax.set_xlabel('Distance to water point (km)')            
             ax.set_ylabel('%s %s (%%)'%(stat.capitalize(), cover))
             ax.set_xlim([0, 8])

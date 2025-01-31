@@ -15,7 +15,7 @@ import numpy as np
 
 # Construct dateList for desired temporal extent
 startDate = 200101
-endDate = 202408
+endDate = 202412
 dateList = []
 for y in range(int(str(startDate)[0:4]), int(str(endDate)[0:4])+1):
     for m in range(1, 13):

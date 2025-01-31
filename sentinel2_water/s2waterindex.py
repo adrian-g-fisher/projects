@@ -15,17 +15,27 @@ import numpy as np
 from rios import applier
 
 
+#def make_wi_image(info, inputs, outputs, otherargs):
+#    """
+#    This calculates the water index.
+#    """
+#    green = inputs.sr[2].astype(np.float32)/10000.0
+#    red = inputs.sr[3].astype(np.float32)/10000.0
+#    nir = inputs.sr[7].astype(np.float32)/10000.0
+#    swir1 = inputs.sr[9].astype(np.float32)/10000.0
+#    swir2 = inputs.sr[10].astype(np.float32)/10000.0
+#    c = [1.7204, 171, 3, -70, -45, -71]
+#    wi = (c[0] + c[1]*green + c[2]*red + c[3]*nir + c[4]*swir1 + c[5]*swir2)
+#   outputs.wi = np.array([wi])
+
+
 def make_wi_image(info, inputs, outputs, otherargs):
     """
     This calculates the water index.
     """
-    green = inputs.sr[1].astype(np.float32)/10000.0
-    red = inputs.sr[2].astype(np.float32)/10000.0
-    nir = inputs.sr[6].astype(np.float32)/10000.0
-    swir1 = inputs.sr[7].astype(np.float32)/10000.0
-    swir2 = inputs.sr[8].astype(np.float32)/10000.0
-    c = [1.7204, 171, 3, -70, -45, -71]
-    wi = (c[0] + c[1]*green + c[2]*red + c[3]*nir + c[4]*swir1 + c[5]*swir2)
+    green = inputs.sr[2].astype(np.float32)/10000.0
+    swir2 = inputs.sr[10].astype(np.float32)/10000.0
+    wi = (green - swir2) / (green + swir2)
     outputs.wi = np.array([wi])
 
 

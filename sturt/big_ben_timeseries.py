@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-conda create -n rios rios=1.4.17 numpy scipy matplotlib
+conda create -n geo rios=1.4.17 numpy scipy matplotlib statsmodels
 conda activate rios
 
 Extracts MODIS fractional cover for Big Ben dune

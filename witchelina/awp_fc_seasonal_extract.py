@@ -12,7 +12,7 @@ artifical water.
     - Easting and northing
     - Paddock name
     - Distance to water
-    - Seasonal PV/NPV/BS (1988-2023)
+    - Seasonal PV/NPV/BS (198712-202411)
 """
 
 
@@ -24,6 +24,7 @@ import numpy as np
 from osgeo import ogr
 from rios import applier, cuiprogress
 from scipy import ndimage
+ogr.UseExceptions()
 
 
 def makeDistance(info, inputs, outputs, otherargs):
@@ -106,29 +107,37 @@ def extractValues(info, inputs, outputs, otherargs):
         for ID in range(1, num_samples+1):
             paddock_id = inputs.paddocks[0][labels == ID][0]
             paddock_name = otherargs.ID2Name[paddock_id]
-            easting = eastings[labels == ID]
-            northing = northings[labels == ID]
-            distance = inputs.distance[0][labels == ID]
+            easting = eastings[labels == ID][0]
+            northing = northings[labels == ID][0]
+            distance = inputs.distance[0][labels == ID][0]
             
             stats = []
-            years = len(inputs.annualImages)
-            for y in range(years):
-                statsimage = inputs.annualImages[y]
-                for b in range(12):
-                    stats.append(statsimage[b][labels == ID])
+            images = len(inputs.fcImages)
+            for i in range(images):
+                seasonImage = inputs.fcImages[i]
+                for b in range(3):
+                    stats.append(seasonImage[b][labels == ID][0])
             
             with open(otherargs.csvfile, 'a') as f:
                 line = '%i,%i,%i,%s,%0.1f'%(ID+otherargs.num,
                                               easting, northing,
                                               paddock_name, distance)
                 for s in stats:
+                    if s == 0:
+                        s = 255
+                    else:
+                        s = s - 100
+                        if s < 0:
+                            s = 0
+                        if s > 100:
+                            s = 100
                     line = '%s,%.2f'%(line, s)
                 f.write('%s\n'%line)
         otherargs.num += num_samples
 
 
 def extract_sample_values(csvfile, sample_image, paddock_shapefile,
-                          distance_image, ID2Name, annual_image_dir):
+                          distance_image, ID2Name, seasonal_image_list):
     """
     """
     infiles = applier.FilenameAssociations()
@@ -140,8 +149,7 @@ def extract_sample_values(csvfile, sample_image, paddock_shapefile,
     infiles.samples = sample_image
     infiles.distance = distance_image
     infiles.paddocks = paddock_shapefile
-    infiles.annualImages = [os.path.join(annual_image_dir,
-                      'annual_stats_%i.tif'%year) for year in range(1988, 2024)]
+    infiles.fcImages = seasonal_image_list
     otherargs.num = 0
     otherargs.ID2Name = ID2Name
     otherargs.csvfile = csvfile
@@ -150,7 +158,7 @@ def extract_sample_values(csvfile, sample_image, paddock_shapefile,
 
 
 # Hardcode all the input files and directories
-inDir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\awp_grazing_pressure\redo_analyses_epsg3577'
+inDir = r'D:\witchelina\3_seasonal_analyses'
 awp_shapefile = os.path.join(inDir, r'awp_epsg3577.shp')
 paradise_shapefile = os.path.join(inDir, r'paradise_epsg3577.shp')
 paddock_shapefile = os.path.join(inDir, r'paradise_paddocks_epsg3577.shp')
@@ -177,16 +185,32 @@ for feature in layer:
     Name = feature.GetField("Name")
     ID2Name[ID] = Name
 layer.ResetReading()
+dataSource = None
 
 # Extract sample values to CSV
-band_names = ['PV, 'NPV', 'Bare']
-csvfile = os.path.join(inDir, r'awp_seasonal_analysis_epsg3577_1988_2023.csv')
+band_names = ['Bare', 'PV', 'NPV']
+csvfile = os.path.join(inDir, r'awp_seasonal_analysis_epsg3577_1987_2024.csv')
 header = 'ID,Easting,Northing,Paddock,Distance'
 
 # Get seasonal dates
+start = 198712198802
+end = 202409202411
+dateList = []
+imageList = []
+for y1 in range(1987, 2025):
+    for m1 in range(3, 13, 3):
+        if m1 < 12:
+            y2 = y1
+            m2 = m1 + 2
+        else:
+            y2 = y1 + 1
+            m2 = 2
+        date = int(r'%i%02d%i%02d'%(y1, m1, y2, m2))
+        if date >= start and date <= end:
+            dateList.append(date)
+            imageList.append(os.path.join(seasonal_image_dir, r'lztmre_sa_m%i_dima2_subset.tif'%date))
 
-
-for date in dates:
+for date in dateList:
     for band in band_names:
          colname = '%s_%s'%(band, str(date))
          header = '%s,%s'%(header, colname)
@@ -194,4 +218,4 @@ for date in dates:
 with open(csvfile, 'w') as f:
     f.write('%s\n'%header)
 
-extract_sample_values(csvfile, sample_image, paddock_shapefile, distance_image, ID2Name, annual_image_dir)
+extract_sample_values(csvfile, sample_image, paddock_shapefile, distance_image, ID2Name, imageList)

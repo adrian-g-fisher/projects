@@ -1,71 +1,19 @@
 """
-This processes the initial drone imagery captured across all grazing study sites
-at Boolcoomatta, Fowlers Gap, and Witchelina.
+This copies the drone imagery captured across all grazing study sites
+at Boolcoomatta, Fowlers Gap, and Witchelina onto the D drive.
 
-Subsequent data will use a separate script, to ensure outputs are aligned to the
-initial data by copying the LAZ file into the image directory and naming it
-align.laz
+1. Copies the initial data (the first survey for each site).
 
-outputs = ["project\\odm_dem\\dsm.tif",
-           "project\\odm_dem\\dtm.tif",
-           "project\\odm_georeferencing\\odm_georeferenced_model.laz",
-           "project\\odm_orthophoto\\odm_orthophoto.tif"]
-           
-orthomosaics have 6 bands
-    band 1 - Red
-    band 2 - Green
-    band 3 - Blue
-    band 4 - NIR
-    band 5 - Red-edge
-    band 6 - Alpha
+2. Copies subsequant data.
+
+Data processing is done using metashape scripts.
+
 """
 
 import os
 import sys
 import shutil
 import glob
-import subprocess
-from osgeo import gdal
-
-
-def rename_bands(inTif):
-    raster = gdal.Open(inTif, gdal.GA_Update)
-    raster.GetRasterBand(1).SetDescription('Red')
-    raster.GetRasterBand(2).SetDescription('Green')
-    raster.GetRasterBand(3).SetDescription('Blue')
-    raster.GetRasterBand(4).SetDescription('NIR')    
-    raster.GetRasterBand(5).SetDescription('RedEdge')
-    raster.GetRasterBand(5).SetDescription('Alpha')
-    raster = None
-
-
-def process_projects():
-    for inDir in glob.glob("D:\\drone_multispec\\odm_initial\\*"):
-        name = os.path.basename(inDir)
-        logfile = os.path.join(inDir, "project\\odm.log")
-        orthomosaic = os.path.join(inDir, "project\\odm_orthophoto\\odm_orthophoto.tif")
-        if os.path.exists(orthomosaic) is False:
-            print("Processing %s"%name)
-            cmd = ["docker", "run", "--rm", "-v", "%s:/datasets"%inDir,
-                   "--gpus", "all", "opendronemap/odm:gpu",
-                   "--project-path", "/datasets", "project",
-                   "--radiometric-calibration", "camera+sun",
-                   "--pc-quality", "high", "--sfm-algorithm", "planar",
-                   "--split", "800", "--split-overlap", "100"]
-            with open(logfile, "a") as output:
-                subprocess.run(cmd, stdout=output, stderr=output)
-            
-            # Remove the submodels folder to free space
-            #shutil.rmtree(os.path.join(inDir, "project\\submodels"))
-            
-            # Move and rename TIF, LAZ, DTM, DSM and LOG to main directory
-            
-            # Remove all sub folders
-            
-            # Rename band names in orthomosaic tif
-            #rename_bands(mosaic)
-            
-            sys.exit()
             
 
 def copy_images(nameDirList):
@@ -75,16 +23,15 @@ def copy_images(nameDirList):
         print(name)
         
         # Create project and images folders, and copy all images
-        dstDir = os.path.join("D:\\drone_multispec\\odm_initial", name)
+        dstDir = os.path.join("D:\\drone_multispec\\metashape_initial", name)
         if os.path.exists(dstDir) is False:
             os.mkdir(dstDir)
-            os.mkdir(os.path.join(dstDir, "project"))
-            os.mkdir(os.path.join(dstDir, "project\\images"))
+            os.mkdir(os.path.join(dstDir, "images"))
         
             # Copy images and rename to ensure names are unique
             for imageDir in glob.glob(os.path.join(srcDir, "*PLAN")):
                 for i in glob.glob(os.path.join(imageDir, "*.TIF")):
-                    outDir = os.path.join(dstDir, "project\\images")
+                    outDir = os.path.join(dstDir, "images")
                     outImage = "%s_%s"%(os.path.basename(imageDir), os.path.basename(i))
                     outImage = os.path.join(outDir, outImage)
                     if os.path.exists(outImage) is False:
@@ -118,8 +65,4 @@ nameDirList = [["p4m_bc1_20230317", "S:\\boolcoomata\\drone\\202303\\mosaics\\BO
                ["p4m_fp4_20250316", "D:\\drone_multispec\\raw\\202503\\20250316\\p4m_fp4_20250316"],
                ["p4m_fp5_20250316", "D:\\drone_multispec\\raw\\202503\\20250316\\p4m_fp5_20250316"]]
 
-# Copy data
-#copy_images(nameDirList)
-
-# Process data
-process_projects()
+copy_images(nameDirList)

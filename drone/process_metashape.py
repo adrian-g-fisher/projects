@@ -4,6 +4,8 @@ from the agisoft script using parts of the tern script.
  https://github.com/agisoft-llc/metashape-scripts/blob/master/src/samples/general_workflow.py
  https://github.com/ternaustralia/drone_metashape/blob/main/metashape_proc.py
 
+I also added a section to make the NIR band the master, as advised by Victoria
+Inman.
 
 To create the conda environment:
  - Download the installer
@@ -28,7 +30,7 @@ def process_project(projectDir, epsg):
     """
     project = os.path.basename(projectDir)
     image_folder = os.path.join(projectDir, "images")
-    output_folder = os.path.join(projectDir, "outputs_test")
+    output_folder = os.path.join(projectDir, "outputs")
     if os.path.exists(output_folder) is False:
         os.mkdir(output_folder)
     photos = glob.glob(os.path.join(image_folder, "*.TIF"))

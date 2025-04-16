@@ -28,7 +28,7 @@ def process_project(projectDir, epsg):
     """
     project = os.path.basename(projectDir)
     image_folder = os.path.join(projectDir, "images")
-    output_folder = os.path.join(projectDir, "outputs")
+    output_folder = os.path.join(projectDir, "outputs_test")
     if os.path.exists(output_folder) is False:
         os.mkdir(output_folder)
     photos = glob.glob(os.path.join(image_folder, "*.TIF"))
@@ -38,6 +38,15 @@ def process_project(projectDir, epsg):
     chunk = doc.addChunk()
     chunk.addPhotos(photos)
     doc.save()
+    
+    # Change master band to NIR rather than Blue
+    new_master = chunk.sensors[4]
+    for s in chunk.sensors:
+        s.master = None
+        s.fixed_rotation = False
+    for s in chunk.sensors:
+        s.master = new_master
+        s.fixed_rotation = True
     
     # Calibrate photos
     chunk.calibrateReflectance(use_reflectance_panels=False, use_sun_sensor=True)

@@ -243,5 +243,6 @@ for projectDir in dirList:
     projectDir = os.path.join(projectDir, 'outputs')
     lazFile = os.path.join(projectDir, '%s_mosaic_classified.laz'%project)
     mosaicImage = os.path.join(projectDir, '%s_mosaic.tif'%project)
-    print(lazFile)
-    process_laz(lazFile, mosaicImage)
+    if os.path.exists(lazFile):
+        print(lazFile)
+        process_laz(lazFile, mosaicImage)

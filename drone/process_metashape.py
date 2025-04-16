@@ -19,6 +19,7 @@ import os
 import sys
 import time
 import glob
+import shutil
 
 
 def process_project(projectDir, epsg):
@@ -105,11 +106,28 @@ def process_project(projectDir, epsg):
     
     # Export report
     chunk.exportReport(os.path.join(output_folder, '%s_report.pdf'%project))
-
+    
+    # Delete project folder
+    del doc
+    projDir = os.path.join(output_folder, '%s_project.files'%project)
+    shutil.rmtree(projDir)
+    
     print('Processing finished')
     
     
 # Hardcode
-projectDir = r"D:\drone_multispec\metashape_initial\p4m_bc1_20230317"
-epsg = "32754"
-process_project(projectDir, epsg)
+dirList = glob.glob(r"D:\drone_multispec\metashape_initial\*")
+site2epsg = {'b': '32754', 'w': '32753', 'f': '32754'}
+
+for projectDir in dirList:
+    project = os.path.basename(projectDir)
+    site = project.split('_')[1][0]
+    epsg = site2epsg[site]
+    
+    # Only run if output not present
+    outputDir = os.path.join(projectDir, 'outputs')
+    mosaic = os.path.join(outputDir, '%s_mosaic.tif'%project)
+    if os.path.exists(mosaic) is False:
+        process_project(projectDir, epsg)
+
+print('All processing finished')

@@ -26,7 +26,7 @@ import shutil
 
 def process_project(projectDir, epsg):
     """
-    Processes a singl drone survey project using metashape.
+    Processes a single drone survey project using metashape.
     """
     project = os.path.basename(projectDir)
     image_folder = os.path.join(projectDir, "images")
@@ -38,7 +38,7 @@ def process_project(projectDir, epsg):
     doc = Metashape.Document()
     doc.save(os.path.join(output_folder, '%s_project.psx'%project))
     chunk = doc.addChunk()
-    chunk.addPhotos(photos)
+    chunk.addPhotos(photos, load_xmp_accuracy=True)
     doc.save()
     
     # Change master band to NIR rather than Blue

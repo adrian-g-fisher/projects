@@ -127,7 +127,7 @@ def process_project(projectDir, epsg):
     
     
 # Hardcode
-dirList = glob.glob(r"D:\drone_multispec\metashape_initial\*")
+dirList = glob.glob(r"D:\grazing_study_drone_data\metashape_initial\*")
 site2epsg = {'b': '32754', 'w': '32753', 'f': '32754'}
 
 for projectDir in dirList:

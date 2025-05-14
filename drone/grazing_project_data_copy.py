@@ -16,6 +16,20 @@ import shutil
 import glob
 
 
+def remove_images(mainDir):
+    """
+    Removes all images folders from D to free up space
+    """
+    for srcDir in glob.glob(os.path.join(mainDir, "*")):
+        imageDir = os.path.join(srcDir, 'outputs')
+        if os.path.exists(imageDir):
+            print(imageDir)
+            shutil.rmtree(imageDir)
+
+remove_images(r"D:\grazing_study_drone_data\metashape_initial")
+
+sys.exit()
+
 def transfer_images():
     
     srcDir = r"S:\grazing_study_drone_data\metashape_initial"
@@ -126,16 +140,3 @@ subList = [["p4m_bc1_20240308", r"S:\boolcoomata\drone\202403\raw\20240308\p4m_b
 
 #copy_images(r"D:\drone_multispec\metashape_initial", initialList)
 #copy_images(r"D:\drone_multispec\metashape_subsequent", subList)
-
-
-def remove_images(mainDir):
-    """
-    Removes all images folders from D to free up space
-    """
-    for srcDir in glob.glob(os.path.join(mainDir, "*")):
-        imageDir = os.path.join(srcDir, 'images')
-        if os.path.exists(imageDir):
-            print(imageDir)
-            shutil.rmtree(imageDir)
-
-#remove_images(r"D:\drone_multispec\metashape_initial")

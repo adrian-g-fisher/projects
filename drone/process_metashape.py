@@ -41,14 +41,11 @@ def process_project(projectDir, epsg):
     chunk.addPhotos(photos, load_xmp_accuracy=True)
     doc.save()
     
-    # Change master band to NIR rather than Blue
-    new_master = chunk.sensors[4]
+    # Change primary band to NIR rather than Blue
+    set_primary = "NIR"
     for s in chunk.sensors:
-        s.master = None
-        s.fixed_rotation = False
-    for s in chunk.sensors:
-        s.master = new_master
-        s.fixed_rotation = True
+        if s.label.find(set_primary) != -1:
+            chunk.primary_channel = s.layer_index
     
     # Calibrate photos
     chunk.calibrateReflectance(use_reflectance_panels=False, use_sun_sensor=True)
@@ -64,7 +61,7 @@ def process_project(projectDir, epsg):
     chunk.crs = target_crs
     
     # Process data
-    chunk.matchPhotos(downscale=1, generic_preselection=False, reference_preselection=True,
+    chunk.matchPhotos(downscale=1, generic_preselection=True, reference_preselection=True,
                       reference_preselection_mode=Metashape.ReferencePreselectionSource)
     doc.save()
     chunk.alignCameras()

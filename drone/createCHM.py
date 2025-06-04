@@ -237,12 +237,16 @@ def xyToRowCol(x, y, xMin, yMax, pixSize):
 
 
 # Hardcode
-dirList = glob.glob(r"D:\drone_multispec\metashape_initial\*")
-for projectDir in dirList:
-    project = os.path.basename(projectDir)
-    projectDir = os.path.join(projectDir, 'outputs')
-    lazFile = os.path.join(projectDir, '%s_mosaic_classified.laz'%project)
-    mosaicImage = os.path.join(projectDir, '%s_mosaic.tif'%project)
-    if os.path.exists(lazFile):
-        print(lazFile)
-        process_laz(lazFile, mosaicImage)
+
+
+masterList = glob.glob('D:\grazing_study_drone_data\*')
+for srcDir in masterList:
+    dirList = glob.glob(os.path.join(srcDir, '*'))
+    for projectDir in dirList:
+        project = os.path.basename(projectDir)
+        projectDir = os.path.join(projectDir, 'outputs')
+        lazFile = os.path.join(projectDir, '%s_mosaic_classified.laz'%project)
+        mosaicImage = os.path.join(projectDir, '%s_mosaic.tif'%project)
+        if os.path.exists(lazFile):
+            print(lazFile)
+            process_laz(lazFile, mosaicImage)

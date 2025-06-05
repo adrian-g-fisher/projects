@@ -30,7 +30,7 @@ minZ_pmf <- function(las, res=0.1) {
   }
 
 
-lazList <- list.files(path = "D:/drone_multispec/metashape_initial",
+lazList <- list.files(path = "D:/grazing_study_drone_data",
                       pattern = "*_mosaic.laz", recursive = TRUE,
 					  full.names = TRUE)
 

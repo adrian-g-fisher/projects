@@ -1,5 +1,9 @@
 """
-Process drone data for grazing study using Agisoft Metashape. This was modified
+Process drone data for grazing study using Agisoft Metashape.
+
+Need to transfer model files before running this script on subsequent surveys.
+
+This was modified
 from the agisoft script using parts of the tern script.
  https://github.com/agisoft-llc/metashape-scripts/blob/master/src/samples/general_workflow.py
  https://github.com/ternaustralia/drone_metashape/blob/main/metashape_proc.py
@@ -73,19 +77,24 @@ def process_project(projectDir, epsg):
     chunk.buildPointCloud()
     doc.save()
     
-    # When doing subsequant surveys, instead of buildModel, I should use:
-    # chunk.importModel(path=model, crs=target_crs, format=Metashape.ModelFormatOBJ)
+    # Use buildModel for initial surveys and importModel for subsequent surveys
+    model_file = glob.glob(os.path.join(output_folder, '*_model.obj'))
+    if len(model_file) > 0:
+        model_file = model_file[0]
+        chunk.importModel(path=model_file, crs=target_crs, format=Metashape.ModelFormatOBJ)
     
-    chunk.buildModel(surface_type=Metashape.HeightField,
-                     source_data=Metashape.PointCloudData,
-                     face_count=Metashape.MediumFaceCount)
+    else:
+        chunk.buildModel(surface_type=Metashape.HeightField,
+                         source_data=Metashape.PointCloudData,
+                         face_count=Metashape.MediumFaceCount)
+        
+        # Decimate and smooth mesh to use as orthorectification surface
+        chunk.decimateModel(face_count=len(chunk.model.faces) / 2)
+        chunk.smoothModel(50) # 'low': 50, 'medium': 100, 'high': 200
+        chunk.exportModel(path=os.path.join(output_folder, '%s_model.obj'%project),
+                          crs=target_crs, format=Metashape.ModelFormatOBJ)
+    
     doc.save()
-
-    # Decimate and smooth mesh to use as orthorectification surface
-    chunk.decimateModel(face_count=len(chunk.model.faces) / 2)
-    chunk.smoothModel(50) # 'low': 50, 'medium': 100, 'high': 200
-    chunk.exportModel(path=os.path.join(output_folder, '%s_model.obj'%project),
-                      crs=target_crs, format=Metashape.ModelFormatOBJ)
 
     # Build and export orthomosaic
     chunk.buildOrthomosaic(surface_data=Metashape.DataSource.ModelData,
@@ -124,7 +133,8 @@ def process_project(projectDir, epsg):
     
     
 # Hardcode
-dirList = glob.glob(r"D:\grazing_study_drone_data\metashape_initial\*")
+#dirList = glob.glob(r"D:\grazing_study_drone_data\metashape_initial\*")
+dirList = glob.glob(r"D:\grazing_study_drone_data\metashape_subsequent\*")
 site2epsg = {'b': '32754', 'w': '32753', 'f': '32754'}
 
 for projectDir in dirList:

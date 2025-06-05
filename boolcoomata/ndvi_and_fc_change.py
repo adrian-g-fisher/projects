@@ -54,10 +54,10 @@ def make_drone_ndvi_images():
 
 
 def getPixels(info, inputs, outputs, otherargs):
-    red = inputs.sr[3].astype(np.float32)
-    nir = inputs.sr[4].astype(np.float32)
-    sumRedNir = np.where(red + nir == 0, 1, red + nir)
-    ndvi_array = (nir - red) / sumRedNir
+    #red = inputs.sr[3].astype(np.float32)
+    #nir = inputs.sr[4].astype(np.float32)
+    #sumRedNir = np.where(red + nir == 0, 1, red + nir)
+    #ndvi_array = (nir - red) / sumRedNir
     sites = inputs.sites[0]
     for idvalue in np.unique(sites[sites != 0]):
         singlesite = (sites == idvalue)
@@ -67,23 +67,23 @@ def getPixels(info, inputs, outputs, otherargs):
         bare = fc[0][singlesite]
         green = fc[1][singlesite]
         dead = fc[2][singlesite]
-        ndvi = ndvi_array[singlesite]
+        #ndvi = ndvi_array[singlesite]
         nodata = nodataPixels[singlesite]
         bare = bare[nodata == 0]
         green = green[nodata == 0]
         dead = dead[nodata == 0]
-        ndvi = ndvi[nodata == 0]
+        #ndvi = ndvi[nodata == 0]
         with open(otherargs.csvfile, 'a') as f:
             line = '%i,%s,%s'%(idvalue, id2name[idvalue], otherargs.date)
             if bare.size > 0:
                 line = '%s,%i'%(line, bare.size)
-                line = '%s,%.2f,%.2f'%(line, np.mean(ndvi), np.std(ndvi))
+                #line = '%s,%.2f,%.2f'%(line, np.mean(ndvi), np.std(ndvi))
                 line = '%s,%.2f,%.2f'%(line, np.mean(bare), np.std(bare))
                 line = '%s,%.2f,%.2f'%(line, np.mean(green), np.std(green))
                 line = '%s,%.2f,%.2f\n'%(line, np.mean(dead), np.std(dead))
             else:
                 line = '%s,999'%line
-                line = '%s,999,999'%line
+                #line = '%s,999,999'%line
                 line = '%s,999,999'%line
                 line = '%s,999,999'%line
                 line = '%s,999,999\n'%line
@@ -93,7 +93,7 @@ def getPixels(info, inputs, outputs, otherargs):
 def extract_landsat_data():
     # Create date list
     start = 198712198802
-    end = 202406202408
+    end = 202412202502
     dateList = []
     for y1 in range(2022, 2025):
         for m1 in range(3, 13, 3):
@@ -110,7 +110,7 @@ def extract_landsat_data():
     # Create CSV file
     csvfile = r'exclosure_seasonal_landsat.csv'
     with open(csvfile, 'w') as f:
-        f.write('Id,site,date,pixels,meanNDVI,stdevNDVI,'+
+        f.write('Id,site,date,pixels,'+
                 'meanBare,stdevBare,meanGreen,stdevGreen,meanDead,stdevDead\n')
     
     # Iterate over list and find FC and SR images
@@ -118,7 +118,7 @@ def extract_landsat_data():
         infiles = applier.FilenameAssociations()
         infiles.sites = r'S:\boolcoomata\shapefiles\boolcoomatta_exclosures_albers.shp'
         infiles.fc = r'S:\boolcoomata\seasonal_fractional_cover\lztmre_sa_m%i_dima2_subset.tif'%date
-        infiles.sr = r'S:\boolcoomata\seasonal_surface_reflectance\lzolre_sa_m%i_dbia2_subset.tif'%date
+        #infiles.sr = r'S:\boolcoomata\seasonal_surface_reflectance\lzolre_sa_m%i_dbia2_subset.tif'%date
         outfiles = applier.FilenameAssociations()
         otherargs = applier.OtherInputs()
         otherargs.csvfile = csvfile
@@ -269,6 +269,6 @@ def plot_ndvi_fc():
     plt.close(fig)
 
 #make_drone_ndvi_images()
-#extract_landsat_data()
+extract_landsat_data()
 #extract_drone_ndvi()
-plot_ndvi_fc()
+#plot_ndvi_fc()

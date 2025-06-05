@@ -80,7 +80,7 @@ def getModisPixelValues(info, inputs, outputs, otherargs):
     bare = fc[0][poly != 0]
     green = fc[1][poly != 0]
     dead = fc[2][poly != 0]
-    outfile = os.path.join(otherargs.outdir, 'modis_fractionalcover.csv')
+    outfile = os.path.join(otherargs.outdir, 'modis_fractionalcover_updated.csv')
     with open(outfile, 'a') as f:
         line = '%s,%i'%(otherargs.date, bare.size)
         line = '%s,%.2f,%.2f'%(line, np.mean(bare), np.std(bare))
@@ -93,9 +93,9 @@ def extract_modis_fc():
     """
     Uses RIOS to extract monthly MODIS fractional cover for sample polygons.
     """
-    polys = r'C:\Users\Adrian\OneDrive - UNSW\Documents\songmeter_analysis\polys_wgs84.tif'
+    polys = r'C:\Users\Adrian\OneDrive - UNSW\Documents\songmeter_analysis\polys_updated.tif'
     outdir = r'C:\Users\Adrian\OneDrive - UNSW\Documents\songmeter_analysis' 
-    outfile = os.path.join(outdir, 'modis_fractionalcover.csv')
+    outfile = os.path.join(outdir, 'modis_fractionalcover_updated.csv')
     with open(outfile, 'w') as f:
         f.write('date,pixels,meanBare,stdevBare,meanGreen,stdevGreen,meanDead,stdevDead\n')
     

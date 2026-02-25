@@ -244,7 +244,7 @@ def model_classes(info, inputs, outputs):
     
     # Get the model files
     modelFiles = []
-    modelDir = r'S:\witchelina\awp_distance\classification_trainingdata\rfmodels'
+    modelDir = r'S:\witchelina\awp_distance\1_original_analysis\classification_trainingdata\rfmodels'
     for modelFile in glob.glob(os.path.join(modelDir, '*.pkl')):
         modelFiles.append(modelFile)
     
@@ -279,7 +279,7 @@ def apply_rf_models():
     Applies the random forest model to the image data.
     """
     statsImage = r'S:\witchelina\timeseries_statistic_images\timeseries_stats_198712202302.tif'
-    outdir = r'C:\Users\Adrian\Documents\witchelina'
+    outdir = r'C:\Users\z9803884\OneDrive - UNSW\Documents\witchelina\awp_grazing_pressure\4_including_neighbours'
     infiles = applier.FilenameAssociations()
     infiles.stats = statsImage
     outfiles = applier.FilenameAssociations()
@@ -366,6 +366,7 @@ def extract_validation(info, inputs, outputs, otherargs):
             otherargs.pixels[ids[i]-1, 1] = inputs.landforms[0][validation == ids[i]]
             otherargs.pixels[ids[i]-1, 2] = inputs.probability[0][validation == ids[i]]
     
+    
 def mask_probability(info, inputs, outputs, otherargs):
     """
     Called through RIOS to mask watercourses based on probability.
@@ -385,9 +386,9 @@ def run_validate():
     """
     # Get classification data
     infiles = applier.FilenameAssociations()
-    infiles.validation = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\landform_classification\validation.shp'
-    infiles.landforms = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\landform_classification\landform_classes.img'
-    infiles.probability = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\landform_classification\landform_probability.img'
+    infiles.validation = r'C:\Users\z9803884\OneDrive - UNSW\Documents\witchelina\landform_classification\validation.shp'
+    infiles.landforms = r'C:\Users\z9803884\OneDrive - UNSW\Documents\witchelina\landform_classification\landform_classes.img'
+    infiles.probability = r'C:\Users\z9803884\OneDrive - UNSW\Documents\witchelina\landform_classification\landform_probability.img'
     outfiles = applier.FilenameAssociations()
     controls = applier.ApplierControls()
     controls.setBurnAttribute("Id")
@@ -448,13 +449,18 @@ def run_validate():
     # Users accuracy for stony hills = 85%      (commission - 15% of pixels classified as hills are actually watercourses)
     # Users accuracy for watercourses = 81%     (commission - 19% of pixels classified as watercourses are actually stony hills)
 
-    # Create new classification
+
+def create_optimum():
+    """
+    Applies thresholds to create optimum classified image
+    """
+    
     infiles = applier.FilenameAssociations()
-    infiles.landforms = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\landform_classification\landform_classes.img'
-    infiles.probability = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\landform_classification\landform_probability.img'
-    infiles.paradise = r'S:\witchelina\adrian\paradise_witchelina.shp'
+    infiles.landforms = r'C:\Users\z9803884\OneDrive - UNSW\Documents\witchelina\landform_classification\landform_classes.img'
+    infiles.probability = r'C:\Users\z9803884\OneDrive - UNSW\Documents\witchelina\landform_classification\landform_probability.img'
+    infiles.paradise = r'S:\witchelina\adrian\paradise_total_epsg3577.shp'
     outfiles = applier.FilenameAssociations()
-    outfiles.new = r'C:\Users\Adrian\OneDrive - UNSW\Documents\witchelina\landform_classification\landforms_optimum.img'
+    outfiles.new = r'\Users\z9803884\OneDrive - UNSW\Documents\witchelina\landform_classification\landforms_optimum.img'
     controls = applier.ApplierControls()
     controls.setStatsIgnore(0)
     otherargs = applier.OtherInputs()
@@ -470,4 +476,5 @@ def run_validate():
 #train_rf_models()
 #apply_rf_models()
 #create_validation()
-run_validate()
+#run_validate()
+create_optimum()

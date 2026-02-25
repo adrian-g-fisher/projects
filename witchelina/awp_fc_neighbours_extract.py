@@ -189,7 +189,7 @@ dataSource = None
 
 # Extract sample values to CSV
 band_names = ['Bare', 'PV', 'NPV']
-csvfile = os.path.join(inDir, r'awp_seasonal_analysis_epsg3577_1987_2024.csv')
+csvfile = os.path.join(inDir, r'awp_neighbours_analysis_epsg3577_1987_2024.csv')
 header = 'ID,Easting,Northing,Paddock,Distance'
 
 # Get seasonal dates

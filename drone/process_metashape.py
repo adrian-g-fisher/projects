@@ -83,10 +83,10 @@ def process_project(projectDir, epsg):
         model_file = model_file[0]
         chunk.importModel(path=model_file, crs=target_crs, format=Metashape.ModelFormatOBJ)
     
-    else:
-        chunk.buildModel(surface_type=Metashape.HeightField,
-                         source_data=Metashape.PointCloudData,
-                         face_count=Metashape.MediumFaceCount)
+    else:                                                       # Change to defaults?
+        chunk.buildModel(surface_type=Metashape.HeightField,    # Abitary (3D)
+                         source_data=Metashape.PointCloudData,  # Depth maps
+                         face_count=Metashape.MediumFaceCount)  # High
         
         # Decimate and smooth mesh to use as orthorectification surface
         chunk.decimateModel(face_count=len(chunk.model.faces) / 2)

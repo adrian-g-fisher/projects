@@ -8,8 +8,7 @@ from the agisoft script using parts of the tern script.
  https://github.com/agisoft-llc/metashape-scripts/blob/master/src/samples/general_workflow.py
  https://github.com/ternaustralia/drone_metashape/blob/main/metashape_proc.py
 
-I also added a section to make the NIR band the master, as advised by Victoria
-Inman.
+I also added a section to make the NIR band the master, as advised by Victoria Inman.
 
 To create the conda environment:
  - Download the installer

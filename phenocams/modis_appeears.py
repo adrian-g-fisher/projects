@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 """
+-----------------------------------------------
+conda create -n modis rios scipy==1.14.0 pyyaml 
+conda activate modis
+pip install hdstats
+pip install unpackqa
+-----------------------------------------------
+
 From the MOD09 (vrsion 6.1) User Guide:
 
 Bits 0-1: Cloud state
@@ -143,7 +150,7 @@ def monthly_mosaics():
     imageList = np.array(imageList)
     yearList = np.array(yearList)
     monthList = np.array(monthList)
-    for year in range(2000, 2025):
+    for year in range(2024, 2027):
         for month in range(1, 13):
             srImages = imageList[(yearList == year) & (monthList == month)]
             qcImages = [os.path.join(qcDir, os.path.basename(srImage).replace('_refl_', '_refl_state_500m_')) for srImage in srImages]
@@ -198,7 +205,6 @@ def make_mask(info, inputs, outputs, otherargs):
     mask[qa[:, :, 5] == 1] = 8 # cloud
     outputs.mask = np.array([mask])
 
-
-#stackbands()
-#monthly_mosaics()
 #make_mask_example()
+#stackbands()
+monthly_mosaics()

@@ -8,6 +8,10 @@ To backup data use:
 
     rclone copy --progress srcDir dstDir
 
+    rclone copy --progress D:\\grazing_study_drone_data S:\\grazing_study_drone_data
+
+    rclone copy --progress D:\\grazing_study_drone_data S:\\grazing_study_drone_data\\outputs
+
 """
 
 import os
@@ -26,8 +30,8 @@ def remove_images(mainDir):
             print(imageDir)
             shutil.rmtree(imageDir)
 
-#remove_images(r"D:\grazing_study_drone_data\metashape_initial")
-#remove_images(r"D:\grazing_study_drone_data\metashape_subsequent")
+#remove_images("D:\\grazing_study_drone_data\\metashape_initial")
+#remove_images("D:\\grazing_study_drone_data\\metashape_subsequent")
 
 
 def transfer_images():
@@ -61,7 +65,6 @@ def transfer_images():
 
 #transfer_images()
 
-
 def transfer_outputs():
     
     srcDir = r"D:\grazing_study_drone_data\metashape_initial"
@@ -87,9 +90,9 @@ def transfer_outputs():
             
         shutil.copytree(outputSrc, outputDst, dirs_exist_ok=True)
 
-transfer_outputs()
 
-sys.exit()
+#transfer_outputs()
+
 
 def copy_images(masterDir, nameDirList):
 
@@ -98,6 +101,9 @@ def copy_images(masterDir, nameDirList):
         # Create project and images folders, and copy all images
         dstDir = os.path.join(masterDir, name)
         outDir = os.path.join(dstDir, "images")
+        
+        if os.path.exists(dstDir) is False:
+            os.mkdir(dstDir)
         
         if os.path.exists(outDir) is False:
             os.mkdir(outDir)
@@ -141,36 +147,45 @@ initialList = [["p4m_bc1_20230317", "S:\\boolcoomata\\drone\\202303\\mosaics\\BO
                ["p4m_fp5_20250316", "D:\\drone_multispec\\raw\\202503\\20250316\\p4m_fp5_20250316"]]
 
 # Subsequent data
-subList = [["p4m_bc1_20240308", r"S:\boolcoomata\drone\202403\raw\20240308\p4m_bc1_20240308"],
-           ["p4m_bc3_20240308", r"S:\boolcoomata\drone\202403\raw\20240308\p4m_bc3_20240308"],
-           ["p4m_be1_20240308", r"S:\boolcoomata\drone\202403\raw\20240308\p4m_be1_20240308"],
-           ["p4m_be3_20240308", r"S:\boolcoomata\drone\202403\raw\20240308\p4m_be3_20240308"],
-           ["p4m_bc2_20240309", r"S:\boolcoomata\drone\202403\raw\20240309\p4m_bc2_20240309"],
-           ["p4m_be2_20240309", r"S:\boolcoomata\drone\202403\raw\20240309\p4m_be2_20240309"],
-           ["p4m_we2_20240305", r"S:\witchelina\drone\202403\raw\20240305\wicthex2"],
-           ["p4m_wc2_20240305", r"S:\witchelina\drone\202403\raw\20240305\witchcon2"],
-           ["p4m_we1_20240305", r"S:\witchelina\drone\202403\raw\20240305\witchex1"],
-           ["p4m_wc1_20240306", r"S:\witchelina\drone\202403\raw\20240306\witchcon1"],
-           ["p4m_fc1_20240310", r"S:\fowlers_gap\imagery\drone\2024\202403_exclosures\raw\20240310\concon"],
-           ["p4m_fe1_20240310", r"S:\fowlers_gap\imagery\drone\2024\202403_exclosures\raw\20240310\conex"],
-           ["p4m_fc2_20240310", r"S:\fowlers_gap\imagery\drone\2024\202403_exclosures\raw\20240310\warcon"],
-           ["p4m_fe2_20240311", r"S:\fowlers_gap\imagery\drone\2024\202403_exclosures\raw\20240311\warex"],
-           ["p4m_bc1_20250308", r"S:\grazing_study_drone_data\raw\202503\20250308\p4m_bc1_20250308"],
-           ["p4m_be1_20250308", r"S:\grazing_study_drone_data\raw\202503\20250308\p4m_be1_20250308"],
-           ["p4m_bc2_20250309", r"S:\grazing_study_drone_data\raw\202503\20250309\p4m_bc2_20250309"],
-           ["p4m_bc3_20250309", r"S:\grazing_study_drone_data\raw\202503\20250309\p4m_bc3_20250309"],
-           ["p4m_be2_20250309", r"S:\grazing_study_drone_data\raw\202503\20250309\p4m_be2_20250309"],
-           ["p4m_be3_20250309", r"S:\grazing_study_drone_data\raw\202503\20250309\p4m_be3_20250309"],
-           ["p4m_wc3_20250311", r"S:\grazing_study_drone_data\raw\202503\20250311\p4m_wc3_20250311"],
-           ["p4m_we2_20250311", r"S:\grazing_study_drone_data\raw\202503\20250311\p4m_we2_20250311"],
-           ["p4m_we3_20250311", r"S:\grazing_study_drone_data\raw\202503\20250311\p4m_we3_20250311"],
-           ["p4m_wc1_20250312", r"S:\grazing_study_drone_data\raw\202503\20250312\p4m_wc1_20250312"],
-           ["p4m_wc2_20250312", r"S:\grazing_study_drone_data\raw\202503\20250312\p4m_wc2_20250312"],
-           ["p4m_we1_20250312", r"S:\grazing_study_drone_data\raw\202503\20250312\p4m_we1_20250312"],
-           ["p4m_fc1_20250317", r"S:\grazing_study_drone_data\raw\202503\20250317\p4m_fc1_20250317"],
-           ["p4m_fc2_20250317", r"S:\grazing_study_drone_data\raw\202503\20250317\p4m_fc2_20250317"],
-           ["p4m_fe1_20250317", r"S:\grazing_study_drone_data\raw\202503\20250317\p4m_fe1_20250317"],
-           ["p4m_fe2_20250317", r"S:\grazing_study_drone_data\raw\202503\20250317\p4m_fe2_20250317"]]
+subList = [["p4m_bc1_20240308", "S:\\boolcoomata\\drone\\202403\\raw\\20240308\\p4m_bc1_20240308"],
+           ["p4m_bc3_20240308", "S:\\boolcoomata\\drone\\202403\\raw\\20240308\\p4m_bc3_20240308"],
+           ["p4m_be1_20240308", "S:\\boolcoomata\\drone\\202403\\raw\\20240308\\p4m_be1_20240308"],
+           ["p4m_be3_20240308", "S:\\boolcoomata\\drone\\202403\\raw\\20240308\\p4m_be3_20240308"],
+           ["p4m_bc2_20240309", "S:\\boolcoomata\\drone\\202403\\raw\\20240309\\p4m_bc2_20240309"],
+           ["p4m_be2_20240309", "S:\\boolcoomata\\drone\\202403\\raw\\20240309\\p4m_be2_20240309"],
+           ["p4m_we2_20240305", "S:\\witchelina\\drone\\202403\\raw\\20240305\\wicthex2"],
+           ["p4m_wc2_20240305", "S:\\witchelina\\drone\\202403\\raw\\20240305\\witchcon2"],
+           ["p4m_we1_20240305", "S:\\witchelina\\drone\\202403\\raw\\20240305\\witchex1"],
+           ["p4m_wc1_20240306", "S:\\witchelina\\drone\\202403\\raw\\20240306\\witchcon1"],
+           ["p4m_fc1_20240310", "S:\\fowlers_gap\\imagery\\drone\\2024\\202403_exclosures\\raw\\20240310\\concon"],
+           ["p4m_fe1_20240310", "S:\\fowlers_gap\\imagery\\drone\\2024\\202403_exclosures\\raw\\20240310\\conex"],
+           ["p4m_fc2_20240310", "S:\\fowlers_gap\\imagery\\drone\\2024\\202403_exclosures\\raw\\20240310\\warcon"],
+           ["p4m_fe2_20240311", "S:\\fowlers_gap\\imagery\\drone\\2024\\202403_exclosures\\raw\\20240311\\warex"],
+           ["p4m_bc1_20250308", "S:\\grazing_study_drone_data\\raw\\202503\\20250308\\p4m_bc1_20250308"],
+           ["p4m_be1_20250308", "S:\\grazing_study_drone_data\\raw\\202503\\20250308\\p4m_be1_20250308"],
+           ["p4m_bc2_20250309", "S:\\grazing_study_drone_data\\raw\\202503\\20250309\\p4m_bc2_20250309"],
+           ["p4m_bc3_20250309", "S:\\grazing_study_drone_data\\raw\\202503\\20250309\\p4m_bc3_20250309"],
+           ["p4m_be2_20250309", "S:\\grazing_study_drone_data\\raw\\202503\\20250309\\p4m_be2_20250309"],
+           ["p4m_be3_20250309", "S:\\grazing_study_drone_data\\raw\\202503\\20250309\\p4m_be3_20250309"],
+           ["p4m_wc3_20250311", "S:\\grazing_study_drone_data\\raw\\202503\\20250311\\p4m_wc3_20250311"],
+           ["p4m_we2_20250311", "S:\\grazing_study_drone_data\\raw\\202503\\20250311\\p4m_we2_20250311"],
+           ["p4m_we3_20250311", "S:\\grazing_study_drone_data\\raw\\202503\\20250311\\p4m_we3_20250311"],
+           ["p4m_wc1_20250312", "S:\\grazing_study_drone_data\\raw\\202503\\20250312\\p4m_wc1_20250312"],
+           ["p4m_wc2_20250312", "S:\\grazing_study_drone_data\\raw\\202503\\20250312\\p4m_wc2_20250312"],
+           ["p4m_we1_20250312", "S:\\grazing_study_drone_data\\raw\\202503\\20250312\\p4m_we1_20250312"],
+           ["p4m_fc1_20250317", "S:\\grazing_study_drone_data\\raw\\202503\\20250317\\p4m_fc1_20250317"],
+           ["p4m_fc2_20250317", "S:\\grazing_study_drone_data\\raw\\202503\\20250317\\p4m_fc2_20250317"],
+           ["p4m_fe1_20250317", "S:\\grazing_study_drone_data\\raw\\202503\\20250317\\p4m_fe1_20250317"],
+           ["p4m_fe2_20250317", "S:\\grazing_study_drone_data\\raw\\202503\\20250317\\p4m_fe2_20250317"]]
 
-#copy_images(r"D:\grazing_study_drone_data\metashape_initial", initialList)
-#copy_images(r"D:\grazing_study_drone_data\metashape_subsequent", subList)
+# Witchelina 2026 data
+witch2026 = [["p4m_wc1_20260311", "S:\\grazing_study_drone_data\\witchelina_202603\\p4m_wc1_20260311"],
+             ["p4m_wc2_20260311", "S:\\grazing_study_drone_data\\witchelina_202603\\p4m_wc2_20260311"],
+             ["p4m_wc3_20260312", "S:\\grazing_study_drone_data\\witchelina_202603\\p4m_wc3_20260312"],
+             ["p4m_we1_20260311", "S:\\grazing_study_drone_data\\witchelina_202603\\p4m_we1_20260311"],
+             ["p4m_we2_20260313", "S:\\grazing_study_drone_data\\witchelina_202603\\p4m_we2_20260313"],
+             ["p4m_we3_20260312", "S:\\grazing_study_drone_data\\witchelina_202603\\p4m_we3_20260312"]]
+           
+#copy_images("D:\\grazing_study_drone_data\\metashape_initial", initialList)
+#copy_images("D:\\grazing_study_drone_data\\metashape_subsequent", subList)
+copy_images("S:\\grazing_study_drone_data\\metashape_subsequent", witch2026)

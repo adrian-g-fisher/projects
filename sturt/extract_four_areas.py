@@ -65,28 +65,35 @@ def extract_pixels(polyfile, imagefile, csvfile):
         meanDead = ndimage.mean(values[:, 3], values[:, 0], uids)
         stdDead = ndimage.standard_deviation(values[:, 3], values[:, 0], uids)
         date = int(os.path.basename(imagefile).split(r'_')[2][1:])
-    
+        
+        
+        
         # Write to csv
         with open(csvfile, "a") as f:
             for i in range(uids.size):
-                f.write('%i,%i,%i,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\n'%(date, uids[i], countValues[i],
-                                                                    meanBare[i], stdBare[i],
-                                                                    meanGreen[i], stdGreen[i],
-                                                                    meanDead[i], stdDead[i],))
+                if uids[i] == 1: name = "Quinyambie"
+                if uids[i] == 2: name = "Strzelecki Regional Reserve"
+                if uids[i] == 3: name = "Winnathee"
+                if uids[i] == 4: name = "Sturt National Park"
+                f.write('%i,%i,%s,%i,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\n'%(date, uids[i], name, countValues[i],
+                                                                       meanBare[i], stdBare[i],
+                                                                       meanGreen[i], stdGreen[i],
+                                                                       meanDead[i], stdDead[i],))
 
 
 # Inputs and outputs
 polyfile = r'C:\Users\Adrian\OneDrive - UNSW\Documents\dingo_fence\four_area_analysis\StrzStudyAreas.shp'
-csvfile = r'C:\Users\Adrian\OneDrive - UNSW\Documents\dingo_fence\four_area_analysis\StrzStudyAreas.csv'
+csvfile = r'C:\Users\Adrian\OneDrive - UNSW\Documents\dingo_fence\four_area_analysis\StrzStudyAreas_updated.csv'
 imageDir = r'S:\sturt\landsat\landsat_seasonal_fractional_cover'
 imageList = glob.glob(os.path.join(imageDir, r'*.tif'))
 
 # Write the csvfile header 
 with open(csvfile, 'w') as f:
-    f.write('Date,Id,pixels,meanBare,stdevBare,meanGreen,stdevGreen,meanDead,stdevDead\n')
+    f.write('Date,Id,Name,pixels,meanBare,stdevBare,meanGreen,stdevGreen,meanDead,stdevDead\n')
 
 # Iterate over images and get pixel values
 for imagefile in imageList:
+    print(os.path.basename(imagefile))
     extract_pixels(polyfile, imagefile, csvfile)
 
 print('Pixels extracted')

@@ -5,7 +5,9 @@ each site. It essentially adds 27 new columns to each field observation,
 which contain the mean bare, PV and NPV percentages for the corresponding season
 and all seasons from the previous 2 years.
 
-Now also adds the NDVI 
+Now adds the NDVI 
+
+Also includes STDEV
 
 """
 
@@ -54,8 +56,11 @@ def date2season(d):
 dates = []
 Id = []
 bare = []
+bare_stdev = []
 green = []
+green_stdev = []
 dead = []
+dead_stdev = []
 csvfile = r'C:\Users\Adrian\OneDrive - UNSW\Documents\plains_wanderer\seasonal_fc_extract.csv'
 with open(csvfile, 'r') as f:
     #Id,date,pixels,meanBare,stdevBare,meanGreen,stdevGreen,meanDead,stdevDead
@@ -65,12 +70,19 @@ with open(csvfile, 'r') as f:
         Id.append(int(l[0]))
         dates.append(int(l[1]))
         bare.append(float(l[3]))
+        bare_stdev.append(float(l[4]))
         green.append(float(l[5]))
+        green_stdev.append(float(l[6]))
         dead.append(float(l[7]))
+        dead_stdev.append(float(l[8]))
+        
 Id = np.array(Id)
 bare = np.array(bare)
+bare_stdev = np.array(bare_stdev)
 green = np.array(green)
+green_stdev = np.array(green_stdev)
 dead = np.array(dead)
+dead_stdev = np.array(dead_stdev)
 datetimes = np.array([datetime.date(year=int(str(d)[:4]),
                                     month=int(str(d)[4:6]), day=15) +
                                     datetime.timedelta(days=30) for d in dates])
@@ -79,6 +91,7 @@ datetimes = np.array([datetime.date(year=int(str(d)[:4]),
 ndvi_dates = []
 ndvi_id = []
 ndvi = []
+ndvi_stdev = []
 csvfile = r'C:\Users\Adrian\OneDrive - UNSW\Documents\plains_wanderer\seasonal_ndvi_extract.csv'
 with open(csvfile, 'r') as f:
     #Id,date,pixels,meanNDVI,stdevNDVI
@@ -87,6 +100,7 @@ with open(csvfile, 'r') as f:
         l = line.strip().split(',')
         ndvi_id.append(int(l[0]))
         ndvi.append(float(l[3]))
+        ndvi_stdev.append(float(l[4]))
         y = int(l[1][0:4])
         m = int(l[1][4:6])
         ndvi_dates.append(datetime.date(year=y, month=m, day=15) +
@@ -94,6 +108,7 @@ with open(csvfile, 'r') as f:
 ndvi_dates = np.array(ndvi_dates)
 ndvi_id = np.array(ndvi_id)
 ndvi = np.array(ndvi)
+ndvi_stdev = np.array(ndvi_stdev)
 
 # Read in site and Id values and make dictionary
 csvfile = r'C:\Users\Adrian\OneDrive - UNSW\Documents\plains_wanderer\pw_site_ids.csv'
@@ -126,7 +141,9 @@ field_dates = np.array(field_dates)
 # Find FC and ndvi values for each date
 ss = np.zeros(field_dates.size, dtype=np.uint64)
 fc_values = np.zeros((field_dates.size, 27), dtype=np.float32)
+fc_stdev_values = np.zeros((field_dates.size, 3), dtype=np.float32)
 ndvi_values = np.zeros(field_dates.size, dtype=np.float32)
+ndvi_stdev_values = np.zeros(field_dates.size, dtype=np.float32)
 for i in range(field_dates.size):
     s = field_sites[i]
     bare_subset = bare[Id == site2id[s]]
@@ -142,7 +159,11 @@ for i in range(field_dates.size):
         fc_list[lag*3 + 1] = green_subset[date_subset == d_lag][0]
         fc_list[lag*3 + 2] = dead_subset[date_subset == d_lag][0]
     fc_values[i, :] = fc_list
+    fc_stdev_values[i, 0] = bare_stdev[(Id == site2id[s]) & (datetimes == d)][0]
+    fc_stdev_values[i, 1] = green_stdev[(Id == site2id[s]) & (datetimes == d)][0]
+    fc_stdev_values[i, 2] = dead_stdev[(Id == site2id[s]) & (datetimes == d)][0]
     ndvi_values[i] = ndvi[(ndvi_id == site2id[s]) & (ndvi_dates == d)][0]
+    ndvi_stdev_values[i] = ndvi_stdev[(ndvi_id == site2id[s]) & (ndvi_dates == d)][0]
 
 
 # Add new column descriptions to the header
@@ -154,15 +175,20 @@ for s in range(1, 9):
 header = '%s,%s'%(header, ','.join(seasons))
 
 # Add new column for NDVI
-header = '%s,%s\n'%(header, 'field_season_ndvi')
+header = '%s,%s'%(header, 'field_season_ndvi')
+
+# Add new columns for STDEV
+header = '%s,%s,%s,%s,%s\n'%(header, 'field_season_ndvi_stdev', 'field_season_bare_stdev',
+                                     'field_season_green_stdev', 'field_season_dead_stdev')
 
 # Create new CSV file
-new_csv = r'C:\Users\Adrian\OneDrive - UNSW\Documents\plains_wanderer\PW_data_plus_FC_plus_NDVI.csv'
+new_csv = r'C:\Users\Adrian\OneDrive - UNSW\Documents\plains_wanderer\PW_data_plus_FC_plus_NDVI_plus_stdev.csv'
 with open(new_csv, 'w') as f:
     f.write(header)
     for i in range(field_dates.size):
         fc_data = ','.join(['%.2f'%v for v in fc_values[i, :]])
-        line = '%s,%s,%s,%s\n'%(field_data[i], ss[i], fc_data, ndvi_values[i])
+        line = '%s,%s,%s,%.2f,%.2f,%.2f,%.2f,%.2f\n'%(field_data[i], ss[i], fc_data, ndvi_values[i], ndvi_stdev_values[i],
+                                                      fc_stdev_values[i, 0], fc_stdev_values[i, 1], fc_stdev_values[i, 2])
         f.write(line)
         
 # CHECK: for polygon 10, 200612200702, Bare = 28.38, Green =  2.65, Dead = 67.49, NDVI = 0.17

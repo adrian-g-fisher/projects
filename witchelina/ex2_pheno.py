@@ -5,13 +5,15 @@ conda create -c conda-forge -n pheno numpy pillow matplotlib scipy moviepy
 conda activate pheno
 
 Correct dates
-20250702-20250923 Z:/LinkageGrazing/September2025/Witchelina/Phenocams/WX2PC
-20250311-20250702 Z:/LinkageGrazing/Winter2025/Witchelina/Phenocams/WX2PC
-20240926-20250311 Z:/LinkageGrazing/Autumn25/Witchelina/Phenocams/WX2PC
-20240731-20240908 Z:/LinkageGrazing/Spring24/Phenocams/Witchelina/PCWX2
+20251105-20260221 Z:/LinkageGrazing/fieldtrips/8_WitchelinaFeb2025/Phenocams/WX2PC
+20250924-20251104 Z:/LinkageGrazing/fieldtrips/7_Spring2025/Witchelina/Phenocam/WX2PC
+20250702-20250923 Z:/LinkageGrazing/fieldtrips/6_September2025/Witchelina/Phenocams/WX2PC
+20250311-20250702 Z:/LinkageGrazing/fieldtrips/5_Winter2025/Witchelina/Phenocams/WX2PC
+20240926-20250311 Z:/LinkageGrazing/fieldtrips/4_Autumn25/Witchelina/Phenocams/WX2PC
+20240731-20240908 Z:/LinkageGrazing/fieldtrips/3_Spring24/Phenocams/Witchelina/PCWX2
 
 Incorrect dates :
-20220131-20220528 Z:/LinkageGrazing/Winter24/Phenocams/Witchelina/PCWX2
+20220131-20220528 Z:/LinkageGrazing/fieldtrips/2_Winter24/Phenocams/Witchelina/PCWX2
 20210719-20220131 Z:/LinkageGrazing/Witchelina/Spring23-Autumn24/Witchx2/100MEDIA
 20210110-20210718 Z:/LinkageGrazing/Witchelina/witchx2/March-Sep23
 
@@ -30,11 +32,13 @@ import datetime
 from moviepy.video.io import ImageSequenceClip
 
 
-imageDirs = [r'Z:/LinkageGrazing/September2025/Witchelina/Phenocams/WX2PC',
-             r'Z:/LinkageGrazing/Winter2025/Witchelina/Phenocams/WX2PC',
-             r'Z:/LinkageGrazing/Autumn25/Witchelina/Phenocams/WX2PC',
-             r'Z:/LinkageGrazing/Spring24/Phenocams/Witchelina/PCWX2',
-             r'Z:/LinkageGrazing/Winter24/Phenocams/Witchelina/PCWX2',
+imageDirs = [r'Z:/LinkageGrazing/fieldtrips/8_WitchelinaFeb2025/Phenocams/WX2PC',
+             r'Z:/LinkageGrazing/fieldtrips/7_Spring2025/Witchelina/Phenocam/WX2PC',
+             r'Z:/LinkageGrazing/fieldtrips/6_September2025/Witchelina/Phenocams/WX2PC',
+             r'Z:/LinkageGrazing/fieldtrips/5_Winter2025/Witchelina/Phenocams/WX2PC',
+             r'Z:/LinkageGrazing/fieldtrips/4_Autumn25/Witchelina/Phenocams/WX2PC',
+             r'Z:/LinkageGrazing/fieldtrips/3_Spring24/Phenocams/Witchelina/PCWX2',
+             r'Z:/LinkageGrazing/fieldtrips/2_Winter24/Phenocams/Witchelina/PCWX2',
              r'Z:/LinkageGrazing/Witchelina/Spring23-Autumn24/Witchx2/100MEDIA',
              r'Z:/LinkageGrazing/Witchelina/witchx2/March-Sep23']
 
@@ -110,9 +114,15 @@ def fix_image_dates():
 
 
 def make_video():
-    fps = 8
-    videofile = r'C:/Data/phenocams/witchelina_ex2_daily_timelapse_8fps.mp4'
-    srcDir = r'C:/Data/phenocams/wx2_correctdates'
+    
+    #fps = 8
+    #videofile = r'C:/Data/phenocams/witchelina_ex2_daily_timelapse_8fps_2023-2026.mp4'
+    #srcDir = r'C:/Data/phenocams/wx2_correctdates'
+    
+    fps = 1
+    videofile = r'C:/Data/phenocams/witchelina_ex2_daily_timelapse_1fps_1-21_Feb_2026.mp4'
+    srcDir = r'C:/Data/phenocams/wx2_correctdates_1-21_Feb_2026'
+    
     srcList = glob.glob(os.path.join(srcDir, '*JPG'))
     clip = ImageSequenceClip.ImageSequenceClip(srcList, fps=fps)
     clip.write_videofile(videofile, fps=fps)

@@ -35,7 +35,6 @@ def makeDistance(info, inputs, outputs, otherargs):
     awps = inputs.awps[0]
     distance = np.zeros_like(paddocks).astype(np.float32)
     for p in range(1, 21):
-        print(p)
         awp = np.where(awps > 0, 0, 1)
         awp[paddocks != p] = 1
         dist_p = ndimage.distance_transform_edt(awp) * 30
@@ -140,6 +139,7 @@ def extract_sample_values(csvfile, sample_image, paddock_shapefile,
                           distance_image, ID2Name, seasonal_image_list):
     """
     """
+    print("Starting extract")
     infiles = applier.FilenameAssociations()
     outfiles = applier.FilenameAssociations()
     otherargs = applier.OtherInputs()

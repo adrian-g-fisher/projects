@@ -109,6 +109,8 @@ def process_project(projectDir, epsg):
         chunk.exportRaster(path=os.path.join(output_folder, '%s_mosaic.tif'%project),
                            resolution_x=res_xy, resolution_y=res_xy,
                            image_format=Metashape.ImageFormatTIFF,
+                           pixel_format=Metashape.PixelFormat.PixelFormatFloat32,
+                           nodata_value=-32767,
                            save_alpha=False,
                            source_data=Metashape.OrthomosaicData,
                            image_compression=compression)

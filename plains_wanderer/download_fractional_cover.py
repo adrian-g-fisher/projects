@@ -19,7 +19,7 @@ ds = None
 
 # Construct dateList for all seasonal dates
 start = 198712198802
-end = 202509202511
+end = 202512202602
 dateList = []
 for y1 in range(1987, 2026):
     for m1 in range(3, 13, 3):

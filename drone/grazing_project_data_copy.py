@@ -6,6 +6,8 @@ To backup data use:
 
     conda activate rclone
 
+    rclone copy --progress srcDir dstDir
+
     rclone copy --progress D:\\grazing_study_drone_data S:\\grazing_study_drone_data
 
     rclone copy --progress D:\\grazing_study_drone_data S:\\grazing_study_drone_data\\outputs
@@ -31,13 +33,14 @@ def remove_images(mainDir):
 #remove_images("D:\\grazing_study_drone_data\\metashape_initial")
 #remove_images("D:\\grazing_study_drone_data\\metashape_subsequent")
 
+
 def transfer_images():
     
-    #srcDir = "S:\\grazing_study_drone_data\\metashape_initial"
-    #dstDir = "D:\\grazing_study_drone_data\\metashape_initial"
+    #srcDir = r"D:\grazing_study_drone_data\metashape_initial"
+    #dstDir = r"S:\grazing_study_drone_data\metashape_initial"
     
-    #srcDir = "D:\\grazing_study_drone_data\\metashape_subsequent"
-    #dstDir = "S:\\grazing_study_drone_data\\metashape_subsequent"
+    #srcDir = r"D:\grazing_study_drone_data\metashape_subsequent"
+    #dstDir = r"S:\grazing_study_drone_data\metashape_subsequent"
     
     for projSrc in glob.glob(os.path.join(srcDir, "*")):
         
@@ -61,6 +64,35 @@ def transfer_images():
                 shutil.copy(inImage, outImage)
 
 #transfer_images()
+
+def transfer_outputs():
+    
+    srcDir = r"D:\grazing_study_drone_data\metashape_initial"
+    dstDir = r"S:\grazing_study_drone_data\metashape_initial"
+    
+    #srcDir = r"D:\grazing_study_drone_data\metashape_subsequent"
+    #dstDir = r"S:\grazing_study_drone_data\metashape_subsequent"
+    
+    for projSrc in glob.glob(os.path.join(srcDir, "*")):
+        
+        proj = os.path.basename(projSrc)
+        print(proj)
+        
+        outputSrc = os.path.join(projSrc, "outputs")
+        projDst = os.path.join(dstDir, proj)
+        outputDst = os.path.join(projDst, "outputs")
+        
+        if os.path.exists(projDst) is False:
+            os.mkdir(projDst)
+        
+        if os.path.exists(outputDst) is False:
+            os.mkdir(outputDst)
+            
+        shutil.copytree(outputSrc, outputDst, dirs_exist_ok=True)
+
+
+#transfer_outputs()
+
 
 def copy_images(masterDir, nameDirList):
 

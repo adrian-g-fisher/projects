@@ -42,6 +42,12 @@ def transfer_images():
     #srcDir = r"D:\grazing_study_drone_data\metashape_subsequent"
     #dstDir = r"S:\grazing_study_drone_data\metashape_subsequent"
     
+    srcDir = r"S:\grazing_study_drone_data\metashape_initial"
+    dstDir = r"C:\Data\grazing_study_drone_data\metashape_initial"
+    
+    #srcDir = r"S:\grazing_study_drone_data\metashape_subsequent"
+    #dstDir = r"C:\Data\grazing_study_drone_data\metashape_subsequent"
+    
     for projSrc in glob.glob(os.path.join(srcDir, "*")):
         
         proj = os.path.basename(projSrc)
@@ -63,7 +69,7 @@ def transfer_images():
                 print(inImage)
                 shutil.copy(inImage, outImage)
 
-#transfer_images()
+transfer_images()
 
 def transfer_outputs():
     
@@ -188,4 +194,4 @@ witch2026 = [["p4m_wc1_20260311", "S:\\grazing_study_drone_data\\witchelina_2026
            
 #copy_images("D:\\grazing_study_drone_data\\metashape_initial", initialList)
 #copy_images("D:\\grazing_study_drone_data\\metashape_subsequent", subList)
-copy_images("S:\\grazing_study_drone_data\\metashape_subsequent", witch2026)
+#copy_images("S:\\grazing_study_drone_data\\metashape_subsequent", witch2026)

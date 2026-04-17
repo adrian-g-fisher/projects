@@ -3,19 +3,27 @@ Process drone data for grazing study using Agisoft Metashape.
 
 Need to transfer model files before running this script on subsequent surveys.
 
-This was modified
-from the agisoft script using parts of the tern script.
+This was modified from the agisoft script using parts of the tern script.
  https://github.com/agisoft-llc/metashape-scripts/blob/master/src/samples/general_workflow.py
  https://github.com/ternaustralia/drone_metashape/blob/main/metashape_proc.py
 
-I also added a section to make the NIR band the master, as advised by Victoria Inman.
+I found more scripts at:
+https://github.com/open-forest-observatory/automate-metashape/blob/main/python/metashape_workflow_functions.py
+
+I also added the following based on metashape forum advice:
+- The NIR band is the master, as advised by Victoria Inman
+- The pixel format is changed from the default (int16) to Float32, as this
+  allows the setting of a nodata value
+- The nodata value is set to -32767
 
 To create the conda environment:
  - Download the installer
  - conda create -n metashape python=3.11
- - python -m pip install Metashape-2.2.0-cp37.cp38.cp39.cp310.cp311-none-win_amd64.whl
  - conda activate metashape
- 
+ - python -m pip install Metashape-2.2.0-cp37.cp38.cp39.cp310.cp311-none-win_amd64.whl
+
+License Code: E9DX1-U3FU1-R1JU6-8B2KT-SH7JV
+
 """
 
 
@@ -63,7 +71,7 @@ def process_project(projectDir, epsg):
                                                                          target_crs)
     chunk.crs = target_crs
     
-    # Process data
+    # Process dataexport
     chunk.matchPhotos(downscale=1, generic_preselection=True, reference_preselection=True,
                       reference_preselection_mode=Metashape.ReferencePreselectionSource)
     doc.save()
@@ -106,13 +114,18 @@ def process_project(projectDir, epsg):
         compression.tiff_big = True
         compression.tiff_tiled = True
         compression.tiff_overviews = True
+        
+        chunk.raster_transform.formula = ['B1/32768', 'B2/32768', 'B3/32768', 'B4/32768', 'B5/32768']
+        chunk.raster_transform.calibrateRange()
+        chunk.raster_transform.enabled = True
+        
         chunk.exportRaster(path=os.path.join(output_folder, '%s_mosaic.tif'%project),
                            resolution_x=res_xy, resolution_y=res_xy,
                            image_format=Metashape.ImageFormatTIFF,
-                           pixel_format=Metashape.PixelFormat.PixelFormatFloat32,
                            nodata_value=-32767,
                            save_alpha=False,
                            source_data=Metashape.OrthomosaicData,
+                           raster_transform = Metashape.RasterTransformValue,
                            image_compression=compression)
     
     # Export point cloud
@@ -135,7 +148,9 @@ def process_project(projectDir, epsg):
     
 # Hardcode
 #dirList = glob.glob(r"D:\grazing_study_drone_data\metashape_initial\*")
-dirList = glob.glob(r"D:\grazing_study_drone_data\metashape_subsequent\*")
+#dirList = glob.glob(r"D:\grazing_study_drone_data\metashape_subsequent\*")
+dirList = glob.glob(r"C:\Data\grazing_study_drone_data\metashape_subsequent\*")
+
 site2epsg = {'b': '32754', 'w': '32753', 'f': '32754'}
 
 for projectDir in dirList:

@@ -33,6 +33,7 @@ import sys
 import time
 import glob
 import shutil
+from osgeo import gdal
 
 
 def process_project(projectDir, epsg):
@@ -143,12 +144,23 @@ def process_project(projectDir, epsg):
     projDir = os.path.join(output_folder, '%s_project.files'%project)
     shutil.rmtree(projDir)
     
+    # Add band names to mosaic
+    ds = gdal.Open(os.path.join(output_folder, '%s_mosaic.tif'%project), gdal.GA_Update)
+    band_names = [r'blue', r'green', r'red', r'red edge', r'nir']
+    for i, name in enumerate(band_names, start=1):
+        band = ds.GetRasterBand(i)
+        band.SetDescription(name)
+    ds.FlushCache()
+    ds = None
+    
     print('Processing finished')
-    
-    
+
+
 # Hardcode
 #dirList = glob.glob(r"D:\grazing_study_drone_data\metashape_initial\*")
 #dirList = glob.glob(r"D:\grazing_study_drone_data\metashape_subsequent\*")
+
+#dirList = glob.glob(r"C:\Data\grazing_study_drone_data\metashape_initial\*")
 dirList = glob.glob(r"C:\Data\grazing_study_drone_data\metashape_subsequent\*")
 
 site2epsg = {'b': '32754', 'w': '32753', 'f': '32754'}

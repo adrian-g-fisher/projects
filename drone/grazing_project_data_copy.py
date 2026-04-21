@@ -20,6 +20,20 @@ import shutil
 import glob
 
 
+def remove_outputs(mainDir):
+    """
+    Removes all outputs folders so they can be replaced with new outputs
+    """
+    for srcDir in glob.glob(os.path.join(mainDir, "*")):
+        outputDir = os.path.join(srcDir, 'outputs')
+        if os.path.exists(outputDir):
+            print(outputDir)
+            shutil.rmtree(outputDir)
+
+#remove_outputs(r"S:\grazing_study_drone_data\metashape_initial")
+#remove_outputs(r"S:\grazing_study_drone_data\metashape_subsequent")
+
+
 def remove_images(mainDir):
     """
     Removes all images folders from D to free up space
@@ -42,62 +56,65 @@ def transfer_images():
     #srcDir = r"D:\grazing_study_drone_data\metashape_subsequent"
     #dstDir = r"S:\grazing_study_drone_data\metashape_subsequent"
     
-    srcDir = r"S:\grazing_study_drone_data\metashape_initial"
-    dstDir = r"C:\Data\grazing_study_drone_data\metashape_initial"
+    #srcDir = r"S:\grazing_study_drone_data\metashape_initial"
+    #dstDir = r"C:\Data\grazing_study_drone_data\metashape_initial"
     
-    #srcDir = r"S:\grazing_study_drone_data\metashape_subsequent"
-    #dstDir = r"C:\Data\grazing_study_drone_data\metashape_subsequent"
+    srcDir = r"S:\grazing_study_drone_data\metashape_subsequent"
+    dstDir = r"C:\Data\grazing_study_drone_data\metashape_subsequent"
     
     for projSrc in glob.glob(os.path.join(srcDir, "*")):
         
         proj = os.path.basename(projSrc)
-        print(proj)
+        site = proj.split('_')[1][0]
+        if site == 'w':
         
-        imageSrc = os.path.join(projSrc, "images")
-        projDst = os.path.join(dstDir, proj)
-        imageDst = os.path.join(projDst, "images")
+            print(proj)
         
-        if os.path.exists(projDst) is False:
-            os.mkdir(projDst)
+            imageSrc = os.path.join(projSrc, "images")
+            projDst = os.path.join(dstDir, proj)
+            imageDst = os.path.join(projDst, "images")
         
-        if os.path.exists(imageDst) is False:
-            os.mkdir(imageDst)
+            if os.path.exists(projDst) is False:
+                os.mkdir(projDst)
+        
+                if os.path.exists(imageDst) is False:
+                    os.mkdir(imageDst)
             
-        for inImage in glob.glob(os.path.join(imageSrc, "*.TIF")):
-            outImage = os.path.join(imageDst, os.path.basename(inImage))
-            if os.path.exists(outImage) is False:
-                print(inImage)
-                shutil.copy(inImage, outImage)
+                for inImage in glob.glob(os.path.join(imageSrc, "*.TIF")):
+                    outImage = os.path.join(imageDst, os.path.basename(inImage))
+                    if os.path.exists(outImage) is False:
+                        shutil.copy(inImage, outImage)
 
-transfer_images()
+#transfer_images()
 
 def transfer_outputs():
     
-    srcDir = r"D:\grazing_study_drone_data\metashape_initial"
+    srcDir = r"C:\Data\grazing_study_drone_data\metashape_initial"
     dstDir = r"S:\grazing_study_drone_data\metashape_initial"
     
-    #srcDir = r"D:\grazing_study_drone_data\metashape_subsequent"
+    #srcDir = r"C:\Data\grazing_study_drone_data\metashape_subsequent"
     #dstDir = r"S:\grazing_study_drone_data\metashape_subsequent"
     
     for projSrc in glob.glob(os.path.join(srcDir, "*")):
         
         proj = os.path.basename(projSrc)
-        print(proj)
-        
         outputSrc = os.path.join(projSrc, "outputs")
         projDst = os.path.join(dstDir, proj)
         outputDst = os.path.join(projDst, "outputs")
         
-        if os.path.exists(projDst) is False:
-            os.mkdir(projDst)
-        
-        if os.path.exists(outputDst) is False:
-            os.mkdir(outputDst)
+        if os.path.exists(outputSrc) is True:
             
-        shutil.copytree(outputSrc, outputDst, dirs_exist_ok=True)
+            print(proj)
+            
+            if os.path.exists(projDst) is False:
+                os.mkdir(projDst)
+        
+            if os.path.exists(outputDst) is False:
+                os.mkdir(outputDst)
+                shutil.copytree(outputSrc, outputDst, dirs_exist_ok=True)
 
 
-#transfer_outputs()
+transfer_outputs()
 
 
 def copy_images(masterDir, nameDirList):

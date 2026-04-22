@@ -89,11 +89,11 @@ def transfer_images():
 
 def transfer_outputs():
     
-    srcDir = r"C:\Data\grazing_study_drone_data\metashape_initial"
-    dstDir = r"S:\grazing_study_drone_data\metashape_initial"
+    #srcDir = r"C:\Data\grazing_study_drone_data\metashape_initial"
+    #dstDir = r"S:\grazing_study_drone_data\metashape_initial"
     
-    #srcDir = r"C:\Data\grazing_study_drone_data\metashape_subsequent"
-    #dstDir = r"S:\grazing_study_drone_data\metashape_subsequent"
+    srcDir = r"C:\Data\grazing_study_drone_data\metashape_subsequent"
+    dstDir = r"S:\grazing_study_drone_data\metashape_subsequent"
     
     for projSrc in glob.glob(os.path.join(srcDir, "*")):
         

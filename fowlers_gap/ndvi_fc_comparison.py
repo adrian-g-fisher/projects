@@ -134,7 +134,6 @@ def compare_landsat_ndvi_pv():
 def makeDroneNDVI(info, inputs, outputs, otherargs):
     """
     """
-    
     nodata = info.getNoDataValueFor(inputs.drone)
     red = inputs.drone[otherargs.red]
     nir = inputs.drone[otherargs.nir]
@@ -212,6 +211,73 @@ def make_drone_ndvi_images():
         controls.setStatsIgnore(2)
         controls.setCalcStats(True) 
         applier.apply(makeDroneNDVI, infiles, outfiles, otherArgs=otherargs, controls=controls)
+
+
+def makeDroneSSI(info, inputs, outputs, otherargs):
+    """
+    """
+    nodata = info.getNoDataValueFor(inputs.drone)
+    blue = inputs.drone[0]
+    green = inputs.drone[1]
+    red = inputs.drone[2]
+    nir = inputs.drone[4]
+    nir_red = (nir - red) / (840 - 650)
+    gre_blu = (green - blue) / (560 - 450)
+    demoninator = np.where(nir_red + gre_blu == 0, 1, nir_red + gre_blu) 
+    ssi = (nir_red - gre_blu) / demoninator
+    ssi[nir_red + gre_blu == 0] = 2
+    ssi[(blue == nodata) | (green == nodata) | (red == nodata) | (nir == nodata)] = 2
+    outputs.ssi = np.array([ssi]).astype(np.float32)
+
+
+def make_drone_ssi_images():
+    droneList = [r'S:\fowlers_gap\imagery\drone\2024\202403_ausplots\conausplot_20240321_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2024\202403_ausplots\emuausplot_20240323_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2024\202403_ausplots\southsandausplot_20240322_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2024\202403_ausplots\emugrazedausplot_20240322_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2024\202403_exclosures\mosaics\concon_20240310_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2024\202403_exclosures\mosaics\conex_20240310_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2024\202403_exclosures\mosaics\warcon_20240310_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2024\202403_exclosures\mosaics\warex_20240311_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2023\202303_exclosures\mosaics\concon_20230318_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2023\202303_exclosures\mosaics\conex_20230318_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2023\202303_exclosures\mosaics\warcon_20230318_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2023\202303_exclosures\mosaics\warex_20230318_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2022\p4m_conausplot_20220514\p4m_conausplot_20220514_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2022\p4m_emuausplot_20220512\p4m_emuausplot_20220512_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2022\p4m_fg03_20220513\p4m_fg03_20220513_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2022\p4m_fg04_20220513\p4m_fg04_20220513_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2022\p4m_fg05_20220513\p4m_fg05_20220513_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2022\p4m_fg08_20220512\p4m_fg08_20220512_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2022\p4m_fg11_20220514\p4m_fg11_20220514_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2022\p4m_fg13_20220515\p4m_fg13_20220515_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2022\p4m_fg14_20220512\p4m_fg14_20220512_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2022\p4m_fg15_20220515\p4m_fg15_20220515_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2021\con1_20210430_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2021\con2_20210430_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2021\emu1_20210502_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2021\emu2_20210502_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2021\man1_20210503_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2021\man2_20210503_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2021\war1_20210501_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2021\war2_20210501_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2021\war3_20210504_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2021\war4_20210504_multiband.tif']
+    
+    dstDir = r"C:\Data\fowlers_gap_ndvi\drone_ssi"
+    for inimage in droneList:
+        outimage = os.path.join(dstDir, os.path.basename(inimage).replace(".tif", "_ssi.img"))
+        print('Creating %s'%os.path.basename(outimage))
+        infiles = applier.FilenameAssociations()
+        infiles.drone = inimage
+        outfiles = applier.FilenameAssociations()
+        outfiles.ssi = outimage
+        otherargs = applier.OtherInputs()
+        controls = applier.ApplierControls()
+        controls.setStatsIgnore(2)
+        controls.setCalcStats(True) 
+        applier.apply(makeDroneSSI, infiles, outfiles, otherArgs=otherargs, controls=controls)
+        sys.exit()
 
 
 def rescaleDrone(info, inputs, outputs, otherargs):
@@ -517,4 +583,6 @@ def extract_plant_ndvi():
 #scale_drone_to_landsat()
 #plot_landsat_vs_drone()
 #make_drone_pv_images()
-extract_plant_ndvi()
+#extract_plant_ndvi()
+
+make_drone_ssi_images()

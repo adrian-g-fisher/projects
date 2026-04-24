@@ -79,7 +79,7 @@ def extract_fc(imagefile, results, tempFile, xSize, ySize):
 
 
 # Define inputs and outputs
-polyfile = r'C:\Users\z9803884\OneDrive - UNSW\Documents\student_projects\phd\matt_brun\polygon.shp'
+polyfile = r'C:\Users\z9803884\OneDrive - UNSW\Documents\student_projects\phd\matt_brun\lindonwgs84.shp'
 csvfile = r'C:\Users\z9803884\OneDrive - UNSW\Documents\student_projects\phd\matt_brun\polygon_fc_extract.csv'
 
 # Create temporary subset over polygon area
@@ -117,8 +117,10 @@ results = []
 for imagefile in imageList:
     results = extract_fc(imagefile, results, tempFile, xSize, ySize)
     print(imagefile)
+    print(results)
+    sys.exit()
 results = np.array(results)
-os.remove(tempFile)
+#os.remove(tempFile)
 
 # Write CSV file
 with open(csvfile, 'w') as f:

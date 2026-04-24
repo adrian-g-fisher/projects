@@ -4,6 +4,7 @@ import os
 import sys
 import glob
 import datetime
+import rasterio
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -221,8 +222,12 @@ def makeDroneSSI(info, inputs, outputs, otherargs):
     green = inputs.drone[1]
     red = inputs.drone[2]
     nir = inputs.drone[4]
+    
+    # The slopes nir_red and gre_blu should be positive
     nir_red = (nir - red) / (840 - 650)
     gre_blu = (green - blue) / (560 - 450)
+    nir_red = np.where(nir_red < 0, 0, nir_red)
+    gre_blu = np.where(gre_blu < 0, 0, gre_blu)
     demoninator = np.where(nir_red + gre_blu == 0, 1, nir_red + gre_blu) 
     ssi = (nir_red - gre_blu) / demoninator
     ssi[nir_red + gre_blu == 0] = 2
@@ -277,7 +282,7 @@ def make_drone_ssi_images():
         controls.setStatsIgnore(2)
         controls.setCalcStats(True) 
         applier.apply(makeDroneSSI, infiles, outfiles, otherArgs=otherargs, controls=controls)
-        sys.exit()
+
 
 
 def rescaleDrone(info, inputs, outputs, otherargs):
@@ -576,6 +581,136 @@ def extract_plant_ndvi():
                                                     meanNDVI[i], stdNDVI[i]))
 
 
+def plot_ndvi_ssi_triangles():
+    droneSSIdir = r'C:\Data\fowlers_gap_ndvi\drone_ssi'
+    droneNDVIdir = r'C:\Data\fowlers_gap_ndvi\drone_ndvi'
+    plotDir = r'C:\Data\fowlers_gap_ndvi\ndvi_ssi_plots'
+    for ssiImage in glob.glob(os.path.join(droneSSIdir, '*_ssi.img')):
+        
+        print(ssiImage)
+        
+        ndviImage = os.path.join(droneNDVIdir, os.path.basename(ssiImage).replace("_ssi.img", "_ndvi.img"))
+        plotfile = os.path.join(plotDir, os.path.basename(ndviImage).replace(".img", "_ssi.png"))
+        
+        with rasterio.open(ndviImage) as src:
+            ndvi = src.read(1)
+        with rasterio.open(ssiImage) as src:
+            ssi = src.read(1)
+        
+        nodata = (ndvi == 2) & (ssi == 2)
+        
+        ndvi = ndvi[~nodata]
+        ssi = ssi[~nodata]
+        
+        fig = plt.figure()
+        fig.set_size_inches((3, 3))
+        ax = plt.axes([0.2, 0.2, 0.7, 0.7])
+        h = ax.hist2d(ndvi, ssi, bins=[100, 100], range=[[0, 1], [-1, 1]], norm=mpl.colors.LogNorm())
+        ax.set_xlabel('Drone NDVI')
+        ax.set_ylabel('Drone SSI')
+        ax.set_xlim([0, 1])
+        ax.set_ylim([-1, 1])
+        plt.savefig(plotfile, dpi=300)
+        plt.close()
+
+
+def makeDroneNSSI(info, inputs, outputs, otherargs):
+    """
+    """
+    nodata = info.getNoDataValueFor(inputs.drone)
+    rededge = inputs.drone[3]
+    nir = inputs.drone[4]
+    demoninator = np.where(rededge + nir == 0, 1, rededge + nir) 
+    nssi = (nir - rededge) / demoninator
+    nssi[rededge + nir == 0] = 2
+    nssi[(rededge == nodata) | (nir == nodata)] = 2
+    outputs.nssi = np.array([nssi]).astype(np.float32)
+
+
+def make_drone_nssi_images():
+    droneList = [r'S:\fowlers_gap\imagery\drone\2024\202403_ausplots\conausplot_20240321_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2024\202403_ausplots\emuausplot_20240323_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2024\202403_ausplots\southsandausplot_20240322_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2024\202403_ausplots\emugrazedausplot_20240322_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2024\202403_exclosures\mosaics\concon_20240310_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2024\202403_exclosures\mosaics\conex_20240310_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2024\202403_exclosures\mosaics\warcon_20240310_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2024\202403_exclosures\mosaics\warex_20240311_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2023\202303_exclosures\mosaics\concon_20230318_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2023\202303_exclosures\mosaics\conex_20230318_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2023\202303_exclosures\mosaics\warcon_20230318_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2023\202303_exclosures\mosaics\warex_20230318_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2022\p4m_conausplot_20220514\p4m_conausplot_20220514_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2022\p4m_emuausplot_20220512\p4m_emuausplot_20220512_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2022\p4m_fg03_20220513\p4m_fg03_20220513_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2022\p4m_fg04_20220513\p4m_fg04_20220513_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2022\p4m_fg05_20220513\p4m_fg05_20220513_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2022\p4m_fg08_20220512\p4m_fg08_20220512_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2022\p4m_fg11_20220514\p4m_fg11_20220514_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2022\p4m_fg13_20220515\p4m_fg13_20220515_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2022\p4m_fg14_20220512\p4m_fg14_20220512_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2022\p4m_fg15_20220515\p4m_fg15_20220515_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2021\con1_20210430_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2021\con2_20210430_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2021\emu1_20210502_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2021\emu2_20210502_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2021\man1_20210503_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2021\man2_20210503_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2021\war1_20210501_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2021\war2_20210501_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2021\war3_20210504_multiband.tif',
+                 r'S:\fowlers_gap\imagery\drone\2021\war4_20210504_multiband.tif']
+    
+    dstDir = r"C:\Data\fowlers_gap_ndvi\drone_nssi"
+    for inimage in droneList:
+        outimage = os.path.join(dstDir, os.path.basename(inimage).replace(".tif", "_nssi.img"))
+        print('Creating %s'%os.path.basename(outimage))
+        infiles = applier.FilenameAssociations()
+        infiles.drone = inimage
+        outfiles = applier.FilenameAssociations()
+        outfiles.nssi = outimage
+        otherargs = applier.OtherInputs()
+        controls = applier.ApplierControls()
+        controls.setStatsIgnore(2)
+        controls.setCalcStats(True) 
+        applier.apply(makeDroneNSSI, infiles, outfiles, otherArgs=otherargs, controls=controls)
+
+
+def plot_ndvi_nssi_triangles():
+    droneNSSIdir = r'C:\Data\fowlers_gap_ndvi\drone_nssi'
+    droneNDVIdir = r'C:\Data\fowlers_gap_ndvi\drone_ndvi'
+    plotDir = r'C:\Data\fowlers_gap_ndvi\ndvi_nssi_plots'
+    for nssiImage in glob.glob(os.path.join(droneNSSIdir, '*_nssi.img')):
+        
+        print(nssiImage)
+        
+        ndviImage = os.path.join(droneNDVIdir, os.path.basename(nssiImage).replace("_nssi.img", "_ndvi.img"))
+        plotfile = os.path.join(plotDir, os.path.basename(ndviImage).replace(".img", "_nssi.png"))
+        
+        with rasterio.open(ndviImage) as src:
+            ndvi = src.read(1)
+        with rasterio.open(nssiImage) as src:
+            nssi = src.read(1)
+        
+        nodata = (ndvi == 2) & (nssi == 2)
+        
+        ndvi = ndvi[~nodata]
+        nssi = nssi[~nodata]
+        
+        fig = plt.figure()
+        fig.set_size_inches((3, 3))
+        ax = plt.axes([0.2, 0.2, 0.7, 0.7])
+        h = ax.hist2d(ndvi, nssi, bins=[100, 100], range=[[-1, 1], [-1, 1]], norm=mpl.colors.LogNorm())
+        ax.set_xlabel('Drone NDVI')
+        ax.set_ylabel('Drone NSSI')
+        ax.set_xlim([-1, 1])
+        ax.set_ylim([-1, 1])
+        plt.savefig(plotfile, dpi=300)
+        plt.close()
+
+
+# NDVI analysis for AEO poster
+# ----------------------------
 #make_landsat_ndvi_images()
 #compare_landsat_ndvi_pv()
 #make_drone_ndvi_images()
@@ -585,4 +720,9 @@ def extract_plant_ndvi():
 #make_drone_pv_images()
 #extract_plant_ndvi()
 
-make_drone_ssi_images()
+# Unmixing analysis
+# -----------------
+#make_drone_ssi_images()
+#plot_ndvi_ssi_triangles()
+#make_drone_nssi_images()
+plot_ndvi_nssi_triangles()

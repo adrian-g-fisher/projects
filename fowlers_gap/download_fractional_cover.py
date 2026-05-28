@@ -7,8 +7,8 @@ from datetime import datetime
 
 # Inputs and outputs
 polygon = r'S:\fowlers_gap\gis\topo\fowlers_aoi_albers.shp'
-dstDir = r'S:\fowlers_gap\imagery\landsat\seasonal_fractional_cover'
-#dstDir = r'S:\fowlers_gap\imagery\landsat\seasonal_fractional_cover_v3'
+#dstDir = r'S:\fowlers_gap\imagery\landsat\seasonal_fractional_cover'
+dstDir = r'S:\fowlers_gap\imagery\landsat\seasonal_fractional_cover_v3'
 
 # Read in shapefile and get bounding box
 basename = os.path.basename(polygon).replace(r'.shp', '')
@@ -20,9 +20,9 @@ ds = None
 
 # Construct dateList for all seasonal dates
 start = 198712198802
-end = 202409202411
+end = 202512202602
 dateList = []
-for y1 in range(1987, 2025):
+for y1 in range(1987, 2026):
     for m1 in range(3, 13, 3):
         if m1 < 12:
             y2 = y1
@@ -37,15 +37,16 @@ for y1 in range(1987, 2025):
 # For each date make the image subset
 # Use either the QLD or TERN server
 #srcDir = r'/vsicurl/http://qld.auscover.org.au/public/data/landsat/seasonal_fractional_cover/fractional_cover/nsw/'
-srcDir = r'/vsicurl/https://data.tern.org.au/rs/public/data/landsat/seasonal_fractional_cover/fractional_cover/nsw/'
-#srcDir = r'/vsicurl/https://data.tern.org.au/rs/public/data/landsat/seasonal_fractional_cover_v3/fractional_cover/seasonal/nsw/'
+#srcDir = r'/vsicurl/https://data.tern.org.au/rs/public/data/landsat/seasonal_fractional_cover/fractional_cover/nsw/'
+srcDir = r'/vsicurl/https://data.tern.org.au/rs/public/data/landsat/seasonal_fractional_cover_v3/fractional_cover/seasonal/nsw/'
 
 for date in dateList:
-    srcImage = r'lztmre_nsw_m%i_dima2.tif'%date
-    #srcImage = r'lztmre_nsw_m%i_dp1a2.tif'%date
+    #srcImage = r'lztmre_nsw_m%i_dima2.tif'%date
+    srcImage = r'lztmre_nsw_m%i_dp1a2.tif'%date
     srcFile = os.path.join(srcDir, srcImage)
     dstFile = os.path.join(dstDir, srcImage.replace(r'.tif', r'_subset.tif'))
     if os.path.exists(dstFile) is False:
+        print(os.path.basename(dstFile))
         src_ds = gdal.Open(srcFile)
         dst_ds = gdal.Translate(dstFile, src_ds, projWin=bbox)
         dst_ds = None

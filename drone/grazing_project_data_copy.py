@@ -8,9 +8,7 @@ To backup data use:
 
     rclone copy --progress srcDir dstDir
 
-    rclone copy --progress D:\\grazing_study_drone_data S:\\grazing_study_drone_data
-
-    rclone copy --progress D:\\grazing_study_drone_data S:\\grazing_study_drone_data\\outputs
+    rclone copy --progress C:\\Data\\grazing_study_drone_data\\metashape_subsequent S:\\grazing_study_drone_data\\metashape_subsequent
 
 """
 
@@ -18,6 +16,30 @@ import os
 import sys
 import shutil
 import glob
+
+def copy_model_files():
+    srcDir = r"C:\Data\grazing_study_drone_data\metashape_initial"
+    dstDir = r"C:\Data\grazing_study_drone_data\metashape_subsequent"
+    
+    for projSrc in glob.glob(os.path.join(srcDir, "*")):
+        proj = os.path.basename(projSrc)
+        site = proj.split('_')[1]
+        modelSrc = os.path.join(projSrc, "outputs")
+        inModel = os.path.join(modelSrc, '%s_model.obj'%proj)
+
+        for dst in glob.glob(os.path.join(dstDir, "*")):
+            dSite = os.path.basename(dst).split('_')[1]
+            if dSite == site:
+                outDir = os.path.join(dst, "outputs")
+                if os.path.exists(outDir) is False:
+                    os.mkdir(outDir)
+                outModel = os.path.join(outDir, os.path.basename(inModel))
+                if os.path.exists(outModel) is False:
+                    print(outModel)
+                    shutil.copy(inModel, outModel)
+
+
+#copy_model_files()
 
 
 def remove_outputs(mainDir):
@@ -31,7 +53,7 @@ def remove_outputs(mainDir):
             shutil.rmtree(outputDir)
 
 #remove_outputs(r"S:\grazing_study_drone_data\metashape_initial")
-#remove_outputs(r"S:\grazing_study_drone_data\metashape_subsequent")
+#remove_outputs(r"C:\data\grazing_study_drone_data\metashape_subsequent")
 
 
 def remove_images(mainDir):
@@ -66,24 +88,24 @@ def transfer_images():
         
         proj = os.path.basename(projSrc)
         site = proj.split('_')[1][0]
-        if site == 'w':
         
+        imageSrc = os.path.join(projSrc, "images")
+        projDst = os.path.join(dstDir, proj)
+        imageDst = os.path.join(projDst, "images")
+        
+        if os.path.exists(projDst) is False:
+                
             print(proj)
+                
+            os.mkdir(projDst)
         
-            imageSrc = os.path.join(projSrc, "images")
-            projDst = os.path.join(dstDir, proj)
-            imageDst = os.path.join(projDst, "images")
-        
-            if os.path.exists(projDst) is False:
-                os.mkdir(projDst)
-        
-                if os.path.exists(imageDst) is False:
-                    os.mkdir(imageDst)
+            if os.path.exists(imageDst) is False:
+                os.mkdir(imageDst)
             
-                for inImage in glob.glob(os.path.join(imageSrc, "*.TIF")):
-                    outImage = os.path.join(imageDst, os.path.basename(inImage))
-                    if os.path.exists(outImage) is False:
-                        shutil.copy(inImage, outImage)
+            for inImage in glob.glob(os.path.join(imageSrc, "*.TIF")):
+                outImage = os.path.join(imageDst, os.path.basename(inImage))
+                if os.path.exists(outImage) is False:
+                    shutil.copy(inImage, outImage)
 
 #transfer_images()
 
@@ -106,15 +128,13 @@ def transfer_outputs():
             
             print(proj)
             
-            if os.path.exists(projDst) is False:
-                os.mkdir(projDst)
-        
-            if os.path.exists(outputDst) is False:
-                os.mkdir(outputDst)
-                shutil.copytree(outputSrc, outputDst, dirs_exist_ok=True)
+            if os.path.exists(projDst) is True:
+                if os.path.exists(outputDst) is False:
+                    os.mkdir(outputDst)
+                    shutil.copytree(outputSrc, outputDst, dirs_exist_ok=True)
 
 
-transfer_outputs()
+#transfer_outputs()
 
 
 def copy_images(masterDir, nameDirList):
@@ -208,7 +228,29 @@ witch2026 = [["p4m_wc1_20260311", "S:\\grazing_study_drone_data\\witchelina_2026
              ["p4m_we1_20260311", "S:\\grazing_study_drone_data\\witchelina_202603\\p4m_we1_20260311"],
              ["p4m_we2_20260313", "S:\\grazing_study_drone_data\\witchelina_202603\\p4m_we2_20260313"],
              ["p4m_we3_20260312", "S:\\grazing_study_drone_data\\witchelina_202603\\p4m_we3_20260312"]]
-           
+
+# 2026 data
+data_2026 = [["p4m_be1_20260510", r"D:\raw_202605\be1_20260510"],
+             ["p4m_bc1_20260510", r"D:\raw_202605\bc1_20260510"],
+             ["p4m_be2_20260510", r"D:\raw_202605\be2_20260510"],
+             ["p4m_bc2_20260510", r"D:\raw_202605\bc2_20260510"],
+             ["p4m_bc3_20260510", r"D:\raw_202605\bc3_20260510"],
+             ["p4m_be3_20260511", r"D:\raw_202605\be3_20260511"],
+             ["p4m_fp3_20260516", r"D:\raw_202605\fp3_20260516"],
+             ["p4m_fc1_20260512", r"D:\raw_202605\fc1_20260512"],
+             ["p4m_fc2_20260512", r"D:\raw_202605\fc2_20260512"],
+             ["p4m_fe1_20260512", r"D:\raw_202605\fe1_20260512"],
+             ["p4m_fe2_20260512", r"D:\raw_202605\fe2_20260512"],
+             ["p4m_fe3_20260517", r"D:\raw_202605\fe3_20260517"],
+             ["p4m_fc3_20260517", r"D:\raw_202605\fc3_20260517"],
+             ["p4m_fe5_20260518", r"D:\raw_202605\fe5_20260518"],
+             ["p4m_fp5_20260518", r"D:\raw_202605\fp5_20260518"],
+             ["p4m_fc5_20260518", r"D:\raw_202605\fc5_20260518"],
+             ["p4m_fc4_20260513", r"D:\raw_202605\fc4_20260513"],
+             ["p4m_fe4_20260513", r"D:\raw_202605\fe4_20260513"],
+             ["p4m_fp4_20260513", r"D:\raw_202605\fp4_20260513"]]
+
 #copy_images("D:\\grazing_study_drone_data\\metashape_initial", initialList)
 #copy_images("D:\\grazing_study_drone_data\\metashape_subsequent", subList)
 #copy_images("S:\\grazing_study_drone_data\\metashape_subsequent", witch2026)
+#copy_images(r"C:\Data\grazing_study_drone_data\metashape_subsequent", data_2026)

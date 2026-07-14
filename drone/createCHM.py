@@ -33,21 +33,21 @@ def process_laz(lazFile, mosaic):
     and canopy height model using th pixelgrid of mosaic.
     """
     
-    # First reproject the mosaic image into a new image with square 5 cm pixels
-    mosaic_5cm = mosaic.replace('.tif', '_5cm.tif')
-    if os.path.exists(mosaic_5cm) is False:
-        kwargs = {'xRes': 0.05, 'yRes': 0.05, 'resampleAlg': 'bilinear',
+    # First reproject the mosaic image into a new image with square 20 cm pixels
+    mosaic_20cm = mosaic.replace('.tif', '_20cm.tif')
+    if os.path.exists(mosaic_20cm) is False:
+        kwargs = {'xRes': 0.2, 'yRes': 0.2, 'resampleAlg': 'bilinear',
                   'targetAlignedPixels': True, 'srcNodata': 65535}
-        ds = gdal.Warp(mosaic_5cm, mosaic, **kwargs)
+        ds = gdal.Warp(mosaic_20cm, mosaic, **kwargs)
         ds = None
     
     # Create names for output files
-    dsmFile = mosaic_5cm.replace('.tif', '_dsm.tif')
-    demFile = mosaic_5cm.replace('.tif', '_dem.tif')
-    chmFile = mosaic_5cm.replace('.tif', '_chm.tif')
+    dsmFile = mosaic_20cm.replace('.tif', '_dsm.tif')
+    demFile = mosaic_20cm.replace('.tif', '_dem.tif')
+    chmFile = mosaic_20cm.replace('.tif', '_chm.tif')
     
     # Read in mosaic image and get image information
-    ds = gdal.Open(mosaic_5cm)
+    ds = gdal.Open(mosaic_20cm)
     gt = ds.GetGeoTransform()
     pixelSize = gt[1]
     rows  = ds.RasterYSize
@@ -239,14 +239,13 @@ def xyToRowCol(x, y, xMin, yMax, pixSize):
 # Hardcode
 
 
-masterList = glob.glob('D:\grazing_study_drone_data\*')
-for srcDir in masterList:
-    dirList = glob.glob(os.path.join(srcDir, '*'))
-    for projectDir in dirList:
-        project = os.path.basename(projectDir)
-        projectDir = os.path.join(projectDir, 'outputs')
-        lazFile = os.path.join(projectDir, '%s_mosaic_classified.laz'%project)
-        mosaicImage = os.path.join(projectDir, '%s_mosaic.tif'%project)
-        if os.path.exists(lazFile):
-            print(lazFile)
-            process_laz(lazFile, mosaicImage)
+srcDir = glob.glob('C:\Data\grazing_study_drone_data')
+dirList = glob.glob(os.path.join(srcDir, '*'))
+for projectDir in dirList:
+    project = os.path.basename(projectDir)
+    projectDir = os.path.join(projectDir, 'outputs')
+    lazFile = os.path.join(projectDir, '%s_mosaic_classified.laz'%project)
+    mosaicImage = os.path.join(projectDir, '%s_mosaic.tif'%project)
+    if os.path.exists(lazFile):
+        print(lazFile)
+        process_laz(lazFile, mosaicImage)

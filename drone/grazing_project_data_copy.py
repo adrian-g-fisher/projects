@@ -111,11 +111,8 @@ def transfer_images():
 
 def transfer_outputs():
     
-    #srcDir = r"C:\Data\grazing_study_drone_data\metashape_initial"
-    #dstDir = r"S:\grazing_study_drone_data\metashape_initial"
-    
-    srcDir = r"C:\Data\grazing_study_drone_data\metashape_subsequent"
-    dstDir = r"S:\grazing_study_drone_data\metashape_subsequent"
+    srcDir = r"C:\Data\grazing_study_drone_data"
+    dstDir = r"D:\grazing_study_drone_data"
     
     for projSrc in glob.glob(os.path.join(srcDir, "*")):
         
@@ -128,13 +125,19 @@ def transfer_outputs():
             
             print(proj)
             
-            if os.path.exists(projDst) is True:
-                if os.path.exists(outputDst) is False:
-                    os.mkdir(outputDst)
-                    shutil.copytree(outputSrc, outputDst, dirs_exist_ok=True)
+            if os.path.exists(projDst) is False:
+                os.mkdir(projDst)
+                
+            if os.path.exists(outputDst) is False:
+                os.mkdir(outputDst)
+            
+            shutil.copytree(outputSrc, outputDst, dirs_exist_ok=True)
 
 
-#transfer_outputs()
+transfer_outputs()
+
+
+sys.exit()
 
 
 def copy_images(masterDir, nameDirList):

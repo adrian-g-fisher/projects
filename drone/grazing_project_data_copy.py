@@ -17,6 +17,36 @@ import sys
 import shutil
 import glob
 
+
+def transfer_chms():
+    
+    srcMain = r"D:\grazing_study_drone_data"
+    dstMain = r"S:\grazing_study_drone_data\metashape"
+    
+    for projSrc in glob.glob(os.path.join(srcMain, "p4m_*")):
+        
+        proj = os.path.basename(projSrc)
+        srcDir = os.path.join(projSrc, "outputs")
+        projDst = os.path.join(dstMain, proj)
+        dstDir = os.path.join(projDst, "outputs")
+        
+        laz = os.path.join(srcDir, '%s_mosaic_classified.laz'%proj)
+        mosaic = os.path.join(srcDir, '%s_mosaic_20cm.tif'%proj)
+        dsm = os.path.join(srcDir, '%s_mosaic_20cm_dsm.tif'%proj)
+        chm = os.path.join(srcDir, '%s_mosaic_20cm_chm.tif'%proj)
+        dem = os.path.join(srcDir, '%s_mosaic_20cm_dem.tif'%proj)
+        
+        print(proj)
+        
+        for srcFile in [laz, mosaic, dsm, chm, dem]:
+            dstFile = os.path.join(dstDir, os.path.basename(srcFile))
+            if os.path.exists(dstFile) is False:
+                shutil.copy(srcFile, dstFile)
+
+transfer_chms()
+
+sys.exit()
+
 def copy_model_files():
     srcDir = r"C:\Data\grazing_study_drone_data\metashape_initial"
     dstDir = r"C:\Data\grazing_study_drone_data\metashape_subsequent"
@@ -134,11 +164,7 @@ def transfer_outputs():
             shutil.copytree(outputSrc, outputDst, dirs_exist_ok=True)
 
 
-transfer_outputs()
-
-
-sys.exit()
-
+#transfer_outputs()
 
 def copy_images(masterDir, nameDirList):
 

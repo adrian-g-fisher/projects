@@ -237,10 +237,8 @@ def xyToRowCol(x, y, xMin, yMax, pixSize):
 
 
 # Hardcode
-
-
-srcDir = glob.glob('C:\Data\grazing_study_drone_data')
-dirList = glob.glob(os.path.join(srcDir, '*'))
+srcDir = 'D:\grazing_study_drone_data'
+dirList = glob.glob(os.path.join(srcDir, 'p4m_*'))
 for projectDir in dirList:
     project = os.path.basename(projectDir)
     projectDir = os.path.join(projectDir, 'outputs')

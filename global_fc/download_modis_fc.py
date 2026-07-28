@@ -2,7 +2,7 @@
 """
 This downloads global MODIS fractional cover from CSIRO
 
-Needs the MODIS 
+conda create -n modis gdal rioxarray numpy urllib3 pandas lxml
 
 """
 

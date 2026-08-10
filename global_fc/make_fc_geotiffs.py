@@ -60,59 +60,87 @@ def calcStats(info, inputs, outputs, otherargs):
     total_stack = total_stack.astype(float).filled(np.nan)
     nodata = (np.sum(green_nodata, axis=0) == stack.shape[0])
     
-    greenP = np.nanpercentile(green_stack, [5, 25, 50, 75, 95], axis=0)
-    greenp05 = greenP[0]
-    greenp05[nodata == 1] = 255
-    greenp25 = greenP[1]
-    greenp25[nodata == 1] = 255
-    greenp50 = greenP[1]
-    greenp50[nodata == 1] = 255
-    greenp75 = greenP[1]
-    greenp75[nodata == 1] = 255
-    greenp95 = greenP[1]
-    greenp95[nodata == 1] = 255
+    if np.isnan(green_stack).all():
+        greenp05 = np.full_like(nodata, 255)
+        greenp25 = np.full_like(nodata, 255)
+        greenp50 = np.full_like(nodata, 255)
+        greenp75 = np.full_like(nodata, 255)
+        greenp95 = np.full_like(nodata, 255)
+    else:
+        greenP = np.nanpercentile(green_stack, [5, 25, 50, 75, 95], axis=0)
+        greenp05 = greenP[0]
+        greenp05[nodata == 1] = 255
+        greenp25 = greenP[1]
+        greenp25[nodata == 1] = 255
+        greenp50 = greenP[1]
+        greenp50[nodata == 1] = 255
+        greenp75 = greenP[1]
+        greenp75[nodata == 1] = 255
+        greenp95 = greenP[1]
+        greenp95[nodata == 1] = 255
     
-    deadP = np.nanpercentile(dead_stack, [5, 25, 50, 75, 95], axis=0)
-    deadp05 = deadP[0]
-    deadp05[nodata == 1] = 255
-    deadp25 = deadP[1]
-    deadp25[nodata == 1] = 255
-    deadp50 = deadP[1]
-    deadp50[nodata == 1] = 255
-    deadp75 = deadP[1]
-    deadp75[nodata == 1] = 255
-    deadp95 = deadP[1]
-    deadp95[nodata == 1] = 255
-
-    bareP = np.nanpercentile(bare_stack, [5, 25, 50, 75, 95], axis=0)
-    barep05 = bareP[0]
-    barep05[nodata == 1] = 255
-    barep25 = bareP[1]
-    barep25[nodata == 1] = 255
-    barep50 = bareP[1]
-    barep50[nodata == 1] = 255
-    barep75 = bareP[1]
-    barep75[nodata == 1] = 255
-    barep95 = bareP[1]
-    barep95[nodata == 1] = 255
-
-    totalP = np.nanpercentile(total_stack, [5, 25, 50, 75, 95], axis=0)
-    totalp05 = totalP[0]
-    totalp05[nodata == 1] = 255
-    totalp25 = totalP[1]
-    totalp25[nodata == 1] = 255
-    totalp50 = totalP[1]
-    totalp50[nodata == 1] = 255
-    totalp75 = totalP[1]
-    totalp75[nodata == 1] = 255
-    totalp95 = totalP[1]
-    totalp95[nodata == 1] = 255
+    if np.isnan(dead_stack).all():
+        deadp05 = np.full_like(nodata, 255)
+        deadp25 = np.full_like(nodata, 255)
+        deadp50 = np.full_like(nodata, 255)
+        deadp75 = np.full_like(nodata, 255)
+        deadp95 = np.full_like(nodata, 255)
+    else:
+        deadP = np.nanpercentile(dead_stack, [5, 25, 50, 75, 95], axis=0)
+        deadp05 = deadP[0]
+        deadp05[nodata == 1] = 255
+        deadp25 = deadP[1]
+        deadp25[nodata == 1] = 255
+        deadp50 = deadP[1]
+        deadp50[nodata == 1] = 255
+        deadp75 = deadP[1]
+        deadp75[nodata == 1] = 255
+        deadp95 = deadP[1]
+        deadp95[nodata == 1] = 255
     
-    outputs.p05 = np.array([pGreen, pDead, pBare, pTotal]).astype(np.uint8)
-    outputs.p25 = np.array([pGreen, pDead, pBare, pTotal]).astype(np.uint8)
-    outputs.p50 = np.array([pGreen, pDead, pBare, pTotal]).astype(np.uint8)
-    outputs.p75 = np.array([pGreen, pDead, pBare, pTotal]).astype(np.uint8)
-    outputs.p95 = np.array([pGreen, pDead, pBare, pTotal]).astype(np.uint8)
+    if np.isnan(bare_stack).all():
+        barep05 = np.full_like(nodata, 255)
+        barep25 = np.full_like(nodata, 255)
+        barep50 = np.full_like(nodata, 255)
+        barep75 = np.full_like(nodata, 255)
+        barep95 = np.full_like(nodata, 255)
+    else:
+        bareP = np.nanpercentile(bare_stack, [5, 25, 50, 75, 95], axis=0)
+        barep05 = bareP[0]
+        barep05[nodata == 1] = 255
+        barep25 = bareP[1]
+        barep25[nodata == 1] = 255
+        barep50 = bareP[1]
+        barep50[nodata == 1] = 255
+        barep75 = bareP[1]
+        barep75[nodata == 1] = 255
+        barep95 = bareP[1]
+        barep95[nodata == 1] = 255
+
+    if np.isnan(total_stack).all():
+        totalp05 = np.full_like(nodata, 255)
+        totalp25 = np.full_like(nodata, 255)
+        totalp50 = np.full_like(nodata, 255)
+        totalp75 = np.full_like(nodata, 255)
+        totalp95 = np.full_like(nodata, 255)
+    else:
+        totalP = np.nanpercentile(total_stack, [5, 25, 50, 75, 95], axis=0)
+        totalp05 = totalP[0]
+        totalp05[nodata == 1] = 255
+        totalp25 = totalP[1]
+        totalp25[nodata == 1] = 255
+        totalp50 = totalP[1]
+        totalp50[nodata == 1] = 255
+        totalp75 = totalP[1]
+        totalp75[nodata == 1] = 255
+        totalp95 = totalP[1]
+        totalp95[nodata == 1] = 255
+    
+    outputs.p05 = np.array([greenp05, deadp05, barep05, totalp05]).astype(np.uint8)
+    outputs.p25 = np.array([greenp25, deadp25, barep25, totalp25]).astype(np.uint8)
+    outputs.p50 = np.array([greenp50, deadp50, barep50, totalp50]).astype(np.uint8)
+    outputs.p75 = np.array([greenp75, deadp75, barep75, totalp75]).astype(np.uint8)
+    outputs.p95 = np.array([greenp95, deadp95, barep95, totalp95]).astype(np.uint8)
 
 
 def calculate_percentiles():

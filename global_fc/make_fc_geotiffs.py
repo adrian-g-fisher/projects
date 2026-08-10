@@ -48,66 +48,70 @@ def calcStats(info, inputs, outputs, otherargs):
     
     green_nodata = (stack[:, 0, :, :] == 255)
     green_stack = np.ma.masked_where(green_nodata == 1, green_stack)
+    green_stack = green_stack.astype(float).filled(np.nan)
     dead_nodata = (stack[:, 1, :, :] == 255)
     dead_stack = np.ma.masked_where(dead_nodata == 1, dead_stack)
+    dead_stack = dead_stack.astype(float).filled(np.nan)
     bare_nodata = (stack[:, 2, :, :] == 255)
     bare_stack = np.ma.masked_where(bare_nodata == 1, bare_stack)
+    bare_stack = bare_stack.astype(float).filled(np.nan)
     total_nodata = (stack[:, 3, :, :] == 255)
     total_stack = np.ma.masked_where(total_nodata == 1, total_stack)
+    total_stack = total_stack.astype(float).filled(np.nan)
     nodata = (np.sum(green_nodata, axis=0) == stack.shape[0])
     
     p = 5
-    pGreen = np.percentile(green_stack, p, axis=0)
+    pGreen = np.nanpercentile(green_stack, p, axis=0)
     pGreen[nodata == 1] = 255
-    pDead = np.percentile(dead_stack, p, axis=0)
+    pDead = np.nanpercentile(dead_stack, p, axis=0)
     pDead[nodata == 1] = 255
-    pBare = np.percentile(bare_stack, p, axis=0)
+    pBare = np.nanpercentile(bare_stack, p, axis=0)
     pBare[nodata == 1] = 255
-    pTotal = np.percentile(total_stack, p, axis=0)
+    pTotal = np.nanpercentile(total_stack, p, axis=0)
     pTotal[nodata == 1] = 255
     outputs.p05 = np.array([pGreen, pDead, pBare, pTotal]).astype(np.uint8)
     
     p = 25
-    pGreen = np.percentile(green_stack, p, axis=0)
+    pGreen = np.nanpercentile(green_stack, p, axis=0)
     pGreen[nodata == 1] = 255
-    pDead = np.percentile(dead_stack, p, axis=0)
+    pDead = np.nanpercentile(dead_stack, p, axis=0)
     pDead[nodata == 1] = 255
-    pBare = np.percentile(bare_stack, p, axis=0)
+    pBare = np.nanpercentile(bare_stack, p, axis=0)
     pBare[nodata == 1] = 255
-    pTotal = np.percentile(total_stack, p, axis=0)
+    pTotal = np.nanpercentile(total_stack, p, axis=0)
     pTotal[nodata == 1] = 255
     outputs.p25 = np.array([pGreen, pDead, pBare, pTotal]).astype(np.uint8)
     
     p = 50
-    pGreen = np.percentile(green_stack, p, axis=0)
+    pGreen = np.nanpercentile(green_stack, p, axis=0)
     pGreen[nodata == 1] = 255
-    pDead = np.percentile(dead_stack, p, axis=0)
+    pDead = np.nanpercentile(dead_stack, p, axis=0)
     pDead[nodata == 1] = 255
-    pBare = np.percentile(bare_stack, p, axis=0)
+    pBare = np.nanpercentile(bare_stack, p, axis=0)
     pBare[nodata == 1] = 255
-    pTotal = np.percentile(total_stack, p, axis=0)
+    pTotal = np.nanpercentile(total_stack, p, axis=0)
     pTotal[nodata == 1] = 255
     outputs.p50 = np.array([pGreen, pDead, pBare, pTotal]).astype(np.uint8)
     
     p = 75
-    pGreen = np.percentile(green_stack, p, axis=0)
+    pGreen = np.nanpercentile(green_stack, p, axis=0)
     pGreen[nodata == 1] = 255
-    pDead = np.percentile(dead_stack, p, axis=0)
+    pDead = np.nanpercentile(dead_stack, p, axis=0)
     pDead[nodata == 1] = 255
-    pBare = np.percentile(bare_stack, p, axis=0)
+    pBare = np.nanpercentile(bare_stack, p, axis=0)
     pBare[nodata == 1] = 255
-    pTotal = np.percentile(total_stack, p, axis=0)
+    pTotal = np.nanpercentile(total_stack, p, axis=0)
     pTotal[nodata == 1] = 255
     outputs.p75 = np.array([pGreen, pDead, pBare, pTotal]).astype(np.uint8)
 
     p = 95
-    pGreen = np.percentile(green_stack, p, axis=0)
+    pGreen = np.nanpercentile(green_stack, p, axis=0)
     pGreen[nodata == 1] = 255
-    pDead = np.percentile(dead_stack, p, axis=0)
+    pDead = np.nanpercentile(dead_stack, p, axis=0)
     pDead[nodata == 1] = 255
-    pBare = np.percentile(bare_stack, p, axis=0)
+    pBare = np.nanpercentile(bare_stack, p, axis=0)
     pBare[nodata == 1] = 255
-    pTotal = np.percentile(total_stack, p, axis=0)
+    pTotal = np.nanpercentile(total_stack, p, axis=0)
     pTotal[nodata == 1] = 255
     outputs.p95 = np.array([pGreen, pDead, pBare, pTotal]).astype(np.uint8)
 

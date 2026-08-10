@@ -60,125 +60,108 @@ def calcStats(info, inputs, outputs, otherargs):
     total_stack = total_stack.astype(float).filled(np.nan)
     nodata = (np.sum(green_nodata, axis=0) == stack.shape[0])
     
-    p = 5
-    pGreen = np.nanpercentile(green_stack, p, axis=0)
-    pGreen[nodata == 1] = 255
-    pDead = np.nanpercentile(dead_stack, p, axis=0)
-    pDead[nodata == 1] = 255
-    pBare = np.nanpercentile(bare_stack, p, axis=0)
-    pBare[nodata == 1] = 255
-    pTotal = np.nanpercentile(total_stack, p, axis=0)
-    pTotal[nodata == 1] = 255
-    outputs.p05 = np.array([pGreen, pDead, pBare, pTotal]).astype(np.uint8)
+    greenP = np.nanpercentile(green_stack, [5, 25, 50, 75, 95], axis=0)
+    greenp05 = greenP[0]
+    greenp05[nodata == 1] = 255
+    greenp25 = greenP[1]
+    greenp25[nodata == 1] = 255
+    greenp50 = greenP[1]
+    greenp50[nodata == 1] = 255
+    greenp75 = greenP[1]
+    greenp75[nodata == 1] = 255
+    greenp95 = greenP[1]
+    greenp95[nodata == 1] = 255
     
-    p = 25
-    pGreen = np.nanpercentile(green_stack, p, axis=0)
-    pGreen[nodata == 1] = 255
-    pDead = np.nanpercentile(dead_stack, p, axis=0)
-    pDead[nodata == 1] = 255
-    pBare = np.nanpercentile(bare_stack, p, axis=0)
-    pBare[nodata == 1] = 255
-    pTotal = np.nanpercentile(total_stack, p, axis=0)
-    pTotal[nodata == 1] = 255
-    outputs.p25 = np.array([pGreen, pDead, pBare, pTotal]).astype(np.uint8)
-    
-    p = 50
-    pGreen = np.nanpercentile(green_stack, p, axis=0)
-    pGreen[nodata == 1] = 255
-    pDead = np.nanpercentile(dead_stack, p, axis=0)
-    pDead[nodata == 1] = 255
-    pBare = np.nanpercentile(bare_stack, p, axis=0)
-    pBare[nodata == 1] = 255
-    pTotal = np.nanpercentile(total_stack, p, axis=0)
-    pTotal[nodata == 1] = 255
-    outputs.p50 = np.array([pGreen, pDead, pBare, pTotal]).astype(np.uint8)
-    
-    p = 75
-    pGreen = np.nanpercentile(green_stack, p, axis=0)
-    pGreen[nodata == 1] = 255
-    pDead = np.nanpercentile(dead_stack, p, axis=0)
-    pDead[nodata == 1] = 255
-    pBare = np.nanpercentile(bare_stack, p, axis=0)
-    pBare[nodata == 1] = 255
-    pTotal = np.nanpercentile(total_stack, p, axis=0)
-    pTotal[nodata == 1] = 255
-    outputs.p75 = np.array([pGreen, pDead, pBare, pTotal]).astype(np.uint8)
+    deadP = np.nanpercentile(dead_stack, [5, 25, 50, 75, 95], axis=0)
+    deadp05 = deadP[0]
+    deadp05[nodata == 1] = 255
+    deadp25 = deadP[1]
+    deadp25[nodata == 1] = 255
+    deadp50 = deadP[1]
+    deadp50[nodata == 1] = 255
+    deadp75 = deadP[1]
+    deadp75[nodata == 1] = 255
+    deadp95 = deadP[1]
+    deadp95[nodata == 1] = 255
 
-    p = 95
-    pGreen = np.nanpercentile(green_stack, p, axis=0)
-    pGreen[nodata == 1] = 255
-    pDead = np.nanpercentile(dead_stack, p, axis=0)
-    pDead[nodata == 1] = 255
-    pBare = np.nanpercentile(bare_stack, p, axis=0)
-    pBare[nodata == 1] = 255
-    pTotal = np.nanpercentile(total_stack, p, axis=0)
-    pTotal[nodata == 1] = 255
+    bareP = np.nanpercentile(bare_stack, [5, 25, 50, 75, 95], axis=0)
+    barep05 = bareP[0]
+    barep05[nodata == 1] = 255
+    barep25 = bareP[1]
+    barep25[nodata == 1] = 255
+    barep50 = bareP[1]
+    barep50[nodata == 1] = 255
+    barep75 = bareP[1]
+    barep75[nodata == 1] = 255
+    barep95 = bareP[1]
+    barep95[nodata == 1] = 255
+
+    totalP = np.nanpercentile(total_stack, [5, 25, 50, 75, 95], axis=0)
+    totalp05 = totalP[0]
+    totalp05[nodata == 1] = 255
+    totalp25 = totalP[1]
+    totalp25[nodata == 1] = 255
+    totalp50 = totalP[1]
+    totalp50[nodata == 1] = 255
+    totalp75 = totalP[1]
+    totalp75[nodata == 1] = 255
+    totalp95 = totalP[1]
+    totalp95[nodata == 1] = 255
+    
+    outputs.p05 = np.array([pGreen, pDead, pBare, pTotal]).astype(np.uint8)
+    outputs.p25 = np.array([pGreen, pDead, pBare, pTotal]).astype(np.uint8)
+    outputs.p50 = np.array([pGreen, pDead, pBare, pTotal]).astype(np.uint8)
+    outputs.p75 = np.array([pGreen, pDead, pBare, pTotal]).astype(np.uint8)
     outputs.p95 = np.array([pGreen, pDead, pBare, pTotal]).astype(np.uint8)
 
 
 def calculate_percentiles():
+    
+    with open('S:/global/modis_fractional_cover/modis_hv_countries.txt', 'r') as f:
+        hvCountries = f.read().splitlines()[1:]
+    
     inDir = r'S:\global\modis_fractional_cover\tif'
     outDir = r'S:\global\modis_fractional_cover\percentiles'
     imageList = glob.glob(os.path.join(inDir, "*.tif"))
     hvList = np.array([os.path.basename(i).split("_")[-2] for i in imageList])
     imageList = np.array(imageList)
     hv_unique = np.unique(hvList)
-    for hv in hv_unique:
-        hv_images = list(imageList[hvList == hv])
-        
-        # geotransforms can be different due to rounding of pixel sizes!
-        # ref_gt = None
-        # for hvImage in hv_images:
-            # ds = gdal.Open(hvImage)
-            # gt = ds.GetGeoTransform()
-            # ds = None
-            # if ref_gt == None:
-                # ref_gt = gt
-            # else:
-                # if gt != ref_gt:
-                    # print(os.path.basename(hvImage))
-                    # print(ref_gt)
-                    # print(gt)
-        
-        infiles = applier.FilenameAssociations()
-        infiles.fc_list = hv_images
-        outfiles = applier.FilenameAssociations()
-        outfiles.p05 = os.path.join(outDir, r'p05/FC_Monthly_Medoid_v310_MCD43A4_%s_p05.tif'%hv)
-        outfiles.p25 = os.path.join(outDir, r'p25/FC_Monthly_Medoid_v310_MCD43A4_%s_p25.tif'%hv)
-        outfiles.p50 = os.path.join(outDir, r'p50/FC_Monthly_Medoid_v310_MCD43A4_%s_p50.tif'%hv)
-        outfiles.p75 = os.path.join(outDir, r'p75/FC_Monthly_Medoid_v310_MCD43A4_%s_p75.tif'%hv)
-        outfiles.p95 = os.path.join(outDir, r'p95/FC_Monthly_Medoid_v310_MCD43A4_%s_p95.tif'%hv)
-        otherargs = applier.OtherInputs()
-        controls = applier.ApplierControls()
-        controls.setWindowXsize(256)
-        controls.setWindowYsize(256)
-        controls.setStatsIgnore(255)
-        controls.setCalcStats(True)
-        controls.setOutputDriverName("GTiff")
-        controls.setReferenceImage(hv_images[0])
-        controls.setResampleMethod('near')
-        controls.setLayerNames(['Photosynthetic vegetation', 'Non-photosynthetic vegetation', 'Bare soil', 'Total cover'])
-        controls.setProgress(cuiprogress.CUIProgressBar()) 
-        applier.apply(calcStats, infiles, outfiles, otherArgs=otherargs, controls=controls)
-        print('Created percentiles for %s'%hv)
+    for hv in hvCountries:
+        if hv in hv_unique:
+            
+            print("Processing %s"%hv)
+            
+            hv_images = list(imageList[hvList == hv])
+            infiles = applier.FilenameAssociations()
+            infiles.fc_list = hv_images
+            outfiles = applier.FilenameAssociations()
+            outfiles.p05 = os.path.join(outDir, r'p05/FC_Monthly_Medoid_v310_MCD43A4_%s_p05.tif'%hv)
+            outfiles.p25 = os.path.join(outDir, r'p25/FC_Monthly_Medoid_v310_MCD43A4_%s_p25.tif'%hv)
+            outfiles.p50 = os.path.join(outDir, r'p50/FC_Monthly_Medoid_v310_MCD43A4_%s_p50.tif'%hv)
+            outfiles.p75 = os.path.join(outDir, r'p75/FC_Monthly_Medoid_v310_MCD43A4_%s_p75.tif'%hv)
+            outfiles.p95 = os.path.join(outDir, r'p95/FC_Monthly_Medoid_v310_MCD43A4_%s_p95.tif'%hv)
+            otherargs = applier.OtherInputs()
+            controls = applier.ApplierControls()
+            controls.setWindowXsize(256)
+            controls.setWindowYsize(256)
+            controls.setStatsIgnore(255)
+            controls.setCalcStats(True)
+            controls.setOutputDriverName("GTiff")
+            controls.setReferenceImage(hv_images[0])
+            controls.setResampleMethod('near')
+            controls.setLayerNames(['Photosynthetic vegetation', 'Non-photosynthetic vegetation', 'Bare soil', 'Total cover'])
+            controls.setProgress(cuiprogress.CUIProgressBar()) 
+            applier.apply(calcStats, infiles, outfiles, otherArgs=otherargs, controls=controls)
 
 
-# Merge dates together
-# I need to change this to merge the percentiles
-def merge_dates_globally():
-    inDir = r'S:\global\modis_fractional_cover\tif'
-    outDir = r'S:\global\modis_fractional_cover\global'
-    imageList = glob.glob(os.path.join(inDir, "*.tif"))
-    dateList = np.array([os.path.basename(i).split("_")[-1].replace(".tif", "") for i in imageList])
-    imageList = np.array(imageList)
-    date_unique = np.unique(dateList)
-    for date in date_unique:
-        print(date)
-        dateImages = imageList[dateList == date]
-        outFile = os.path.join(outDir, 'FC_Monthly_Medoid_v310_MCD43A4_global_%s.tif'%date)
+def merge_tiles_globally():
+    inDir = r'S:\global\modis_fractional_cover\percentiles'
+    for p in ['p05', 'p25', 'p50', 'p75', 'p95']:
+        imageList = glob.glob(os.path.join(inDir, "p/*.tif"))
+        outFile = os.path.join(inDir, 'FC_Monthly_Medoid_v310_MCD43A4_global_%s.tif'%p)
         if os.path.exists(outFile) is False:
             outVrt = outFile.replace('.tif', '.vrt')
-            outds = gdal.BuildVRT(outVrt, dateImages.tolist())
+            outds = gdal.BuildVRT(outVrt, imageList.tolist())
             outds = gdal.Translate(outFile, outds)
             bandnames = ['Photosynthetic vegetation', 'Non-photosynthetic vegetation', 'Bare soil', 'Total cover']
             for i in range(4):
@@ -192,4 +175,4 @@ def merge_dates_globally():
 
 #netcdf2tif()
 calculate_percentiles()
-#merge_dates_globally()
+#merge_tiles_globally()

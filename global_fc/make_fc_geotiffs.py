@@ -156,30 +156,38 @@ def calculate_percentiles():
     hv_unique = np.unique(hvList)
     for hv in hvCountries:
         if hv in hv_unique:
+            p05 = os.path.join(outDir, r'p05/FC_Monthly_Medoid_v310_MCD43A4_%s_p05.tif'%hv)
+            p25 = os.path.join(outDir, r'p25/FC_Monthly_Medoid_v310_MCD43A4_%s_p25.tif'%hv)
+            p50 = os.path.join(outDir, r'p50/FC_Monthly_Medoid_v310_MCD43A4_%s_p50.tif'%hv)
+            p75 = os.path.join(outDir, r'p75/FC_Monthly_Medoid_v310_MCD43A4_%s_p75.tif'%hv)
+            p95 = os.path.join(outDir, r'p95/FC_Monthly_Medoid_v310_MCD43A4_%s_p95.tif'%hv)
             
-            print("Processing %s"%hv)
+            if all(os.path.isfile(f) for f in [p05, p25, p50, p75, p95]) is True:
+                print("Completed %s"%hv)
             
-            hv_images = list(imageList[hvList == hv])
-            infiles = applier.FilenameAssociations()
-            infiles.fc_list = hv_images
-            outfiles = applier.FilenameAssociations()
-            outfiles.p05 = os.path.join(outDir, r'p05/FC_Monthly_Medoid_v310_MCD43A4_%s_p05.tif'%hv)
-            outfiles.p25 = os.path.join(outDir, r'p25/FC_Monthly_Medoid_v310_MCD43A4_%s_p25.tif'%hv)
-            outfiles.p50 = os.path.join(outDir, r'p50/FC_Monthly_Medoid_v310_MCD43A4_%s_p50.tif'%hv)
-            outfiles.p75 = os.path.join(outDir, r'p75/FC_Monthly_Medoid_v310_MCD43A4_%s_p75.tif'%hv)
-            outfiles.p95 = os.path.join(outDir, r'p95/FC_Monthly_Medoid_v310_MCD43A4_%s_p95.tif'%hv)
-            otherargs = applier.OtherInputs()
-            controls = applier.ApplierControls()
-            controls.setWindowXsize(256)
-            controls.setWindowYsize(256)
-            controls.setStatsIgnore(255)
-            controls.setCalcStats(True)
-            controls.setOutputDriverName("GTiff")
-            controls.setReferenceImage(hv_images[0])
-            controls.setResampleMethod('near')
-            controls.setLayerNames(['Photosynthetic vegetation', 'Non-photosynthetic vegetation', 'Bare soil', 'Total cover'])
-            controls.setProgress(cuiprogress.CUIProgressBar()) 
-            applier.apply(calcStats, infiles, outfiles, otherArgs=otherargs, controls=controls)
+            else:
+                print("Processing %s"%hv)
+                hv_images = list(imageList[hvList == hv])
+                infiles = applier.FilenameAssociations()
+                infiles.fc_list = hv_images
+                outfiles = applier.FilenameAssociations()
+                outfiles.p05 = p05
+                outfiles.p25 = p25
+                outfiles.p50 = p50
+                outfiles.p75 = p75
+                outfiles.p95 = p95
+                otherargs = applier.OtherInputs()
+                controls = applier.ApplierControls()
+                controls.setWindowXsize(256)
+                controls.setWindowYsize(256)
+                controls.setStatsIgnore(255)
+                controls.setCalcStats(True)
+                controls.setOutputDriverName("GTiff")
+                controls.setReferenceImage(hv_images[0])
+                controls.setResampleMethod('near')
+                controls.setLayerNames(['Photosynthetic vegetation', 'Non-photosynthetic vegetation', 'Bare soil', 'Total cover'])
+                controls.setProgress(cuiprogress.CUIProgressBar()) 
+                applier.apply(calcStats, infiles, outfiles, otherArgs=otherargs, controls=controls)
 
 
 def merge_tiles_globally():

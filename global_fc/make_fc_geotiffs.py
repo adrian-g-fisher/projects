@@ -162,9 +162,9 @@ def calculate_percentiles():
             p75 = os.path.join(outDir, r'p75/FC_Monthly_Medoid_v310_MCD43A4_%s_p75.tif'%hv)
             p95 = os.path.join(outDir, r'p95/FC_Monthly_Medoid_v310_MCD43A4_%s_p95.tif'%hv)
             
-            if all(os.path.isfile(f) for f in [p05, p25, p50, p75, p95]) is True:
+            if all(os.path.isfile(f) for f in [p05, p25, p50, p75, p95]) is False:
                 print("Completed %s"%hv)
-            
+           
             else:
                 print("Processing %s"%hv)
                 hv_images = list(imageList[hvList == hv])
@@ -191,13 +191,13 @@ def calculate_percentiles():
 
 
 def merge_tiles_globally():
-    inDir = r'S:\global\modis_fractional_cover\percentiles'
+    inDir = r'S:/global/modis_fractional_cover/percentiles'
     for p in ['p05', 'p25', 'p50', 'p75', 'p95']:
-        imageList = glob.glob(os.path.join(inDir, "p/*.tif"))
+        imageList = glob.glob(os.path.join(inDir, "%s/*.tif"%p))
         outFile = os.path.join(inDir, 'FC_Monthly_Medoid_v310_MCD43A4_global_%s.tif'%p)
         if os.path.exists(outFile) is False:
             outVrt = outFile.replace('.tif', '.vrt')
-            outds = gdal.BuildVRT(outVrt, imageList.tolist())
+            outds = gdal.BuildVRT(outVrt, list(imageList))
             outds = gdal.Translate(outFile, outds)
             bandnames = ['Photosynthetic vegetation', 'Non-photosynthetic vegetation', 'Bare soil', 'Total cover']
             for i in range(4):
@@ -209,6 +209,48 @@ def merge_tiles_globally():
             os.remove(outVrt)
 
 
+def fixNodata(info, inputs, outputs, otherargs):
+    """
+    This fixes the nodata values.
+    """
+    PV = inputs.FC[0]
+    NPV = inputs.FC[1]
+    BS = inputs.FC[2]
+    TV = inputs.FC[3]
+    extraNodata = (PV == 1) & (NPV == 1) & (BS == 1)
+    PV[extraNodata] = 255
+    NPV[extraNodata] = 255
+    BS[extraNodata] = 255
+    TV[extraNodata] = 255
+    outputs.FC = np.array([PV, NPV, BS, TV]).astype(np.uint8)
+    
+
+def fix_nodata():
+    inDir = r'S:/global/modis_fractional_cover/percentiles'
+    for p in ['p05', 'p25', 'p50', 'p75', 'p95']:
+        inFile = os.path.join(inDir, 'FC_Monthly_Medoid_v310_MCD43A4_global_%s.tif'%p)
+        outFile = os.path.join(inDir, 'FC_Monthly_Medoid_v310_MCD43A4_global_200101-202606_%s.tif'%p)
+        
+        print(os.path.basename(outFile))
+        
+        infiles = applier.FilenameAssociations()
+        infiles.FC = inFile
+        outfiles = applier.FilenameAssociations()
+        outfiles.FC = outFile
+        otherargs = applier.OtherInputs()
+        controls = applier.ApplierControls()
+        controls.setWindowXsize(256)
+        controls.setWindowYsize(256)
+        controls.setStatsIgnore(255)
+        controls.setCalcStats(True)
+        controls.setOutputDriverName("GTiff")
+        controls.setLayerNames(['Photosynthetic vegetation', 'Non-photosynthetic vegetation', 'Bare soil', 'Total cover'])
+        controls.setProgress(cuiprogress.CUIProgressBar()) 
+        applier.apply(fixNodata, infiles, outfiles, otherArgs=otherargs, controls=controls)
+
+
+
 #netcdf2tif()
-calculate_percentiles()
+#calculate_percentiles()
 #merge_tiles_globally()
+fix_nodata()

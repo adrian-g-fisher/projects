@@ -249,8 +249,87 @@ def fix_nodata():
         applier.apply(fixNodata, infiles, outfiles, otherArgs=otherargs, controls=controls)
 
 
+def fixNodata(info, inputs, outputs, otherargs):
+    """
+    Fixes the nodata problem in the aridity data
+    """
+    aridity = inputs.aridity[0]
+    africa = inputs.africa[0]
+    aridity[(africa == 1) & (aridity == 0)] = 1
+    outputs.aridity = np.array([aridity])
+
+
+def resampleImage(info, inputs, outputs, otherargs):
+    """
+    Resamples aridity to modis
+    """
+    aridity = inputs.aridity[0].astype(np.float32) * 0.0001
+    nodata = (inputs.fc[0] == 255) & (inputs.fc[1] == 255) & (inputs.fc[2] == 255)
+    aridity[nodata == 1] = -999
+    outputs.aridity = np.array([aridity]).astype(np.float32)
+
+
+def resample_aridity():
+    
+    # First fix the nodata values in Africa
+    infiles = applier.FilenameAssociations()
+    infiles.aridity = 'S:/global/global-aridity_v3_1/Global-AI_ET0__annual_v3_1/ai_v31_yr.tif'
+    infiles.africa = 'S:/global/global-aridity_v3_1/Global-AI_ET0__annual_v3_1/africa_nodata.shp'
+    outfiles = applier.FilenameAssociations()
+    outfiles.aridity = 'S:/global/global-aridity_v3_1/Global-AI_ET0__annual_v3_1/ai_v31_yr_nodata_fixed.tif'
+    otherargs = applier.OtherInputs()
+    controls = applier.ApplierControls()
+    controls.setWindowXsize(256)
+    controls.setWindowYsize(256)
+    controls.setStatsIgnore(0)
+    controls.setCalcStats(True)
+    controls.setOutputDriverName("GTiff")
+    controls.setProgress(cuiprogress.CUIProgressBar()) 
+    applier.apply(fixNodata, infiles, outfiles, otherArgs=otherargs, controls=controls)
+    
+    # Now resample using gdal.warp
+    inImage = 'S:/global/global-aridity_v3_1/Global-AI_ET0__annual_v3_1/ai_v31_yr_nodata_fixed.tif'
+    refImage = 'S:/global/modis_fractional_cover/percentiles/FC_Monthly_Medoid_v310_MCD43A4_global_200101-202606_p50.tif'
+    outImage = 'S:/global/global-aridity_v3_1/Global-AI_ET0__annual_v3_1/ai_v31_yr_gdalwarp.tif'
+    ref_ds = gdal.Open(refImage, gdal.GA_ReadOnly)
+    ref_proj = ref_ds.GetProjection()
+    ref_geotrans = ref_ds.GetGeoTransform()
+    ref_width = ref_ds.RasterXSize
+    ref_height = ref_ds.RasterYSize
+    ref_ds = None
+    min_x = ref_geotrans[0]
+    max_y = ref_geotrans[3]
+    max_x = min_x + ref_geotrans[1] * ref_width
+    min_y = max_y + ref_geotrans[5] * ref_height
+    ref_output_bounds = [min_x, min_y, max_x, max_y]
+    warp_options = gdal.WarpOptions(format='GTiff',
+                                    dstSRS=ref_proj,
+                                    outputBounds=ref_output_bounds,
+                                    xRes=ref_geotrans[1],
+                                    yRes=abs(ref_geotrans[5]),
+                                    resampleAlg='bilinear',
+                                    creationOptions=['COMPRESS=DEFLATE'])
+    gdal.Warp(outImage, inImage, options=warp_options)
+    
+    # Now set nodata to mask oceans and lakes
+    infiles = applier.FilenameAssociations()
+    infiles.aridity = 'S:/global/global-aridity_v3_1/Global-AI_ET0__annual_v3_1/ai_v31_yr_gdalwarp.tif'
+    infiles.fc = 'S:/global/modis_fractional_cover/percentiles/FC_Monthly_Medoid_v310_MCD43A4_global_200101-202606_p50.tif'
+    outfiles = applier.FilenameAssociations()
+    outfiles.aridity = 'S:/global/global-aridity_v3_1/Global-AI_ET0__annual_v3_1/ai_v31_yr_modis_masked.tif'
+    otherargs = applier.OtherInputs()
+    controls = applier.ApplierControls()
+    controls.setWindowXsize(256)
+    controls.setWindowYsize(256)
+    controls.setStatsIgnore(-999)
+    controls.setCalcStats(True)
+    controls.setOutputDriverName("GTiff")
+    controls.setProgress(cuiprogress.CUIProgressBar()) 
+    applier.apply(resampleImage, infiles, outfiles, otherArgs=otherargs, controls=controls)
+
 
 #netcdf2tif()
 #calculate_percentiles()
 #merge_tiles_globally()
-fix_nodata()
+#fix_nodata()
+resample_aridity()

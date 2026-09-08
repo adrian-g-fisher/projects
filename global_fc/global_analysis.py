@@ -3,27 +3,33 @@
 
 conda activate modis
       
-Extract a sample of pixels to a CSV file, including:
+Extracts a sample of pixels to a CSV file, including:
  - percentiles of bare, PV, NPV
  - aridity index
  - population density
  - dryland class
  - continent
 
-... but mask out all salt lakes.
+Then reads the extract and makes plots
 
 """
-
 
 import os, sys
 import numpy as np
 import glob
-import xarray as xr
-import rioxarray
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 from scipy import ndimage
 from osgeo import gdal, ogr, osr
 from rios import applier, cuiprogress
 gdal.UseExceptions()
+
+
+params = {'text.usetex': False, 'mathtext.fontset': 'stixsans',
+          'xtick.direction': 'out', 'ytick.direction': 'out',
+          'font.sans-serif': 'Arial', 'font.family': 'sans-serif'}
+plt.rcParams.update(params)
 
 
 # Make dictionary for continent names and IDs
@@ -127,40 +133,65 @@ def extractSample(info, inputs, outputs, otherargs):
                 f.write(line)
 
 
-outCsv = 'global_pixel_sample.csv'
-with open(outCsv, 'w') as f:
-    f.write('easting,northing,continent,dryland,population,aridity,p05PV,p05NPV,p05BS,p25PV,p25NPV,p25BS,p50PV,p50NPV,p50BS,p75PV,p75NPV,p75BS,p95PV,p95NPV,p95BS\n')
+def make_extract():
     
+    outCsv = 'global_pixel_sample.csv'
+    with open(outCsv, 'w') as f:
+        f.write('easting,northing,continent,dryland,population,aridity,p05PV,p05NPV,p05BS,p25PV,p25NPV,p25BS,p50PV,p50NPV,p50BS,p75PV,p75NPV,p75BS,p95PV,p95NPV,p95BS\n')
+    
+    infiles = applier.FilenameAssociations()
+    infiles.p05 = r'S:/global/modis_fractional_cover/percentiles/FC_Monthly_Medoid_v310_MCD43A4_global_200101-202606_p05.tif'
+    infiles.p25 = r'S:/global/modis_fractional_cover/percentiles/FC_Monthly_Medoid_v310_MCD43A4_global_200101-202606_p25.tif'
+    infiles.p50 = r'S:/global/modis_fractional_cover/percentiles/FC_Monthly_Medoid_v310_MCD43A4_global_200101-202606_p50.tif'
+    infiles.p75 = r'S:/global/modis_fractional_cover/percentiles/FC_Monthly_Medoid_v310_MCD43A4_global_200101-202606_p75.tif'
+    infiles.p95 = r'S:/global/modis_fractional_cover/percentiles/FC_Monthly_Medoid_v310_MCD43A4_global_200101-202606_p95.tif'
+    infiles.aridity = r'S:/global/global-aridity_v3_1/Global-AI_ET0__annual_v3_1/ai_v31_yr_modis_masked.tif'
+    infiles.salt = 'S:/global/GLWD_v2_0/GLWD_v2_0_combined_classes/GLWD_v2_0_saltlakes_sinusoidal_clip_fixed.tif'
+    infiles.population = 'S:/global/population/gpw_v4_population_density_rev11_2020_30_sec_sinusoidal_masked.tif'
+    infiles.dryland = r'S:/global/Drylands_dataset_2007/drylands_UNCCD_CBD_july2014_sinusoidal.tif'
+    infiles.continent = r'S:/global/continents/World_Continents_sinusoidal.tif'
+    outfiles = applier.FilenameAssociations()
+    outfiles.samples = 'sample_pixels.tif'
+    otherargs = applier.OtherInputs()
+    otherargs.csv = outCsv
+    controls = applier.ApplierControls()
+    controls.setWindowXsize(256)
+    controls.setWindowYsize(256)
+    controls.setStatsIgnore(0)
+    controls.setCalcStats(True)
+    controls.setOutputDriverName("GTiff")
+    controls.setFootprintType(applier.INTERSECTION)
+    applier.apply(extractSample, infiles, outfiles, otherArgs=otherargs, controls=controls)
 
-infiles = applier.FilenameAssociations()
-infiles.p05 = r'S:/global/modis_fractional_cover/percentiles/FC_Monthly_Medoid_v310_MCD43A4_global_200101-202606_p05.tif'
-infiles.p25 = r'S:/global/modis_fractional_cover/percentiles/FC_Monthly_Medoid_v310_MCD43A4_global_200101-202606_p25.tif'
-infiles.p50 = r'S:/global/modis_fractional_cover/percentiles/FC_Monthly_Medoid_v310_MCD43A4_global_200101-202606_p50.tif'
-infiles.p75 = r'S:/global/modis_fractional_cover/percentiles/FC_Monthly_Medoid_v310_MCD43A4_global_200101-202606_p75.tif'
-infiles.p95 = r'S:/global/modis_fractional_cover/percentiles/FC_Monthly_Medoid_v310_MCD43A4_global_200101-202606_p95.tif'
-infiles.aridity = r'S:/global/global-aridity_v3_1/Global-AI_ET0__annual_v3_1/ai_v31_yr_modis_masked.tif'
-infiles.salt = 'S:/global/GLWD_v2_0/GLWD_v2_0_combined_classes/GLWD_v2_0_saltlakes_sinusoidal_clip_fixed.tif'
-infiles.population = 'S:/global/population/gpw_v4_population_density_rev11_2020_30_sec_sinusoidal_masked.tif'
-infiles.dryland = r'S:/global/Drylands_dataset_2007/drylands_UNCCD_CBD_july2014_sinusoidal.tif'
-infiles.continent = r'S:/global/continents/World_Continents_sinusoidal.tif'
-outfiles = applier.FilenameAssociations()
-outfiles.samples = 'sample_pixels.tif'
-otherargs = applier.OtherInputs()
-otherargs.csv = outCsv
-controls = applier.ApplierControls()
-controls.setWindowXsize(256)
-controls.setWindowYsize(256)
-controls.setStatsIgnore(0)
-controls.setCalcStats(True)
-controls.setOutputDriverName("GTiff")
-controls.setFootprintType(applier.INTERSECTION)
-applier.apply(extractSample, infiles, outfiles, otherArgs=otherargs, controls=controls)
 
-# for infile in [infiles.p05, infiles.p25, infiles.p50, infiles.p75, infiles.p95,
-               # infiles.aridity, infiles.salt, infiles.population,
-               # infiles.dryland, infiles.continent]:
-    # ref_ds = gdal.Open(infile, gdal.GA_ReadOnly)
-    # ref_proj = ref_ds.GetProjection()
-    # ref_geotrans = ref_ds.GetGeoTransform()
-    # print(ref_geotrans)
-    # ref_ds = None
+def make_plots():
+    
+    # Global sample n = 2330244
+    
+    # Read in data and remove problem values
+    csv = r'C:/Users/z9803884/OneDrive - UNSW/Documents/publications/preparation/global_arid_brown_food_webs/global_pixel_sample.csv'
+    df = pd.read_csv(csv)
+    df.loc[df.p50BS > 100, 'p50BS'] = 100
+    df.loc[df.p50PV > 100, 'p50PV'] = 100
+    df.loc[df.p50NPV > 100, 'p50NPV'] = 100
+    
+    # Scatter plot of aridity vs FC
+    fig = plt.figure(1)
+    fig.set_size_inches((6, 2))
+    ax1 = plt.axes([0.1, 0.20, 0.25, 0.75])
+    ax1.hist2d(df.p50BS, df.aridity, bins=100, norm=mcolors.LogNorm(), cmap='Reds')
+    ax1.set_ylabel('AI')
+    ax1.set_xlabel('BS')
+    ax2 = plt.axes([0.4, 0.20, 0.25, 0.75])
+    ax2.hist2d(df.p50PV, df.aridity, bins=100, norm=mcolors.LogNorm(), cmap='Greens')
+    ax2.set_xlabel('PV')
+    ax2.set_yticklabels([])
+    ax3 = plt.axes([0.7, 0.20, 0.25, 0.75])
+    ax3.hist2d(df.p50NPV, df.aridity, bins=100, norm=mcolors.LogNorm(), cmap='Blues')
+    ax3.set_xlabel('NPV')
+    ax3.set_yticklabels([])
+    plt.savefig(r'C:/Users/z9803884/OneDrive - UNSW/Documents/publications/preparation/global_arid_brown_food_webs/aridity_vs_fc.png', dpi=300)
+    
+    
+#make_extract()
+make_plots()

@@ -72,11 +72,11 @@ def calcStats(info, inputs, outputs, otherargs):
         greenp05[nodata == 1] = 255
         greenp25 = greenP[1]
         greenp25[nodata == 1] = 255
-        greenp50 = greenP[1]
+        greenp50 = greenP[2]
         greenp50[nodata == 1] = 255
-        greenp75 = greenP[1]
+        greenp75 = greenP[3]
         greenp75[nodata == 1] = 255
-        greenp95 = greenP[1]
+        greenp95 = greenP[4]
         greenp95[nodata == 1] = 255
     
     if np.isnan(dead_stack).all():
@@ -91,11 +91,11 @@ def calcStats(info, inputs, outputs, otherargs):
         deadp05[nodata == 1] = 255
         deadp25 = deadP[1]
         deadp25[nodata == 1] = 255
-        deadp50 = deadP[1]
+        deadp50 = deadP[2]
         deadp50[nodata == 1] = 255
-        deadp75 = deadP[1]
+        deadp75 = deadP[3]
         deadp75[nodata == 1] = 255
-        deadp95 = deadP[1]
+        deadp95 = deadP[4]
         deadp95[nodata == 1] = 255
     
     if np.isnan(bare_stack).all():
@@ -110,11 +110,11 @@ def calcStats(info, inputs, outputs, otherargs):
         barep05[nodata == 1] = 255
         barep25 = bareP[1]
         barep25[nodata == 1] = 255
-        barep50 = bareP[1]
+        barep50 = bareP[2]
         barep50[nodata == 1] = 255
-        barep75 = bareP[1]
+        barep75 = bareP[3]
         barep75[nodata == 1] = 255
-        barep95 = bareP[1]
+        barep95 = bareP[4]
         barep95[nodata == 1] = 255
 
     if np.isnan(total_stack).all():
@@ -129,11 +129,11 @@ def calcStats(info, inputs, outputs, otherargs):
         totalp05[nodata == 1] = 255
         totalp25 = totalP[1]
         totalp25[nodata == 1] = 255
-        totalp50 = totalP[1]
+        totalp50 = totalP[2]
         totalp50[nodata == 1] = 255
-        totalp75 = totalP[1]
+        totalp75 = totalP[3]
         totalp75[nodata == 1] = 255
-        totalp95 = totalP[1]
+        totalp95 = totalP[4]
         totalp95[nodata == 1] = 255
     
     outputs.p05 = np.array([greenp05, deadp05, barep05, totalp05]).astype(np.uint8)
@@ -514,13 +514,14 @@ def fix_proj():
 
 
 #netcdf2tif()
-#calculate_percentiles()
+calculate_percentiles()
 #merge_tiles_globally()
 #fix_nodata()
+#fix_proj()
+
 #resample_aridity()
 #resample_population()
 #make_saltlake_mask()
 #fix_saltlakes()
 #rasterise_drylands()
 #rasterise_continents()
-#fix_proj()

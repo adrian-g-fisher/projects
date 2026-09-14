@@ -39,3 +39,6 @@ sentinel2_water/problem_water_pixels.shx
 sentinel2_water/waterindex_histograms.png
 sentinel2_water/waterindex_histograms_fowlers.png
 sentinel2_water/waterindex_histograms_witchelina.png
+global_fc/sample_pixels.tif
+global_fc/sample_pixels.tif.aux.xml
+global_fc/global_pixel_sample.csv

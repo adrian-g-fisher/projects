@@ -162,7 +162,7 @@ def calculate_percentiles():
             p75 = os.path.join(outDir, r'p75/FC_Monthly_Medoid_v310_MCD43A4_%s_p75.tif'%hv)
             p95 = os.path.join(outDir, r'p95/FC_Monthly_Medoid_v310_MCD43A4_%s_p95.tif'%hv)
             
-            if all(os.path.isfile(f) for f in [p05, p25, p50, p75, p95]) is False:
+            if all(os.path.isfile(f) for f in [p05, p25, p50, p75, p95]) is True:
                 print("Completed %s"%hv)
            
             else:
@@ -217,11 +217,24 @@ def fixNodata(info, inputs, outputs, otherargs):
     NPV = inputs.FC[1]
     BS = inputs.FC[2]
     TV = inputs.FC[3]
+    nodata = (PV == 255) & (NPV == 255) & (BS == 255)
     extraNodata = (PV == 1) & (NPV == 1) & (BS == 1)
+    
+    PV[PV > 100] = 100
+    NPV[NPV > 100] = 100
+    BS[BS > 100] = 100
+    TV[TV > 100] = 100
+    
+    PV[nodata] = 255
+    NPV[nodata] = 255
+    BS[nodata] = 255
+    TV[nodata] = 255
+    
     PV[extraNodata] = 255
     NPV[extraNodata] = 255
     BS[extraNodata] = 255
     TV[extraNodata] = 255
+    
     outputs.FC = np.array([PV, NPV, BS, TV]).astype(np.uint8)
     
 
@@ -249,7 +262,7 @@ def fix_nodata():
         applier.apply(fixNodata, infiles, outfiles, otherArgs=otherargs, controls=controls)
 
 
-def fixNodata(info, inputs, outputs, otherargs):
+def aridityFixNodata(info, inputs, outputs, otherargs):
     """
     Fixes the nodata problem in the aridity data
     """
@@ -285,7 +298,7 @@ def resample_aridity():
     controls.setCalcStats(True)
     controls.setOutputDriverName("GTiff")
     controls.setProgress(cuiprogress.CUIProgressBar()) 
-    applier.apply(fixNodata, infiles, outfiles, otherArgs=otherargs, controls=controls)
+    applier.apply(aridityFixNodata, infiles, outfiles, otherArgs=otherargs, controls=controls)
     
     # Now resample using gdal.warp
     inImage = 'S:/global/global-aridity_v3_1/Global-AI_ET0__annual_v3_1/ai_v31_yr_nodata_fixed.tif'
@@ -514,10 +527,10 @@ def fix_proj():
 
 
 #netcdf2tif()
-calculate_percentiles()
+#calculate_percentiles()
 #merge_tiles_globally()
-#fix_nodata()
-#fix_proj()
+fix_nodata()
+fix_proj()
 
 #resample_aridity()
 #resample_population()

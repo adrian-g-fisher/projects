@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 
-conda activate modis
+conda activate geo
       
 Extracts a sample of pixels to a CSV file, including:
  - percentiles of bare, PV, NPV
@@ -161,6 +161,7 @@ def make_extract():
     controls.setCalcStats(True)
     controls.setOutputDriverName("GTiff")
     controls.setFootprintType(applier.INTERSECTION)
+    controls.setProgress(cuiprogress.CUIProgressBar()) 
     applier.apply(extractSample, infiles, outfiles, otherArgs=otherargs, controls=controls)
 
 
@@ -193,5 +194,5 @@ def make_plots():
     plt.savefig(r'C:/Users/z9803884/OneDrive - UNSW/Documents/publications/preparation/global_arid_brown_food_webs/aridity_vs_fc.png', dpi=300)
     
     
-#make_extract()
-make_plots()
+make_extract()
+#make_plots()

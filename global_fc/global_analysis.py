@@ -172,9 +172,6 @@ def make_plots():
     # Read in data and remove problem values
     csv = r'C:/Users/z9803884/OneDrive - UNSW/Documents/publications/preparation/global_arid_brown_food_webs/global_pixel_sample.csv'
     df = pd.read_csv(csv)
-    df.loc[df.p50BS > 100, 'p50BS'] = 100
-    df.loc[df.p50PV > 100, 'p50PV'] = 100
-    df.loc[df.p50NPV > 100, 'p50NPV'] = 100
     
     # Scatter plot of aridity vs FC
     fig = plt.figure(1)
@@ -191,8 +188,8 @@ def make_plots():
     ax3.hist2d(df.p50NPV, df.aridity, bins=100, norm=mcolors.LogNorm(), cmap='Blues')
     ax3.set_xlabel('NPV')
     ax3.set_yticklabels([])
-    plt.savefig(r'C:/Users/z9803884/OneDrive - UNSW/Documents/publications/preparation/global_arid_brown_food_webs/aridity_vs_fc.png', dpi=300)
+    plt.savefig(r'C:/Users/z9803884/OneDrive - UNSW/Documents/publications/preparation/global_arid_brown_food_webs/aridity_vs_median_fc.png', dpi=300)
     
-    
+   
 make_extract()
 #make_plots()

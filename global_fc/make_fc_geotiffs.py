@@ -277,7 +277,7 @@ def resampleImage(info, inputs, outputs, otherargs):
     Resamples aridity to modis
     """
     aridity = inputs.aridity[0].astype(np.float32) * 0.0001
-    nodata = (inputs.fc[0] == 255) & (inputs.fc[1] == 255) & (inputs.fc[2] == 255)
+    nodata = (inputs.fc[0] == 255) & (inputs.fc[1] == 255) & (inputs.fc[2] == 255) | (aridity == 0)
     aridity[nodata == 1] = -999
     outputs.aridity = np.array([aridity]).astype(np.float32)
 
@@ -298,7 +298,7 @@ def resample_aridity():
     controls.setCalcStats(True)
     controls.setOutputDriverName("GTiff")
     controls.setProgress(cuiprogress.CUIProgressBar()) 
-    applier.apply(aridityFixNodata, infiles, outfiles, otherArgs=otherargs, controls=controls)
+    #applier.apply(aridityFixNodata, infiles, outfiles, otherArgs=otherargs, controls=controls)
     
     # Now resample using gdal.warp
     inImage = 'S:/global/global-aridity_v3_1/Global-AI_ET0__annual_v3_1/ai_v31_yr_nodata_fixed.tif'
@@ -322,7 +322,7 @@ def resample_aridity():
                                     yRes=abs(ref_geotrans[5]),
                                     resampleAlg='bilinear',
                                     creationOptions=['COMPRESS=DEFLATE'])
-    gdal.Warp(outImage, inImage, options=warp_options)
+    #gdal.Warp(outImage, inImage, options=warp_options)
     
     # Now set nodata to mask oceans and lakes
     infiles = applier.FilenameAssociations()
@@ -529,10 +529,11 @@ def fix_proj():
 #netcdf2tif()
 #calculate_percentiles()
 #merge_tiles_globally()
-fix_nodata()
-fix_proj()
+#fix_nodata()
+#fix_proj()
 
-#resample_aridity()
+resample_aridity()
+
 #resample_population()
 #make_saltlake_mask()
 #fix_saltlakes()

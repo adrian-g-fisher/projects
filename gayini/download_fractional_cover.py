@@ -6,8 +6,11 @@ from osgeo import gdal, ogr
 from datetime import datetime
 
 # Inputs and outputs
-polygon = r'C:\Users\z9803884\OneDrive - UNSW\Documents\gayini\gayini_aoi_albers.shp'
-dstDir = r'S:\gayini\landsat_fractionalcover3'
+#polygon = r'C:\Users\z9803884\OneDrive - UNSW\Documents\gayini\gayini_aoi_albers.shp'
+#dstDir = r'S:\gayini\landsat_fractionalcover3'
+
+polygon = r'S:\gayini\cumbung\cumbung_aoi_albers.shp'
+dstDir = r'S:\gayini\cumbung\landsat_fractionalcover3'
 
 # Read in shapefile and get bounding box
 basename = os.path.basename(polygon).replace(r'.shp', '')
@@ -19,9 +22,9 @@ ds = None
 
 # Construct dateList for all seasonal dates
 start = 198712198802
-end = 202512202602
+end = 202603202605
 dateList = []
-for y1 in range(1987, 2026):
+for y1 in range(1987, 2030):
     for m1 in range(3, 13, 3):
         if m1 < 12:
             y2 = y1

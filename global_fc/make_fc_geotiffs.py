@@ -531,9 +531,7 @@ def fix_proj():
 #merge_tiles_globally()
 #fix_nodata()
 #fix_proj()
-
-resample_aridity()
-
+#resample_aridity()
 #resample_population()
 #make_saltlake_mask()
 #fix_saltlakes()

@@ -164,33 +164,5 @@ def make_extract():
     controls.setFootprintType(applier.INTERSECTION)
     controls.setProgress(cuiprogress.CUIProgressBar())
     applier.apply(extractSample, infiles, outfiles, otherArgs=otherargs, controls=controls)
-
-
-def make_plots():
     
-    # Global sample n = 2330244
-    
-    # Read in data and remove problem values
-    csv = r'C:/Users/z9803884/OneDrive - UNSW/Documents/publications/preparation/global_arid_brown_food_webs/global_pixel_sample.csv'
-    df = pd.read_csv(csv)
-    
-    # Scatter plot of aridity vs FC
-    fig = plt.figure(1)
-    fig.set_size_inches((6, 2))
-    ax1 = plt.axes([0.1, 0.20, 0.25, 0.75])
-    ax1.hist2d(df.p50BS, df.aridity, bins=100, norm=mcolors.LogNorm(), cmap='Reds')
-    ax1.set_ylabel('AI')
-    ax1.set_xlabel('BS')
-    ax2 = plt.axes([0.4, 0.20, 0.25, 0.75])
-    ax2.hist2d(df.p50PV, df.aridity, bins=100, norm=mcolors.LogNorm(), cmap='Greens')
-    ax2.set_xlabel('PV')
-    ax2.set_yticklabels([])
-    ax3 = plt.axes([0.7, 0.20, 0.25, 0.75])
-    ax3.hist2d(df.p50NPV, df.aridity, bins=100, norm=mcolors.LogNorm(), cmap='Blues')
-    ax3.set_xlabel('NPV')
-    ax3.set_yticklabels([])
-    plt.savefig(r'C:/Users/z9803884/OneDrive - UNSW/Documents/publications/preparation/global_arid_brown_food_webs/aridity_vs_median_fc.png', dpi=300)
-    
-   
 make_extract()
-#make_plots()

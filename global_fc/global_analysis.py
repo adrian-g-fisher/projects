@@ -90,6 +90,7 @@ def extractSample(info, inputs, outputs, otherargs):
     samples[salt == 1] = 0
     samples[p05PV == 255] = 0
     samples[continent == 0] = 0
+    samples[aridity == -999] = 0
     
     outputs.samples = np.array([samples]).astype(np.uint8)
     
@@ -125,7 +126,7 @@ def extractSample(info, inputs, outputs, otherargs):
             
             with open(otherargs.csv, 'a') as f:
                 line = '%i,%i,%s,%s'%(easting, northing, continent_name, dryland_name)
-                line = '%s,%0.2f,%0.2f,%i,%i,%i'%(line, pop, ai, P05PV, P05NPV, P05BS)
+                line = '%s,%0.4f,%0.4f,%i,%i,%i'%(line, pop, ai, P05PV, P05NPV, P05BS)
                 line = '%s,%i,%i,%i'%(line, P25PV, P25NPV, P25BS)
                 line = '%s,%i,%i,%i'%(line, P50PV, P50NPV, P50BS)
                 line = '%s,%i,%i,%i'%(line, P75PV, P75NPV, P75BS)
@@ -161,7 +162,7 @@ def make_extract():
     controls.setCalcStats(True)
     controls.setOutputDriverName("GTiff")
     controls.setFootprintType(applier.INTERSECTION)
-    controls.setProgress(cuiprogress.CUIProgressBar()) 
+    controls.setProgress(cuiprogress.CUIProgressBar())
     applier.apply(extractSample, infiles, outfiles, otherArgs=otherargs, controls=controls)
 
 

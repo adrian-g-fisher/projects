@@ -62,6 +62,11 @@ def extract_fc(shapefile):
         with open(outfile, 'w') as f:
             f.write('Date,ID,Pixel_count,BS_mean,BS_std,PV_mean,PV_std,NPV_mean,NPV_std\n')
     
+    # Create CSV for mean of all sites
+    outfile = os.path.join(outdir, 'fractionalcover.csv')
+    with open(outfile, 'w') as f:
+        f.write('Date,Pixel_count,BS_mean,BS_std,PV_mean,PV_std,NPV_mean,NPV_std\n')
+    
     # Iterate over FC images
     for imagefile in glob.glob(r"S:\aust\modis_fractional_cover\*.tif"):
         year = imagefile.replace(r".tif", "").split(r".")[-4][1:]
@@ -86,6 +91,26 @@ def extract_fc(shapefile):
         # Calculate statistics on pixels within polygons
         values = np.array(otherargs.pixels).astype(np.float32)
         if values.size > 0:
+            
+            # Calculate for all areas
+            countValues = np.sum(np.ones_like(values[:, 1]))
+            meanBare = np.mean(values[:, 1])
+            stdBare = np.standard_deviation(values[:, 1])
+            meanGreen = np.mean(values[:, 2])
+            stdGreen = np.standard_deviation(values[:, 2])
+            meanDead = np.mean(values[:, 3])
+            stdDead = np.standard_deviation(values[:, 3])
+            
+            # Write to csv
+            outfile = os.path.join(outdir, 'fractionalcover.csv')
+            with open(outfile, "a") as f:
+                f.write('%s,%i,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\n'%(date,
+                                                      countValues,
+                                                      meanBare, stdBare,
+                                                      meanGreen, stdGreen,
+                                                      meanDead, stdDead))
+            
+            # Calculate for different areas
             uids = np.unique(values[:, 0])
             countValues = ndimage.sum(np.ones_like(values[:, 1]), values[:, 0], uids)
             meanBare = ndimage.mean(values[:, 1], values[:, 0], uids)

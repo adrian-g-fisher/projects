@@ -22,9 +22,9 @@ ds = None
 
 # Construct dateList for all seasonal dates
 start = 198712198802
-end = 202512202602
+end = 202606202608
 dateList = []
-for y1 in range(1987, 2026):
+for y1 in range(1987, 2027):
     for m1 in range(3, 13, 3):
         if m1 < 12:
             y2 = y1
@@ -43,6 +43,9 @@ for y1 in range(1987, 2026):
 srcDir = r'/vsicurl/https://data.tern.org.au/rs/public/data/landsat/seasonal_fractional_cover_v3/fractional_cover/seasonal/sa/'
 
 for date in dateList:
+    
+    print(date)
+    
     #srcImage = r'lztmre_sa_m%i_dima2.tif'%date
     srcImage = r'lztmre_sa_m%i_dp1a2.tif'%date
     srcFile = os.path.join(srcDir, srcImage)

@@ -6,7 +6,7 @@ from osgeo import gdal, ogr
 from datetime import datetime
 
 # Inputs and outputs
-polygon = r'S:\fowlers_gap\gis\topo\fowlers_aoi_albers.shp'
+polygon = r'fowlers_aoi_albers.shp'
 #dstDir = r'S:\fowlers_gap\imagery\landsat\seasonal_fractional_cover'
 dstDir = r'S:\fowlers_gap\imagery\landsat\seasonal_fractional_cover_v3'
 
@@ -48,10 +48,11 @@ for date in dateList:
     srcFile = os.path.join(srcDir, srcImage)
     dstFile = os.path.join(dstDir, srcImage.replace(r'.tif', r'_subset.tif'))
     if os.path.exists(dstFile) is False:
-        print(os.path.basename(dstFile))
+        print(os.path.basename(srcFile))
         src_ds = gdal.Open(srcFile)
         dst_ds = gdal.Translate(dstFile, src_ds, projWin=bbox)
         dst_ds = None
         src_ds = None 
 
 print('Image subsets downloaded')
+

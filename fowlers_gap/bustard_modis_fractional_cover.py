@@ -95,11 +95,11 @@ def extract_fc(shapefile):
             # Calculate for all areas
             countValues = np.sum(np.ones_like(values[:, 1]))
             meanBare = np.mean(values[:, 1])
-            stdBare = np.standard_deviation(values[:, 1])
+            stdBare = np.std(values[:, 1])
             meanGreen = np.mean(values[:, 2])
-            stdGreen = np.standard_deviation(values[:, 2])
+            stdGreen = np.std(values[:, 2])
             meanDead = np.mean(values[:, 3])
-            stdDead = np.standard_deviation(values[:, 3])
+            stdDead = np.std(values[:, 3])
             
             # Write to csv
             outfile = os.path.join(outdir, 'fractionalcover.csv')
